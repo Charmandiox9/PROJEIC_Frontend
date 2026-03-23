@@ -2,7 +2,7 @@
 import { usePathname } from 'next/navigation';
 import Navbar from './Navbar';
 
-const PRIVATE_ROUTES = ['/profile'];
+const PRIVATE_ROUTES = ['/misc/profile'];
 
 function isPrivateRoute(pathname: string): boolean {
   return PRIVATE_ROUTES.some(route => pathname.startsWith(route));

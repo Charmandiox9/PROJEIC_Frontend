@@ -14,11 +14,11 @@ export default function Sidebar() {
   useEffect(() => setMounted(true), []);
 
   const navItems = [
-    { name: 'Dashboard', href: '/profile', icon: LayoutDashboard },
-    { name: 'Mis proyectos', href: '/profile/proyectos', icon: FolderKanban },
+    { name: 'Dashboard', href: '/misc/profile', icon: LayoutDashboard },
+    { name: 'Mis proyectos', href: '/misc/profile/proyectos', icon: FolderKanban },
     { name: 'Proyectos públicos', href: '/proyectos', icon: Globe },
-    { name: 'Notificaciones', href: '/profile/notificaciones', icon: Bell },
-    { name: 'Configuración', href: '/profile/configuracion', icon: Settings },
+    { name: 'Notificaciones', href: '/misc/profile/notificaciones', icon: Bell },
+    { name: 'Configuración', href: '/misc/profile/configuracion', icon: Settings },
   ];
 
   const getInitials = (name?: string) => {
@@ -49,7 +49,7 @@ export default function Sidebar() {
       <nav className="flex-1 px-3 space-y-1">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = pathname === item.href || (pathname.startsWith(item.href) && item.href !== '/profile' && item.href !== '/proyectos');
+          const isActive = pathname === item.href || (pathname.startsWith(item.href) && item.href !== '/misc/profile' && item.href !== '/proyectos');
           
           return (
             <Link 

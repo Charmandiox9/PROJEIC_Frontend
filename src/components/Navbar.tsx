@@ -39,13 +39,13 @@ export default function Navbar() {
           {isAuthenticated ? (
             <>
               <Link 
-                href="/profile" 
+                href="/misc/profile" 
                 className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
               >
                 Hola, {user?.name?.split(' ')[0] || 'Usuario'}
               </Link>
               <Link
-                href="/profile"
+                href="/misc/profile"
                 className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Mi dashboard

@@ -36,7 +36,7 @@ export default function AuthSuccessPage() {
         // Falló en la decodificación
       }
 
-      window.location.href = '/projeic/profile';
+      window.location.href = '/projeic/misc/profile';
     } else {
       window.location.href = '/projeic/auth/login';
     }
