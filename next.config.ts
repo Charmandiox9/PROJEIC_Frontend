@@ -3,6 +3,9 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   output: "standalone",
   basePath: "/projeic",
+  turbopack: {
+    root: __dirname,
+  },
   images: {
     remotePatterns: [
       {

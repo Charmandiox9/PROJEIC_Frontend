@@ -1,12 +1,10 @@
 'use client';
-
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface User {
-  id: string;
   email: string;
-  nombre: string;
+  name: string;
   avatarUrl?: string;
   isAdmin?: boolean;
 }
@@ -20,21 +18,25 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+function readUserFromStorage(): User | null {
+  if (typeof window === 'undefined') return null;
+  const stored = localStorage.getItem('projeic_user');
+  const token = localStorage.getItem('projeic_accessToken');
+  if (!stored || !token) return null;
+  try {
+    const parsed = JSON.parse(stored);
+    return {
+      ...parsed,
+      name: parsed.name || parsed.nombre // Fallback if local storage still has the old 'nombre'
+    };
+  } catch {
+    return null;
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(readUserFromStorage);
   const router = useRouter();
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem('projeic_user');
-    const token = localStorage.getItem('projeic_accessToken');
-
-    if (storedUser && token) {
-      setUser(JSON.parse(storedUser));
-    }
-    
-    setIsLoading(false);
-  }, []);
 
   const logout = () => {
     localStorage.removeItem('projeic_accessToken');
@@ -44,11 +46,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      isAuthenticated: !!user, 
-      isLoading, 
-      logout 
+    <AuthContext.Provider value={{
+      user,
+      isAuthenticated: !!user,
+      isLoading: false,
+      logout
     }}>
       {children}
     </AuthContext.Provider>

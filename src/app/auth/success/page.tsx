@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { jwtDecode } from 'jwt-decode'; 
+import { jwtDecode } from 'jwt-decode';
 
 interface GoogleUserPayload {
   email: string;
@@ -32,21 +32,19 @@ export default function AuthSuccessPage() {
         };
 
         localStorage.setItem('projeic_user', JSON.stringify(userData));
-        console.log("✅ Usuario decodificado y guardado:", userData);
-
       } catch (error) {
-        console.error("❌ Falló la decodificación del token:", error);
+        // Falló en la decodificación
       }
-      
+
       window.location.href = '/projeic/profile';
     } else {
-      window.location.href = '/projeic/login';
+      window.location.href = '/projeic/auth/login';
     }
   }, [router, searchParams]);
 
   return (
-    <div className="flex justify-center items-center h-screen text-xl font-bold">
-      <p>Autenticando... 🔄</p>
+    <div className="flex justify-center items-center h-screen bg-gray-50">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
     </div>
   );
 }
