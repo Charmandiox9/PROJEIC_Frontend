@@ -42,7 +42,7 @@ export default function Navbar() {
                 href="/profile" 
                 className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
               >
-                Hola, {user?.nombre?.split(' ')[0] || 'Usuario'}
+                Hola, {user?.name?.split(' ')[0] || 'Usuario'}
               </Link>
               <Link
                 href="/profile"
