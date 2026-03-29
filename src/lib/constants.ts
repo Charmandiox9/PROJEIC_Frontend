@@ -1,0 +1,1 @@
+export const AVATAR_FALLBACK_URL = 'https://ui-avatars.com/api/?name=';
