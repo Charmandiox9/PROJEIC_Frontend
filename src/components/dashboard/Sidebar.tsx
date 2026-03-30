@@ -31,7 +31,7 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="w-[220px] sticky top-0 h-screen bg-[#1e3a5f] text-white flex flex-col py-6 shrink-0">
+    <aside className="w-[220px] sticky top-0 h-screen bg-brand-dark text-white flex flex-col py-6 shrink-0">
       <div className="px-6 mb-6 flex flex-col gap-6">
         <div className="flex items-center gap-2">
           <div className="w-2.5 h-2.5 bg-blue-400 rounded-full"></div>
@@ -82,11 +82,11 @@ export default function Sidebar() {
             {mounted && user?.avatarUrl ? (
               <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
             ) : (
-              <span>{getInitials(user?.name)}</span>
+              <span>{mounted ? getInitials(user?.name) : 'U'}</span>
             )}
           </div>
           <div className="flex flex-col overflow-hidden">
-            <span className="text-sm font-medium truncate">{user?.name ?? '...'}</span>
+            <span className="text-sm font-medium truncate">{mounted ? (user?.name ?? '...') : '...'}</span>
             <span className="text-xs text-white/50 truncate">Estudiante</span>
           </div>
         </div>

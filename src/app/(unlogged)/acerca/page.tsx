@@ -1,4 +1,4 @@
-import { Eye, History, Users, Code2, Code, Database, Server, Container } from 'lucide-react';
+import { Eye, History, Users, Github, Linkedin } from 'lucide-react';
 
 const PAGE_TEXTS = {
   heroTitle: 'Acerca de PROJEIC',
@@ -6,7 +6,8 @@ const PAGE_TEXTS = {
   aboutTitle: '¿Qué es PROJEIC?',
   aboutDescription: 'PROJEIC es una plataforma de gestión de proyectos académicos desarrollada para la Escuela de Ingeniería Coquimbo de la Universidad Católica del Norte. Su objetivo principal es centralizar el seguimiento, proporcionar visibilidad pública y asegurar la trazabilidad completa del ciclo de vida de los proyectos estudiantiles, conectando a estudiantes, docentes supervisores y la comunidad universitaria en un solo entorno colaborativo.',
   proposalTitle: 'Nuestra propuesta',
-  technologyTitle: 'Tecnología'
+  technologyTitle: 'Tecnología',
+  developersTitle: 'Desarrolladores'
 };
 
 const PROPOSALS = [
@@ -31,17 +32,38 @@ const PROPOSALS = [
 ];
 
 const TECHNOLOGIES = [
-  { id: 1, name: 'Next.js', role: 'Frontend React Framework', icon: Code2 },
-  { id: 2, name: 'NestJS', role: 'Backend Node Framework', icon: Code },
-  { id: 3, name: 'GraphQL', role: 'Data Query Language', icon: Server },
-  { id: 4, name: 'PostgreSQL', role: 'Base de datos relacional', icon: Database },
-  { id: 5, name: 'Docker', role: 'Contenedorización', icon: Container },
+  { id: 1, name: 'Next.js', role: 'Frontend React Framework', url: 'https://nextjs.org/docs', iconUrl: 'https://cdn.simpleicons.org/nextdotjs/000000' },
+  { id: 2, name: 'NestJS', role: 'Backend Node Framework', url: 'https://docs.nestjs.com/', iconUrl: 'https://cdn.simpleicons.org/nestjs/E0234E' },
+  { id: 3, name: 'GraphQL', role: 'Data Query Language', url: 'https://graphql.org/learn/', iconUrl: 'https://cdn.simpleicons.org/graphql/E10098' },
+  { id: 4, name: 'PostgreSQL', role: 'Base de datos relacional', url: 'https://www.postgresql.org/docs/', iconUrl: 'https://cdn.simpleicons.org/postgresql/4169E1' },
+  { id: 5, name: 'Docker', role: 'Contenedorización', url: 'https://docs.docker.com/', iconUrl: 'https://cdn.simpleicons.org/docker/2496ED' },
+];
+
+const DEVELOPERS = [
+  {
+    id: 1,
+    name: 'Martín Castillo',
+    role: 'Estudiante de Ingeniería en Tecnologías de Información',
+    minor: 'Minor: Seguridad Digital y Ciberinteligencia',
+    minorUrl: 'https://drive.google.com/file/d/1KHAZv6aHp_feKtrPbhZXxPHSqn6xOuzL/view',
+    github: 'https://github.com/Marton1123',
+    linkedin: 'https://www.linkedin.com/in/martin-castillo-t'
+  },
+  {
+    id: 2,
+    name: 'Daniel Durán',
+    role: 'Estudiante de Ingeniería en Tecnologías de Información',
+    minor: 'Minor: Desarrollo y Arquitectura de Software',
+    minorUrl: 'https://drive.google.com/file/d/1vQu27z8fN4BSLSRP-6g9lumdkTk4bzx0/view',
+    github: 'https://github.com/Charmandiox9',
+    linkedin: 'https://www.linkedin.com/in/daniel-durán-garcía/'
+  }
 ];
 
 export default function AcercaPage() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      <section className="bg-[#1e3a5f] text-white py-16 px-6">
+      <section className="bg-brand-dark bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white/5 via-transparent to-transparent text-white py-16 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-3xl md:text-5xl font-bold mb-4">{PAGE_TEXTS.heroTitle}</h1>
           <p className="text-blue-200 text-lg md:text-xl">{PAGE_TEXTS.heroSubtitle}</p>
@@ -64,8 +86,8 @@ export default function AcercaPage() {
             {PROPOSALS.map((item) => {
               const Icon = item.icon;
               return (
-                <div key={item.id} className="bg-gray-50 border border-gray-100 p-8 rounded-2xl text-center hover:bg-white hover:shadow-lg transition-all duration-300">
-                  <div className="w-14 h-14 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <div key={item.id} className="bg-gray-50 border border-gray-100 p-8 rounded-2xl text-center hover:bg-white hover:border-brand hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
+                  <div className="w-14 h-14 bg-brand-light text-brand rounded-full flex items-center justify-center mx-auto mb-6">
                     <Icon className="w-6 h-6" />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-3">{item.title}</h3>
@@ -83,13 +105,66 @@ export default function AcercaPage() {
             <h2 className="text-2xl font-bold text-gray-900">{PAGE_TEXTS.technologyTitle}</h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {TECHNOLOGIES.map((tech) => {
-              const Icon = tech.icon;
+            {TECHNOLOGIES.map((tech) => (
+              <a 
+                key={tech.id} 
+                href={tech.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="border border-gray-200 p-5 rounded-xl flex flex-col items-center justify-center text-center bg-white hover:border-brand hover:shadow-lg hover:-translate-y-1 transition-all duration-200 group"
+              >
+                <img src={tech.iconUrl} alt={`Logo de ${tech.name}`} className="w-10 h-10 mb-4 group-hover:scale-110 transition-transform duration-300" />
+                <span className="font-bold text-gray-900 text-sm mb-1 group-hover:text-brand transition-colors">{tech.name}</span>
+                <span className="text-xs text-gray-500">{tech.role}</span>
+              </a>
+            ))}
+          </div>
+        </section>
+
+        <section className="border-t border-gray-100 pt-20">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl font-bold text-gray-900">{PAGE_TEXTS.developersTitle}</h2>
+          </div>
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            {DEVELOPERS.map((dev) => {
+              const githubUsername = dev.github.split('/').pop();
+              const avatarUrl = `https://github.com/${githubUsername}.png`;
+              
               return (
-                <div key={tech.id} className="border border-gray-200 p-4 rounded-xl flex flex-col items-center justify-center text-center bg-white hover:border-blue-300 transition-colors">
-                  <Icon className="w-8 h-8 text-gray-700 mb-3" />
-                  <span className="font-semibold text-gray-900 text-sm mb-1">{tech.name}</span>
-                  <span className="text-xs text-gray-500">{tech.role}</span>
+                <div key={dev.id} className="p-6 bg-white border border-gray-100 rounded-xl shadow-sm flex flex-col justify-between hover:border-brand hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
+                  <div className="flex flex-col items-center mb-4">
+                    <img src={avatarUrl} alt={`Avatar de ${dev.name}`} className="w-20 h-20 rounded-full border-4 border-gray-50 mb-4" />
+                    <h3 className="font-bold text-xl text-gray-900 text-center">{dev.name}</h3>
+                    <p className="text-sm text-gray-600 mt-1 text-center">{dev.role}</p>
+                    <a 
+                      href={dev.minorUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-medium text-brand hover:text-brand-hover hover:underline transition-colors mt-2 text-center"
+                    >
+                      {dev.minor}
+                    </a>
+                  </div>
+                  <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-center space-x-6">
+                    <a
+                      href={dev.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center space-x-2 text-purple-600 hover:text-purple-700 transition-colors text-sm font-medium"
+                    >
+                      <Github className="w-5 h-5" />
+                      <span>GitHub</span>
+                    </a>
+                    <a
+                      href={dev.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center space-x-2 text-brand hover:text-brand-hover transition-colors text-sm font-medium"
+                    >
+                      <Linkedin className="w-5 h-5" />
+                      <span>LinkedIn</span>
+                    </a>
+                  </div>
                 </div>
               );
             })}
@@ -97,7 +172,7 @@ export default function AcercaPage() {
         </section>
       </main>
 
-      <footer className="bg-[#1e3a5f] text-white/80 py-6 text-center text-sm mt-auto">
+      <footer className="bg-brand-dark text-white/80 py-6 text-center text-sm mt-auto border-t border-white/10">
         <p>PROJEIC &middot; Escuela de Ingeniería Coquimbo</p>
       </footer>
     </div>

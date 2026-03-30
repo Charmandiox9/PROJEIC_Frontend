@@ -1,6 +1,6 @@
 import Sidebar from '@/components/dashboard/Sidebar';
 
-export default function ProfileLayout({
+export default function LoggedLayout({
   children,
 }: {
   children: React.ReactNode;

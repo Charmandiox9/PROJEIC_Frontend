@@ -29,7 +29,7 @@ export default function Sidebar() {
               href={item.href}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${
                 isActive 
-                  ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' 
+                  ? 'bg-brand-light text-brand dark:bg-blue-900/20 dark:text-blue-400' 
                   : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-white'
               }`}
             >

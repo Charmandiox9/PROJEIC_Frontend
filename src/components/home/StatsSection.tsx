@@ -2,47 +2,43 @@
 
 import { useEffect, useState } from 'react';
 import { fetchGraphQL } from '@/lib/graphQLClient';
-import { GET_PLATFORM_STATS } from '@/graphql/misc/operations';
+import { GET_PUBLIC_PROJECTS } from '@/graphql/misc/operations';
 
-interface PlatformStats {
-  activeProjects: number | string;
-  supervisors: number | string;
-  students: number | string;
-  semesters: number | string;
+const STATIC_SEMESTERS = 1;
+
+interface StatsState {
+  totalProjects: number | null;
 }
 
+const STATS_VIEW = [
+  { id: 2, label: 'Docentes supervisores', value: null as null },
+  { id: 3, label: 'Estudiantes registrados', value: null as null },
+  { id: 4, label: 'Semestres en uso', value: STATIC_SEMESTERS as number | null },
+];
+
 export default function StatsSection() {
-  const [stats, setStats] = useState<PlatformStats>({
-    activeProjects: '-',
-    supervisors: '-',
-    students: '-',
-    semesters: '-'
-  });
+  const [totalProjects, setTotalProjects] = useState<number | null>(null);
 
   useEffect(() => {
-    async function loadStats() {
+    async function loadProjectCount() {
       try {
-        const data = await fetchGraphQL({ query: GET_PLATFORM_STATS });
-        if (data?.platformStats) {
-          setStats({
-            activeProjects: data.platformStats.activeProjects,
-            supervisors: data.platformStats.supervisors,
-            students: data.platformStats.students,
-            semesters: data.platformStats.semesters
-          });
+        const data = await fetchGraphQL({
+          query: GET_PUBLIC_PROJECTS,
+          variables: { skip: 0, take: 1 },
+        });
+        if (typeof data?.findAll?.total === 'number') {
+          setTotalProjects(data.findAll.total);
         }
-      } catch (error) {
-        // En caso de error se retiene el estado con los guiones
+      } catch {
+        // Retain dash on error
       }
     }
-    loadStats();
+    loadProjectCount();
   }, []);
 
   const statsView = [
-    { id: 1, label: 'Proyectos activos', value: stats.activeProjects },
-    { id: 2, label: 'Docentes supervisores', value: stats.supervisors },
-    { id: 3, label: 'Estudiantes registrados', value: stats.students },
-    { id: 4, label: 'Semestres en uso', value: stats.semesters },
+    { id: 1, label: 'Proyectos activos', value: totalProjects },
+    ...STATS_VIEW,
   ];
 
   return (
@@ -50,7 +46,9 @@ export default function StatsSection() {
       <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
         {statsView.map((stat) => (
           <div key={stat.id} className="text-center">
-            <div className="text-3xl font-bold text-gray-900 mb-2">{stat.value}</div>
+            <div className="text-3xl font-bold text-gray-900 mb-2">
+              {stat.value !== null ? stat.value : '-'}
+            </div>
             <div className="text-sm text-gray-500 font-medium uppercase tracking-wide">
               {stat.label}
             </div>

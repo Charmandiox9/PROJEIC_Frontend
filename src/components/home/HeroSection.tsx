@@ -3,7 +3,7 @@ import { ArrowRight } from 'lucide-react';
 
 export default function HeroSection() {
   return (
-    <section className="bg-[#1e3a5f] text-white py-20 px-6">
+    <section className="bg-brand-dark text-white py-20 px-6">
       <div className="max-w-4xl mx-auto text-center">
         <div className="inline-block px-4 py-1 mb-6 text-xs font-semibold tracking-wider text-blue-200 bg-blue-900/50 rounded-full border border-blue-800">
           Plataforma de proyectos para la EIC

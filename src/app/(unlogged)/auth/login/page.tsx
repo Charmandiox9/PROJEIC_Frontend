@@ -1,244 +1,64 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import { GraduationCap, ArrowLeft } from 'lucide-react';
-import { fetchGraphQL } from '@/lib/graphQLClient';
-import { LOGIN_MUTATION, REGISTER_MUTATION } from '@/graphql/auth/operations';
+import { ArrowLeft } from 'lucide-react';
 
-function AuthContent() {
-  const searchParams = useSearchParams();
-  const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
-
-  useEffect(() => {
-    if (searchParams.get('tab') === 'register') {
-      setActiveTab('register');
-    } else {
-      setActiveTab('login');
-    }
-  }, [searchParams]);
-
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-  });
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
-  };
-
+export default function AuthPage() {
   const handleOAuthLogin = () => {
     window.location.href = process.env.NEXT_PUBLIC_OAUTH_URL ?? 'http://localhost:4000/projeic/api/auth/google';
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setErrorMsg('');
-
-    try {
-      if (activeTab === 'login') {
-        const data = await fetchGraphQL({
-          query: LOGIN_MUTATION,
-          variables: { email: form.email, password: form.password }
-        });
-        if (data?.login?.accessToken) {
-          localStorage.setItem('projeic_accessToken', data.login.accessToken);
-          window.location.href = '/projeic';
-        } else {
-          throw new Error('Credenciales inválidas');
-        }
-      } else {
-        if (form.password !== form.confirmPassword) {
-          throw new Error('Las contraseñas no coinciden');
-        }
-        const data = await fetchGraphQL({
-          query: REGISTER_MUTATION,
-          variables: { name: form.name, email: form.email, password: form.password }
-        });
-        if (data?.register?.accessToken) {
-          localStorage.setItem('projeic_accessToken', data.register.accessToken);
-          window.location.href = '/projeic';
-        } else {
-          throw new Error('Error al registrar usuario');
-        }
-      }
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Error desconocido';
-      setErrorMsg(message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-[#1e3a5f] flex flex-col items-center justify-center p-4 relative">
+    <div className="min-h-screen bg-brand flex flex-col items-center justify-center p-4 relative">
       <Link 
         href="/" 
-        className="absolute top-6 left-6 flex items-center space-x-2 text-white/70 hover:text-white transition-colors text-sm font-medium"
+        className="absolute top-6 left-6 flex items-center space-x-2 text-white/80 hover:text-white transition-colors text-sm font-medium"
       >
-        <ArrowLeft className="w-4 h-4" />
+        <ArrowLeft className="w-5 h-5" />
         <span>Volver al inicio</span>
       </Link>
 
-      <div className="flex items-center space-x-2 mb-4">
-        <div className="w-2.5 h-2.5 bg-blue-400 rounded-full"></div>
-        <span className="text-xl font-bold tracking-tight text-white">PROJEIC</span>
-      </div>
-
-      <div className="bg-white w-full max-w-md rounded-2xl shadow-xl p-6">
-        <div className="text-center mb-5">
-          <h1 className="text-xl font-bold text-gray-900 mb-1">Bienvenido</h1>
-          <p className="text-xs text-gray-500">Plataforma de proyectos &middot; EIC</p>
+      <div className="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-8 flex flex-col items-center">
+        
+        <div className="flex items-center space-x-2 mb-6">
+          <div className="w-3 h-3 bg-brand rounded-full"></div>
+          <span className="text-2xl font-bold tracking-tight text-brand">PROJEIC</span>
         </div>
 
-        <div className="flex p-1 bg-gray-100 rounded-lg mb-4">
-          <button
-            onClick={() => { setActiveTab('login'); setErrorMsg(''); }}
-            className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${
-              activeTab === 'login' ? 'bg-white shadow-sm text-gray-900 border border-gray-200' : 'text-gray-500 hover:text-gray-700'
-            }`}
-            type="button"
-          >
-            Iniciar sesión
-          </button>
-          <button
-            onClick={() => { setActiveTab('register'); setErrorMsg(''); }}
-            className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${
-              activeTab === 'register' ? 'bg-white shadow-sm text-gray-900 border border-gray-200' : 'text-gray-500 hover:text-gray-700'
-            }`}
-            type="button"
-          >
-            Registrarse
-          </button>
-        </div>
+        <div className="w-full border-t border-gray-100 mb-6"></div>
 
-        {errorMsg && (
-          <div className="mb-4 p-3 bg-red-50 text-red-700 text-sm rounded-lg text-center">
-            {errorMsg}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-3">
-          {activeTab === 'register' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nombre completo</label>
-              <input
-                type="text"
-                name="name"
-                required
-                value={form.name}
-                onChange={handleChange}
-                className="w-full px-4 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors text-sm text-gray-900"
-                placeholder="Juan Pérez"
-              />
-            </div>
-          )}
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Correo institucional</label>
-            <input
-              type="email"
-              name="email"
-              required
-              value={form.email}
-              onChange={handleChange}
-              className="w-full px-4 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors text-sm text-gray-900"
-              placeholder="usuario@ucn.cl"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
-            <input
-              type="password"
-              name="password"
-              required
-              value={form.password}
-              onChange={handleChange}
-              className="w-full px-4 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors text-sm text-gray-900"
-              placeholder="••••••••"
-            />
-          </div>
-
-          {activeTab === 'register' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar contraseña</label>
-              <input
-                type="password"
-                name="confirmPassword"
-                required
-                value={form.confirmPassword}
-                onChange={handleChange}
-                className="w-full px-4 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors text-sm text-gray-900"
-                placeholder="••••••••"
-              />
-            </div>
-          )}
-
-          {activeTab === 'login' && (
-            <div className="flex items-center justify-between text-sm py-1">
-              <label className="flex items-center space-x-2 text-gray-600 cursor-pointer">
-                <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                <span>Recordar sesión</span>
-              </label>
-              <button type="button" className="text-blue-600 hover:text-blue-800 font-medium">
-                ¿Olvidaste tu contraseña?
-              </button>
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full py-2 px-4 bg-[#1e3a5f] hover:bg-blue-900 text-white font-medium rounded-lg transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-blue-900 disabled:opacity-50 text-sm"
-          >
-            {isLoading ? 'Cargando...' : activeTab === 'login' ? 'Ingresar a PROJEIC' : 'Crear cuenta'}
-          </button>
-        </form>
-
-        <div className="relative my-4 text-center">
-           <div className="absolute inset-0 flex items-center">
-             <div className="w-full border-t border-gray-200"></div>
-           </div>
-           <div className="relative inline-block bg-white px-4 text-xs text-gray-500">
-             o
-           </div>
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Bienvenido de vuelta</h1>
+          <p className="text-sm text-gray-500">Accede con tu cuenta institucional UCN</p>
         </div>
 
         <button
           onClick={handleOAuthLogin}
           type="button"
-          className="w-full flex items-center justify-center space-x-2 py-2 px-4 border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium rounded-lg transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 text-sm"
+          className="w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium rounded-xl transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 text-sm"
         >
-          <GraduationCap className="w-4 h-4" />
-          <span>Ingresar con cuenta UCN</span>
+          <svg viewBox="0 0 24 24" className="w-5 h-5">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          </svg>
+          <span>Continuar con Google UCN</span>
         </button>
 
-        <p className="mt-4 text-center text-xs text-gray-500">
-          Solo para miembros de la comunidad EIC
+        <div className="relative w-full my-6 text-center">
+           <div className="absolute inset-0 flex items-center">
+             <div className="w-full border-t border-gray-100"></div>
+           </div>
+           <div className="relative inline-block bg-white px-3 text-xs text-gray-400">
+             Plataforma oficial EIC
+           </div>
+        </div>
+
+        <p className="text-center text-xs text-gray-400">
+          Solo miembros de la comunidad universitaria pueden acceder.
         </p>
       </div>
     </div>
-  );
-}
-
-export default function AuthPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-[#1e3a5f] flex items-center justify-center p-4">
-        <div className="flex items-center space-x-2">
-          <div className="w-2.5 h-2.5 bg-blue-400 rounded-full animate-pulse"></div>
-          <span className="text-xl font-bold tracking-tight text-white">PROJEIC</span>
-        </div>
-      </div>
-    }>
-      <AuthContent />
-    </Suspense>
   );
 }

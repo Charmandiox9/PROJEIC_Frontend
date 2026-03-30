@@ -42,7 +42,7 @@ export default function FeaturesSection() {
             const Icon = feature.icon;
             return (
               <div key={feature.id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center mb-6">
+                <div className="w-12 h-12 bg-brand-light text-brand rounded-lg flex items-center justify-center mb-6">
                   <Icon className="w-6 h-6" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>

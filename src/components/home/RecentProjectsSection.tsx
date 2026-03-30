@@ -2,22 +2,31 @@
 
 import { useEffect, useState } from 'react';
 import { fetchGraphQL } from '@/lib/graphQLClient';
-import { GET_RECENT_PROJECTS } from '@/graphql/misc/operations';
+import { GET_PUBLIC_PROJECTS } from '@/graphql/misc/operations';
 import { AVATAR_FALLBACK_URL } from '@/lib/constants';
+
+interface PublicUser {
+  id: string;
+  name: string;
+  avatarUrl: string | null;
+}
 
 interface ProjectMember {
   id: string;
-  avatarUrl: string;
+  role: string;
+  user: PublicUser;
 }
 
 interface Project {
   id: string;
-  title: string;
+  name: string;
   status: string;
-  description: string;
-  progress: number;
+  description: string | null;
+  color: string;
   members: ProjectMember[];
 }
+
+const STATUS_INITIAL_TAKE = 6;
 
 export default function RecentProjectsSection() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -27,9 +36,14 @@ export default function RecentProjectsSection() {
   useEffect(() => {
     async function fetchProjects() {
       try {
-        const data = await fetchGraphQL({ query: GET_RECENT_PROJECTS });
-        if (data?.recentProjects) setProjects(data.recentProjects);
-      } catch (err) {
+        const data = await fetchGraphQL({
+          query: GET_PUBLIC_PROJECTS,
+          variables: { skip: 0, take: STATUS_INITIAL_TAKE },
+        });
+        if (data?.findAll?.items) {
+          setProjects(data.findAll.items);
+        }
+      } catch {
         setError(true);
       } finally {
         setLoading(false);
@@ -48,7 +62,7 @@ export default function RecentProjectsSection() {
 
         {loading ? (
           <div className="flex justify-center py-10">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand"></div>
           </div>
         ) : error || projects.length === 0 ? (
           <div className="text-center py-10">
@@ -59,33 +73,23 @@ export default function RecentProjectsSection() {
             {projects.map((project) => (
               <div key={project.id} className="border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-start mb-4">
-                  <h3 className="font-bold text-lg text-gray-900 line-clamp-2">{project.title}</h3>
-                  <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                    project.status === 'En curso' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
+                  <h3 className="font-bold text-lg text-gray-900 line-clamp-2">{project.name}</h3>
+                  <span className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ml-3 ${
+                    project.status === 'ACTIVE' ? 'bg-green-100 text-green-700' :
+                    project.status === 'COMPLETED' ? 'bg-gray-100 text-gray-700' :
+                    'bg-brand-light text-brand'
                   }`}>
                     {project.status}
                   </span>
                 </div>
                 <p className="text-gray-600 text-sm mb-6 line-clamp-3">{project.description}</p>
-                <div className="mb-4">
-                  <div className="flex justify-between text-xs text-gray-500 mb-1">
-                    <span>Progreso</span>
-                    <span>{project.progress}%</span>
-                  </div>
-                  <div className="w-full bg-gray-100 rounded-full h-2">
-                    <div 
-                      className="bg-blue-600 h-2 rounded-full" 
-                      style={{ width: `${project.progress}%` }}
-                    />
-                  </div>
-                </div>
                 <div className="flex -space-x-2">
                   {project.members?.map((member) => (
-                    <img 
+                    <img
                       key={member.id}
                       className="w-8 h-8 rounded-full border-2 border-white bg-gray-200"
-                      src={member.avatarUrl || `${AVATAR_FALLBACK_URL}${member.id}`}
-                      alt="Avatar"
+                      src={member.user.avatarUrl || `${AVATAR_FALLBACK_URL}${member.user.id}`}
+                      alt={member.user.name}
                     />
                   ))}
                 </div>

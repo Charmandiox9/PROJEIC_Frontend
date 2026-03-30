@@ -19,7 +19,7 @@ export default function NotFound() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
           <Link
             href="/"
-            className="flex items-center justify-center w-full sm:w-auto px-6 py-3 text-sm font-semibold text-white bg-[#1e3a5f] rounded-lg hover:bg-blue-900 transition-colors"
+            className="flex items-center justify-center w-full sm:w-auto px-6 py-3 text-sm font-semibold text-white bg-brand-dark rounded-lg hover:bg-brand-dark-hover transition-colors"
           >
             <Home className="w-4 h-4 mr-2" />
             Volver al inicio
