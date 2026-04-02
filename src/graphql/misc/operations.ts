@@ -12,7 +12,7 @@ export const GET_PROFILE = `
 
 export const GET_PUBLIC_PROJECTS = `
   query GetPublicProjects($skip: Int, $take: Int) {
-    findAll(filter: { isPublic: true, skip: $skip, take: $take }) {
+    findAll(filter: { isPublic: true, skip: $skip, take: $take }, includeMembers: true) {
       items {
         id
         name
