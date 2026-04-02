@@ -44,6 +44,7 @@ interface ProjectUser {
 interface ProjectMember {
   id: string;
   role: string;
+  status: string;
   user: ProjectUser;
 }
 
@@ -245,7 +246,14 @@ function TabResumen({
                   <div className="flex items-center gap-3 min-w-0">
                     <MemberAvatar member={member} />
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 truncate max-w-[200px]">{member.user.name}</p>
+                      <p className="text-sm font-semibold text-gray-900 truncate max-w-[200px]">
+                        {member.user.name}
+                      </p>
+                      {member.status === 'PENDING' && (
+                        <span className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-100 border border-amber-200 rounded-md">
+                          <Loader2 className="w-3 h-3 animate-spin" /> Pendiente
+                        </span>
+                      )}
                   <Select
                     value={member.role}
                     onChange={(e) => onUpdateRole(member.id, e.target.value)}
@@ -424,7 +432,14 @@ function TabMiembros({
                 <div className="flex items-center gap-3 min-w-0">
                   <MemberAvatar member={m} />
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 truncate max-w-[200px]">{m.user.name}</p>
+                    <p className="text-sm font-semibold text-gray-900 truncate max-w-[200px]">
+                      {m.user.name}
+                    </p>
+                    {m.status === 'PENDING' && (
+                      <span className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-100 border border-amber-200 rounded-md">
+                        <Loader2 className="w-3 h-3 animate-spin" /> Pendiente
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">

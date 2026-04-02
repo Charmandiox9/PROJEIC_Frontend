@@ -80,6 +80,7 @@ export const GET_PROJECT_BY_ID = `
       members {
         id
         role
+        status
         user {
           id
           name
@@ -160,4 +161,41 @@ export const UPDATE_PROJECT_MEMBER_ROLE = `
       role
     }
   }
+`;
+
+export const RESPOND_INVITATION = `
+  mutation RespondToInvitation($projectId: ID!, $accept: Boolean!) {
+    respondToInvitation(projectId: $projectId, accept: $accept) {
+      id
+      role
+      status
+      joinedAt
+      user {
+        name
+      }
+    }
+  }
+`;
+
+export const GET_MY_NOTIFICATIONS = `
+  query GetMyNotifications($unreadOnly: Boolean) {
+  myNotifications(unreadOnly: $unreadOnly) {
+    id
+    type
+    title
+    message
+    isRead
+    entityId
+    createdAt
+  }
+}
+`;
+
+export const MARK_NOTIFICATION_AS_READ = `
+mutation MarkAsRead($id: ID!) {
+  markNotificationAsRead(id: $id) {
+    id
+    isRead
+  }
+}
 `;

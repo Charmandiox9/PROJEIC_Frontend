@@ -18,7 +18,7 @@ export default function Sidebar() {
     { name: 'Dashboard', href: '/misc/profile', icon: LayoutDashboard },
     { name: 'Mis proyectos', href: '/misc/proyectos', icon: FolderKanban },
     { name: 'Proyectos públicos', href: '/misc/proyectos-publicos', icon: Globe },
-    { name: 'Notificaciones', href: '/misc/profile/notificaciones', icon: Bell },
+    { name: 'Notificaciones', href: '/misc/profile/notifications', icon: Bell },
     { name: 'Configuración', href: '/misc/configuracion', icon: Settings },
   ];
 
