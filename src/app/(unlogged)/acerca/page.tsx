@@ -37,6 +37,8 @@ const TECHNOLOGIES = [
   { id: 3, name: 'GraphQL', role: 'Data Query Language', url: 'https://graphql.org/learn/', iconUrl: 'https://cdn.simpleicons.org/graphql/E10098' },
   { id: 4, name: 'PostgreSQL', role: 'Base de datos relacional', url: 'https://www.postgresql.org/docs/', iconUrl: 'https://cdn.simpleicons.org/postgresql/4169E1' },
   { id: 5, name: 'Docker', role: 'Contenedorización', url: 'https://docs.docker.com/', iconUrl: 'https://cdn.simpleicons.org/docker/2496ED' },
+  { id: 6, name: 'Jenkins', role: 'CI/CD Pipeline', url: 'https://www.jenkins.io/', iconUrl: 'https://cdn.simpleicons.org/jenkins/D24939' },
+  { id: 7, name: 'Nginx', role: 'Web Server / Proxy', url: 'https://nginx.org/en/docs/', iconUrl: 'https://cdn.simpleicons.org/nginx/009639' },
 ];
 
 const DEVELOPERS = [

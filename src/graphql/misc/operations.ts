@@ -1,3 +1,30 @@
+export const GET_RECENT_PROJECTS = `
+  query GetRecentProjects {
+    recentProjects {
+      id
+      title
+      status
+      description
+      progress
+      members {
+        id
+        avatarUrl
+      }
+    }
+  }
+`;
+
+export const GET_PLATFORM_STATS = `
+  query GetPlatformStats {
+    platformStats {
+      activeProjects
+      supervisors
+      students
+      semesters
+    }
+  }
+`;
+
 export const GET_PROFILE = `
   query Me {
     me {
@@ -10,62 +37,8 @@ export const GET_PROFILE = `
   }
 `;
 
-export const GET_PUBLIC_PROJECTS = `
-  query GetPublicProjects($skip: Int, $take: Int) {
-    findAll(filter: { isPublic: true, skip: $skip, take: $take }, includeMembers: true) {
-      items {
-        id
-        name
-        description
-        color
-        status
-        methodology
-        isPublic
-        members {
-          id
-          role
-          user {
-            id
-            name
-            avatarUrl
-          }
-        }
-      }
-      total
-      skip
-      take
-    }
-  }
-`;
-
-export const GET_MY_PROJECTS = `
-  query GetMyProjects($skip: Int, $take: Int) {
-    myProjects(filter: { skip: $skip, take: $take }, includeMembers: true) {
-      items {
-        id
-        name
-        description
-        color
-        status
-        methodology
-        isPublic
-        members {
-          id
-          role
-          user {
-            id
-            name
-            avatarUrl
-          }
-        }
-      }
-      total
-    }
-  }
-`;
-
 export const GET_PROJECT_BY_ID = `
-  query GetProjectById($id: String!) {
+  query FindOne($id: String!) {
     findOne(id: $id) {
       id
       name
@@ -91,16 +64,29 @@ export const GET_PROJECT_BY_ID = `
   }
 `;
 
-export const CREATE_PROJECT = `
-  mutation CreateProject($input: CreateProjectInput!) {
-    createProject(input: $input) {
-      id
-      name
-      description
-      color
-      status
-      methodology
-      isPublic
+export const GET_PUBLIC_PROJECTS = `
+  query GetPublicProjects($skip: Int, $take: Int) {
+    findAll(filter: { skip: $skip, take: $take, isPublic: true }, includeMembers: true) {
+      total
+      items {
+        id
+        name
+        description
+        color
+        status
+        methodology
+        isPublic
+        members {
+          id
+          role
+          status
+          user {
+            id
+            name
+            avatarUrl
+          }
+        }
+      }
     }
   }
 `;
@@ -111,27 +97,16 @@ export const UPDATE_PROJECT = `
       id
       name
       description
-      color
-      status
-      methodology
-      isPublic
     }
   }
 `;
 
-export const ARCHIVE_PROJECT = `
-  mutation ArchiveProject($id: ID!) {
-    archiveProject(id: $id) {
+export const CREATE_PROJECT = `
+  mutation CreateProject($input: CreateProjectInput!) {
+    createProject(input: $input) {
       id
-      isArchived
-    }
-  }
-`;
-
-export const DELETE_PROJECT = `
-  mutation DeleteProject($id: ID!) {
-    deleteProject(id: $id) {
-      id
+      name
+      description
     }
   }
 `;
@@ -141,16 +116,35 @@ export const ADD_PROJECT_MEMBER = `
     addProjectMember(input: $input) {
       id
       role
-      user {
-        name
-      }
+      status
     }
   }
 `;
 
-export const REMOVE_PROJECT_MEMBER = `
-  mutation RemoveProjectMember($memberId: ID!) {
-    removeProjectMember(memberId: $memberId)
+export const GET_MY_PROJECTS = `
+  query MyProjects($skip: Int, $take: Int) {
+    myProjects(filter: { skip: $skip, take: $take }, includeMembers: true) {
+      total
+      items {
+        id
+        name
+        description
+        color
+        status
+        methodology
+        isPublic
+        members {
+          id
+          role
+          status
+          user {
+            id
+            name
+            avatarUrl
+          }
+        }
+      }
+    }
   }
 `;
 
@@ -163,39 +157,53 @@ export const UPDATE_PROJECT_MEMBER_ROLE = `
   }
 `;
 
-export const RESPOND_INVITATION = `
-  mutation RespondToInvitation($projectId: ID!, $accept: Boolean!) {
-    respondToInvitation(projectId: $projectId, accept: $accept) {
+export const REMOVE_PROJECT_MEMBER = `
+  mutation RemoveProjectMember($memberId: ID!) {
+    removeProjectMember(memberId: $memberId)
+  }
+`;
+
+export const DELETE_PROJECT = `
+  mutation DeleteProject($id: ID!) {
+    deleteProject(id: $id) {
       id
-      role
-      status
-      joinedAt
-      user {
-        name
-      }
     }
   }
 `;
 
 export const GET_MY_NOTIFICATIONS = `
-  query GetMyNotifications($unreadOnly: Boolean) {
-  myNotifications(unreadOnly: $unreadOnly) {
-    id
-    type
-    title
-    message
-    isRead
-    entityId
-    createdAt
+  query MyNotifications($unreadOnly: Boolean) {
+    myNotifications(unreadOnly: $unreadOnly) {
+      id
+      type
+      message
+      isRead
+      createdAt
+      entityId
+    }
   }
-}
 `;
 
-export const MARK_NOTIFICATION_AS_READ = `
-mutation MarkAsRead($id: ID!) {
-  markNotificationAsRead(id: $id) {
-    id
-    isRead
+export const MARK_NOTIFICATION_READ = `
+  mutation MarkNotificationAsRead($id: ID!) {
+    markNotificationAsRead(id: $id) {
+      id
+      isRead
+    }
   }
-}
+`;
+
+export const MARK_ALL_READ = `
+  mutation MarkAllNotificationsAsRead {
+    markAllNotificationsAsRead
+  }
+`;
+
+export const RESPOND_TO_INVITATION = `
+  mutation RespondToInvitation($projectId: ID!, $accept: Boolean!) {
+    respondToInvitation(projectId: $projectId, accept: $accept) {
+      id
+      role
+    }
+  }
 `;

@@ -9,7 +9,7 @@ import { AVATAR_FALLBACK_URL } from '@/lib/constants';
 import { useAuth } from '@/context/AuthProvider';
 
 interface PublicUser {
-  id: string;
+  userId: string;
   name: string;
   avatarUrl: string | null;
 }
@@ -135,7 +135,7 @@ export default function ProyectosPublicosLogeadoPage() {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProjects.map((project) => {
-              const isMember = project.members?.some((m) => m.user.id === user?.userId) ?? false;
+              const isMember = project.members?.some((m) => m.user.userId === user?.userId) ?? false;
 
               return (
                 <div 
@@ -168,7 +168,7 @@ export default function ProyectosPublicosLogeadoPage() {
                         <img
                           key={member.id}
                           className="w-7 h-7 rounded-full border-2 border-white bg-gray-200 object-cover shrink-0"
-                          src={member.user.avatarUrl || `${AVATAR_FALLBACK_URL}${member.user.id}`}
+                          src={member.user.avatarUrl || `${AVATAR_FALLBACK_URL}${member.user.userId}`}
                           referrerPolicy="no-referrer"
                           alt={member.user.name}
                           title={member.user.name}

@@ -7,10 +7,12 @@ import { fetchGraphQL } from '@/lib/graphQLClient';
 import { GET_MY_PROJECTS } from '@/graphql/misc/operations';
 import { Plus, FolderKanban, LayoutGrid, List, Search } from 'lucide-react';
 import CreateProjectModal from '@/components/dashboard/CreateProjectModal';
+import { useAuth } from '@/context/AuthProvider';
 
 interface ProjectMember {
   id: string;
   role: string;
+  status: string;
   user: {
     id: string;
     name: string;
@@ -111,8 +113,9 @@ function SkeletonCard() {
   );
 }
 
-function ProjectCard({ project }: { project: Project }) {
-  const myMembership = project.members[0];
+function ProjectCard({ project, currentUserId }: { project: Project; currentUserId?: string }) {
+  const activeMembers = project.members.filter(m => m.status === 'ACTIVE');
+  const myMembership = activeMembers.find(m => m.user.id === currentUserId);
   const role = myMembership?.role ?? 'STUDENT';
 
   return (
@@ -149,7 +152,7 @@ function ProjectCard({ project }: { project: Project }) {
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <MemberAvatars members={project.members} />
+            <MemberAvatars members={activeMembers} />
             <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">
               {project.methodology}
             </span>
@@ -163,6 +166,7 @@ function ProjectCard({ project }: { project: Project }) {
 type ViewMode = 'grid' | 'list';
 
 export default function MisProyectosPage() {
+  const { user } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -296,7 +300,7 @@ export default function MisProyectosPage() {
       ) : (
         <div className={`grid gap-4 ${viewMode === 'grid' ? 'sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
           {filteredProjects.map((project) => (
-            <ProjectCard key={project.id} project={project} />
+            <ProjectCard key={project.id} project={project} currentUserId={user?.userId} />
           ))}
         </div>
       )}

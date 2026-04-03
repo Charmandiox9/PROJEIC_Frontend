@@ -5,20 +5,53 @@ import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { LayoutDashboard, FolderKanban, Globe, Bell, Settings, ArrowLeft, LogOut, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { useAuth } from '@/context/AuthProvider';
+import { fetchGraphQL } from '@/lib/graphQLClient';
+import { GET_MY_NOTIFICATIONS } from '@/graphql/misc/operations';
 
 export default function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const [mounted, setMounted] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const fetchUnread = async () => {
+      try {
+        const data = await fetchGraphQL({
+          query: GET_MY_NOTIFICATIONS,
+          variables: { unreadOnly: true },
+        });
+        setUnreadCount(data?.myNotifications?.length ?? 0);
+      } catch {
+        setUnreadCount(0);
+      }
+    };
+
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 60000);
+    window.addEventListener('notifications:refresh', fetchUnread);
+    
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('notifications:refresh', fetchUnread);
+    };
+  }, []);
 
   useEffect(() => setMounted(true), []);
 
-  const navItems = [
+  interface NavItem {
+    name: string;
+    href: string;
+    icon: React.ElementType;
+    badge?: number;
+  }
+
+  const navItems: NavItem[] = [
     { name: 'Dashboard', href: '/misc/profile', icon: LayoutDashboard },
     { name: 'Mis proyectos', href: '/misc/proyectos', icon: FolderKanban },
     { name: 'Proyectos públicos', href: '/misc/proyectos-publicos', icon: Globe },
-    { name: 'Notificaciones', href: '/misc/profile/notifications', icon: Bell },
+    { name: 'Notificaciones', href: '/misc/notificaciones', icon: Bell, badge: unreadCount },
     { name: 'Configuración', href: '/misc/configuracion', icon: Settings },
   ];
 
@@ -29,6 +62,13 @@ export default function Sidebar() {
       return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
     }
     return name.substring(0, 2).toUpperCase();
+  };
+
+  const getUserRoleLabel = (email?: string) => {
+    if (!email) return 'Cargando...';
+    if (email.endsWith('@alumnos.ucn.cl')) return 'Estudiante';
+    if (email.endsWith('@ucn.cl') || email.endsWith('@ce.ucn.cl')) return 'Personal UCN';
+    return 'Externo';
   };
 
   return (
@@ -66,14 +106,27 @@ export default function Sidebar() {
               key={item.name} 
               href={item.href}
               title={collapsed ? item.name : undefined}
-              className={`flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${collapsed ? 'justify-center' : 'gap-3'} ${
+              className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 isActive 
                   ? 'bg-white/10 text-white' 
                   : 'text-white/70 hover:bg-white/5 hover:text-white'
               }`}
             >
-              <Icon className="w-5 h-5 shrink-0" />
-              {!collapsed && <span className="truncate">{item.name}</span>}
+              <div className={`flex items-center ${collapsed ? 'justify-center w-full' : 'gap-3'}`}>
+                <div className="relative">
+                  <Icon className="w-5 h-5 shrink-0" />
+                  {item.badge !== undefined && item.badge > 0 && collapsed && (
+                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-brand-dark animate-pulse"></span>
+                  )}
+                </div>
+                {!collapsed && <span className="truncate">{item.name}</span>}
+              </div>
+              
+              {!collapsed && item.badge !== undefined && item.badge > 0 && (
+                <span className="ml-auto text-[10px] font-bold bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center shrink-0">
+                  {item.badge > 9 ? '9+' : item.badge}
+                </span>
+              )}
             </Link>
           );
         })}
@@ -100,7 +153,7 @@ export default function Sidebar() {
           {!collapsed && (
             <div className="flex flex-col overflow-hidden">
               <span className="text-sm font-medium truncate max-w-[120px]">{mounted ? (user?.name ?? '...') : '...'}</span>
-              <span className="text-xs text-white/50 truncate">Estudiante</span>
+              <span className="text-xs text-white/50 truncate">{mounted ? getUserRoleLabel(user?.email) : '...'}</span>
             </div>
           )}
         </div>

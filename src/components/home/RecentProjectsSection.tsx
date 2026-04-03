@@ -14,6 +14,7 @@ interface PublicUser {
 interface ProjectMember {
   id: string;
   role: string;
+  status: string;
   user: PublicUser;
 }
 
@@ -84,7 +85,7 @@ export default function RecentProjectsSection() {
                 </div>
                 <p className="text-gray-600 text-sm mb-6 line-clamp-3">{project.description}</p>
                 <div className="flex -space-x-2">
-                  {project.members?.map((member) => (
+                  {project.members?.filter(m => m.status === 'ACTIVE').map((member) => (
                     <img
                       key={member.id}
                       className="w-8 h-8 rounded-full border-2 border-white bg-gray-200"
