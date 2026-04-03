@@ -197,12 +197,18 @@ export default function MisProyectosPage() {
   }, [loadProjects]);
 
   const filteredProjects = projects.filter((p) => {
+    const activeMembers = p.members.filter(m => m.status === 'ACTIVE');
+    const myMembership = activeMembers.find(m => m.user.id === user?.userId);
+    
+    // Si no es miembro activo (ej. está pendiente), no debe ver el proyecto aquí
+    if (!myMembership) return false;
+
     const matchesSearch =
       p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (p.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
     const matchesStatus = statusFilter === 'ALL' || p.status === statusFilter;
-    const myRole = p.members[0]?.role ?? '';
-    const matchesRole = roleFilter === 'ALL' || myRole === roleFilter;
+    
+    const matchesRole = roleFilter === 'ALL' || myMembership.role === roleFilter;
     return matchesSearch && matchesStatus && matchesRole;
   });
 

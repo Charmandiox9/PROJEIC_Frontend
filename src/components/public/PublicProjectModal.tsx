@@ -127,10 +127,10 @@ export default function PublicProjectModal({ isOpen, projectId, onClose }: Publi
 
                 <div className="md:col-span-2 space-y-6">
                   <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">Participantes del Proyecto</h2>
-                  
-                  {project.members && project.members.length > 0 ? (
+
+                  {project.members && project.members.filter((m: any) => m.status === 'ACTIVE').length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {project.members.map((member: any) => (
+                      {project.members.filter((m: any) => m.status === 'ACTIVE').map((member: any) => (
                         <div key={member.id} className="flex items-center p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:border-brand/30 transition-colors min-w-0">
                           <div className="flex items-center gap-4 min-w-0 w-full">
                             {member.user.avatarUrl ? (

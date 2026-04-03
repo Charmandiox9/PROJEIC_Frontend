@@ -151,7 +151,9 @@ export default function ProyectosPage() {
                 </div>
                 <p className="text-gray-600 text-sm mb-6 line-clamp-3">{project.description || 'Paz y colaboración EIC.'}</p>
                 <div className="flex items-center -space-x-2">
-                  {project.members?.map((member) => (
+                  {project.members
+                    ?.filter((member) => member.status === 'ACTIVE')
+                    .map((member) => (
                     <img
                       key={member.id}
                       className="w-8 h-8 rounded-full border-2 border-white bg-gray-200 object-cover shrink-0"

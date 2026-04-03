@@ -135,7 +135,8 @@ export default function ProyectosPublicosLogeadoPage() {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProjects.map((project) => {
-              const isMember = project.members?.some((m) => m.user.userId === user?.userId) ?? false;
+              const activeMembers = project.members?.filter(m => m.status === 'ACTIVE') ?? [];
+              const isMember = project.members?.some((m) => m.user.userId === user?.userId && m.status === 'ACTIVE') ?? false;
 
               return (
                 <div 
@@ -164,7 +165,7 @@ export default function ProyectosPublicosLogeadoPage() {
                   
                   <div className="flex items-center justify-between pt-4 border-t border-gray-50 mt-auto">
                     <div className="flex items-center -space-x-2 relative z-0">
-                      {project.members?.slice(0, 3).map((member) => (
+                      {activeMembers.slice(0, 3).map((member) => (
                         <img
                           key={member.id}
                           className="w-7 h-7 rounded-full border-2 border-white bg-gray-200 object-cover shrink-0"
@@ -174,9 +175,9 @@ export default function ProyectosPublicosLogeadoPage() {
                           title={member.user.name}
                         />
                       ))}
-                      {project.members && project.members.length > 3 && (
+                      {activeMembers.length > 3 && (
                         <div className="w-7 h-7 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-[10px] font-bold text-gray-600 shrink-0 z-10">
-                          +{project.members.length - 3}
+                          +{activeMembers.length - 3}
                         </div>
                       )}
                     </div>
