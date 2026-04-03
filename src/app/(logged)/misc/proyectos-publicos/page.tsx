@@ -2,11 +2,23 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Eye } from 'lucide-react';
+import { Search, Eye, BookOpen, GraduationCap } from 'lucide-react';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { GET_PUBLIC_PROJECTS } from '@/graphql/misc/operations';
 import { AVATAR_FALLBACK_URL } from '@/lib/constants';
 import { useAuth } from '@/context/AuthProvider';
+
+interface Professor {
+  id: string;
+  name: string;
+}
+
+interface Subject {
+  id: string;
+  name: string;
+  period: string;
+  professors?: Professor[];
+}
 
 interface PublicUser {
   userId: string;
@@ -17,6 +29,7 @@ interface PublicUser {
 interface ProjectMember {
   id: string;
   role: string;
+  status: string;
   user: PublicUser;
 }
 
@@ -28,6 +41,8 @@ interface Project {
   color: string;
   methodology: string;
   isPublic: boolean;
+  isInstitutional: boolean;
+  subject?: Subject;
   members: ProjectMember[];
 }
 
@@ -76,7 +91,10 @@ export default function ProyectosPublicosLogeadoPage() {
   const filteredProjects = projects.filter((project) => {
     const matchesSearch =
       project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (project.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
+      (project.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
+      (project.subject?.name.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
+      (project.subject?.professors?.some(p => p.name.toLowerCase().includes(searchTerm.toLowerCase())) ?? false);
+    
     const matchesStatus = statusFilter === 'Todos' || project.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -94,7 +112,7 @@ export default function ProyectosPublicosLogeadoPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Buscar proyectos..."
+                placeholder="Buscar proyectos, ramos o profesores..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-brand focus:border-brand outline-none transition-colors"
@@ -141,29 +159,57 @@ export default function ProyectosPublicosLogeadoPage() {
               return (
                 <div 
                   key={project.id} 
-                  className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-xl hover:border-brand/40 transition-all duration-300 flex flex-col min-h-0"
+                  className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-xl hover:border-brand/40 transition-all duration-300 flex flex-col min-h-0 relative"
                 >
-                  <div className="flex flex-col mb-4 gap-3">
+                  {/* Etiqueta de Miembro en esquina superior derecha */}
+                  {isMember && (
+                    <div className="absolute -top-3 -right-3 z-10">
+                      <span className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider bg-brand text-white shadow-sm rounded-full">
+                        Tu proyecto
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="flex flex-col mb-4 gap-3 pr-2">
                     <div className="flex justify-between items-start gap-3 w-full">
-                      <h3 className="font-bold text-lg text-gray-900 line-clamp-2 break-words leading-tight">{project.name}</h3>
-                      <span className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap shrink-0 ${
-                        project.status === 'ACTIVE' ? 'bg-green-100 text-green-700' :
+                      <div className="flex flex-col gap-2 w-full">
+                        <h3 className="font-bold text-lg text-gray-900 line-clamp-2 break-words leading-tight">{project.name}</h3>
+                        
+                        {project.isInstitutional && project.subject && (
+                          <div className="flex flex-col gap-1.5 mt-1 bg-gray-50/80 p-2.5 rounded-lg border border-gray-100">
+                            <div className="flex items-center gap-1.5">
+                              <BookOpen className="w-3.5 h-3.5 text-brand shrink-0" />
+                              <p className="text-xs font-semibold text-brand truncate">
+                                {project.subject.name} <span className="font-normal text-gray-400 ml-1">• {project.subject.period}</span>
+                              </p>
+                            </div>
+                            
+                            {project.subject.professors && project.subject.professors.length > 0 && (
+                              <div className="flex items-start gap-1.5 pl-0.5">
+                                <GraduationCap className="w-3.5 h-3.5 text-gray-400 shrink-0 mt-0.5" />
+                                <p className="text-[11px] text-gray-600 line-clamp-1">
+                                  <span className="font-medium text-gray-500 mr-1">Prof:</span> 
+                                  {project.subject.professors.map(p => p.name).join(', ')}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      
+                      <span className={`px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md whitespace-nowrap shrink-0 ${
+                        project.status === 'ACTIVE' ? 'bg-green-50 text-green-700' :
                         project.status === 'COMPLETED' ? 'bg-gray-100 text-gray-700' :
-                        'bg-brand-light text-brand'
+                        'bg-brand/10 text-brand'
                       }`}>
                         {getStatusLabel(project.status)}
                       </span>
                     </div>
-                    {isMember && (
-                      <span className="w-fit px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-brand/10 text-brand rounded-md">
-                        Ya eres miembro
-                      </span>
-                    )}
                   </div>
                   
-                  <p className="text-gray-500 text-sm mb-6 line-clamp-3 flex-1">{project.description || 'Sin descripción.'}</p>
+                  <p className="text-gray-500 text-sm mb-6 line-clamp-3 flex-1">{project.description || 'Sin descripción detallada.'}</p>
                   
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-50 mt-auto">
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-auto">
                     <div className="flex items-center -space-x-2 relative z-0">
                       {activeMembers.slice(0, 3).map((member) => (
                         <img
@@ -185,7 +231,7 @@ export default function ProyectosPublicosLogeadoPage() {
                       onClick={() => router.push(`/misc/proyectos/${project.id}`)}
                       className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-brand hover:text-white bg-brand/5 hover:bg-brand rounded-lg transition-colors"
                     >
-                      Ver proyecto <Eye className="w-3.5 h-3.5" />
+                      Ver detalles <Eye className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>

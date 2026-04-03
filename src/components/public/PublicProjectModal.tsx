@@ -3,7 +3,17 @@
 import { useEffect, useState } from 'react';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { GET_PROJECT_BY_ID } from '@/graphql/misc/operations';
-import { Calendar, Layout, User, Loader2, Globe, Lock, X } from 'lucide-react';
+import { 
+  Calendar, 
+  Layout, 
+  User, 
+  Loader2, 
+  Globe, 
+  Lock, 
+  X, 
+  BookOpen, 
+  GraduationCap 
+} from 'lucide-react';
 
 interface PublicProjectModalProps {
   isOpen: boolean;
@@ -86,6 +96,7 @@ export default function PublicProjectModal({ isOpen, projectId, onClose }: Publi
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+                {/* Lado Izquierdo: Ficha Técnica */}
                 <div className="md:col-span-1 space-y-8">
                   <div>
                     <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">Ficha Técnica</h2>
@@ -110,7 +121,40 @@ export default function PublicProjectModal({ isOpen, projectId, onClose }: Publi
                           <p className="text-sm font-semibold text-gray-900 capitalize">{project.methodology.toLowerCase()}</p>
                         </div>
                       </li>
-                      <li className="flex items-center gap-3">
+
+                      {/* Información Institucional */}
+                      {project.isInstitutional && project.subject && (
+                        <>
+                          <li className="flex items-center gap-3 border-t border-gray-100 pt-4">
+                            <div className="w-8 h-8 rounded-full bg-brand/10 flex items-center justify-center text-brand shrink-0">
+                              <BookOpen className="w-4 h-4" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-xs text-gray-500">Asignatura</p>
+                              <p className="text-sm font-semibold text-gray-900 truncate">
+                                {project.subject.name}
+                              </p>
+                              <p className="text-[10px] text-gray-400 font-medium uppercase tracking-tighter">Periodo: {project.subject.period}</p>
+                            </div>
+                          </li>
+                          
+                          {project.subject.professors && project.subject.professors.length > 0 && (
+                            <li className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-brand/10 flex items-center justify-center text-brand shrink-0">
+                                <GraduationCap className="w-4 h-4" />
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-500">Profesor guía</p>
+                                <p className="text-sm font-semibold text-gray-900 line-clamp-1">
+                                  {project.subject.professors.map((p: any) => p.name).join(', ')}
+                                </p>
+                              </div>
+                            </li>
+                          )}
+                        </>
+                      )}
+
+                      <li className="flex items-center gap-3 border-t border-gray-100 pt-4">
                         <div className="w-8 h-8 rounded-full bg-brand/10 flex items-center justify-center text-brand shrink-0">
                           {project.isPublic ? <Globe className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
                         </div>
@@ -125,6 +169,7 @@ export default function PublicProjectModal({ isOpen, projectId, onClose }: Publi
                   </div>
                 </div>
 
+                {/* Lado Derecho: Participantes */}
                 <div className="md:col-span-2 space-y-6">
                   <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">Participantes del Proyecto</h2>
 
@@ -158,7 +203,6 @@ export default function PublicProjectModal({ isOpen, projectId, onClose }: Publi
                   )}
                 </div>
               </div>
-
             </div>
           </div>
         )}

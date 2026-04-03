@@ -50,6 +50,17 @@ export const GET_PROJECT_BY_ID = `
       createdAt
       updatedAt
       isArchived
+      isInstitutional
+      subject {        
+        id
+        name
+        code
+        period
+        professors {
+          id
+          name
+        }
+      }
       members {
         id
         role
@@ -76,6 +87,16 @@ export const GET_PUBLIC_PROJECTS = `
         status
         methodology
         isPublic
+        isInstitutional
+        subject {
+          id
+          name
+          period
+          professors {
+            id
+            name
+          }
+        }
         members {
           id
           role
@@ -97,6 +118,8 @@ export const UPDATE_PROJECT = `
       id
       name
       description
+      isInstitutional
+      subjectId
     }
   }
 `;
@@ -133,6 +156,16 @@ export const GET_MY_PROJECTS = `
         status
         methodology
         isPublic
+        isInstitutional
+        subject {
+          id
+          name
+          period
+          professors {
+            id
+            name
+          }
+        }
         members {
           id
           role

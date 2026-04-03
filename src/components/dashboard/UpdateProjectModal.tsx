@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Loader2 } from 'lucide-react';
+import { X, Loader2, BookOpen } from 'lucide-react';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { UPDATE_PROJECT } from '@/graphql/misc/operations';
+import { GET_ALL_SUBJECTS, CREATE_SUBJECT } from '@/graphql/subjects/operations';
 
 interface UpdateProjectModalProps {
   isOpen: boolean;
@@ -15,6 +16,10 @@ interface UpdateProjectModalProps {
 export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess }: UpdateProjectModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // 🔥 Nuevo estado para almacenar los ramos disponibles
+  const [subjects, setSubjects] = useState<any[]>([]);
+  const [isLoadingSubjects, setIsLoadingSubjects] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -22,9 +27,32 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
     color: '#3B82F6',
     status: 'ACTIVE',
     methodology: 'KANBAN',
-    isPublic: false
+    isPublic: false,
+    isInstitutional: false, // 🔥 Nuevo
+    subjectId: '',          // 🔥 Nuevo
   });
 
+  // Cargar los ramos disponibles cuando se abre el modal
+  useEffect(() => {
+    if (isOpen) {
+      const loadSubjects = async () => {
+        setIsLoadingSubjects(true);
+        try {
+          const response = await fetchGraphQL({ query: GET_ALL_SUBJECTS });
+          if (response?.subjects) {
+            setSubjects(response.subjects);
+          }
+        } catch (err) {
+          console.error("Error al cargar los ramos:", err);
+        } finally {
+          setIsLoadingSubjects(false);
+        }
+      };
+      loadSubjects();
+    }
+  }, [isOpen]);
+
+  // Inicializar el formulario con los datos del proyecto
   useEffect(() => {
     if (project && isOpen) {
       setFormData({
@@ -34,6 +62,8 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
         status: project.status || 'ACTIVE',
         methodology: project.methodology || 'KANBAN',
         isPublic: project.isPublic || false,
+        isInstitutional: project.isInstitutional || false, // 🔥 Mapear datos
+        subjectId: project.subjectId || '',                // 🔥 Mapear datos
       });
       setError(null);
     }
@@ -57,6 +87,13 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
     setIsSubmitting(true);
     setError(null);
 
+    // Validación básica: Si es institucional, debe tener un ramo
+    if (formData.isInstitutional && !formData.subjectId) {
+      setError('Debes seleccionar un ramo si el proyecto es institucional.');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const response = await fetchGraphQL({
         query: UPDATE_PROJECT,
@@ -69,6 +106,8 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
             status: formData.status,
             methodology: formData.methodology,
             isPublic: formData.isPublic,
+            isInstitutional: formData.isInstitutional,
+            subjectId: formData.isInstitutional ? formData.subjectId : null, // Solo enviamos el ID si está marcado
           }
         }
       });
@@ -88,8 +127,8 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
           <h2 className="text-xl font-bold text-gray-900">Editar proyecto</h2>
           <button 
             onClick={onClose}
@@ -99,7 +138,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+        <form onSubmit={handleSubmit} className="p-6 space-y-5 overflow-y-auto">
           {error && (
             <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100">
               {error}
@@ -175,6 +214,50 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
             </div>
           </div>
 
+          {/* 🔥 SECCIÓN INSTITUCIONAL */}
+          <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl space-y-4">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                name="isInstitutional"
+                checked={formData.isInstitutional}
+                onChange={handleChange}
+                className="w-4 h-4 text-brand border-gray-300 rounded focus:ring-brand"
+              />
+              <div className="flex flex-col">
+                <span className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
+                  <BookOpen className="w-4 h-4 text-brand" /> Proyecto Institucional (EIC)
+                </span>
+                <span className="text-xs text-gray-500">Vincular este proyecto a un ramo de la escuela.</span>
+              </div>
+            </label>
+
+            {/* Selector de Ramo (Aparece solo si el checkbox está activo) */}
+            {formData.isInstitutional && (
+              <div className="pt-2 animate-in fade-in slide-in-from-top-2">
+                <label htmlFor="subjectId" className="block text-sm font-medium text-gray-700 mb-1">
+                  Selecciona el Ramo <span className="text-red-500">*</span>
+                </label>
+                <select
+                  id="subjectId"
+                  name="subjectId"
+                  value={formData.subjectId}
+                  onChange={handleChange}
+                  disabled={isLoadingSubjects}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none bg-white disabled:opacity-50"
+                >
+                  <option value="">-- Seleccionar Ramo --</option>
+                  {subjects.map((subject) => (
+                    <option key={subject.id} value={subject.id}>
+                      {subject.name} ({subject.period})
+                    </option>
+                  ))}
+                </select>
+                {isLoadingSubjects && <p className="text-xs text-gray-400 mt-1">Cargando ramos...</p>}
+              </div>
+            )}
+          </div>
+
           <div className="flex items-center justify-between mt-4">
             <div className="flex items-center gap-3">
               <label htmlFor="color" className="block text-sm font-medium text-gray-700">
@@ -204,7 +287,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
             </label>
           </div>
 
-          <div className="pt-4 border-t border-gray-100 flex justify-end gap-3">
+          <div className="pt-4 border-t border-gray-100 flex justify-end gap-3 shrink-0">
             <button
               type="button"
               onClick={onClose}
@@ -220,8 +303,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Guardando...
+                  <Loader2 className="w-4 h-4 animate-spin" /> Guardando...
                 </>
               ) : (
                 'Guardar Cambios'
