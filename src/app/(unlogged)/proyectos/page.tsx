@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { Search, BookOpen, GraduationCap } from 'lucide-react';
@@ -99,10 +99,10 @@ export default function ProyectosPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      <section className="bg-brand-dark text-white py-12 px-6">
+      <section className="bg-white text-ui-dark py-12 px-6 border-b border-gray-100">
         <div className="max-w-6xl mx-auto text-center">
-          <h1 className="text-3xl md:text-4xl font-bold mb-3">Proyectos de la EIC</h1>
-          <p className="text-blue-200">Iniciativas académicas abiertas a la comunidad universitaria.</p>
+          <h1 className="text-3xl md:text-4xl font-extrabold mb-3">Proyectos de la EIC</h1>
+            <p className="text-gray-500 font-medium">Iniciativas académicas abiertas a la comunidad universitaria.</p>
         </div>
       </section>
 
@@ -234,9 +234,6 @@ export default function ProyectosPage() {
         onClose={() => setSelectedProjectId(null)}
       />
 
-      <footer className="bg-brand-dark text-white/80 py-6 text-center text-sm mt-auto">
-        <p>PROJEIC &middot; Escuela de Ingeniería Coquimbo</p>
-      </footer>
     </div>
   );
 }

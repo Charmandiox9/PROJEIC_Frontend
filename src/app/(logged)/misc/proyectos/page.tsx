@@ -43,6 +43,7 @@ interface Project {
   isInstitutional: boolean;
   subject?: Subject;
   members: ProjectMember[];
+  myRole?: string;
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -128,9 +129,9 @@ function SkeletonCard() {
 }
 
 function ProjectCard({ project, currentUserId }: { project: Project; currentUserId?: string }) {
-  const activeMembers = project.members.filter(m => m.status === 'ACTIVE');
+  const activeMembers = project.members?.filter(m => m.status === 'ACTIVE') || [];
   const myMembership = activeMembers.find(m => m.user.id === currentUserId);
-  const role = myMembership?.role ?? 'STUDENT';
+  const role = project.myRole || myMembership?.role || 'STUDENT';
 
   return (
     <Link
@@ -246,21 +247,22 @@ export default function MisProyectosPage() {
   const uniquePeriods = Array.from(new Set(institutionalProjects.map(p => p.subject!.period))).sort((a, b) => b.localeCompare(a)); 
 
   const filteredProjects = projects.filter((p) => {
-    const activeMembers = p.members.filter(m => m.status === 'ACTIVE');
+    const activeMembers = p.members?.filter(m => m.status === 'ACTIVE') || [];
     const myMembership = activeMembers.find(m => m.user.id === user?.userId);
-    
-    if (!myMembership) return false;
+    const role = p.myRole || myMembership?.role;
+
+    if (!role) return false;
 
     const matchesSearch =
       p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (p.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
       (p.subject?.name.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
       (p.subject?.professors?.some(prof => prof.name.toLowerCase().includes(searchTerm.toLowerCase())) ?? false);
-    
+
     const matchesStatus = statusFilter === 'ALL' || p.status === statusFilter;
-    const matchesRole = roleFilter === 'ALL' || myMembership.role === roleFilter;
-    
-    const matchesInstitutional = 
+    const matchesRole = roleFilter === 'ALL' || role === roleFilter;
+
+    const matchesInstitutional =
       institutionalFilter === 'ALL' || 
       (institutionalFilter === 'YES' && p.isInstitutional) ||
       (institutionalFilter === 'NO' && !p.isInstitutional);

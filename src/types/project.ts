@@ -33,4 +33,5 @@ export interface Project {
   isInstitutional: boolean;
   subject?: Subject;
   members: ProjectMember[];
+  myRole?: string;
 }

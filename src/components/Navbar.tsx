@@ -1,10 +1,12 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Menu } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthProvider';
+import logoTexto from '../../public/Logo__Texto.png';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -20,22 +22,29 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-100">
+    <nav className="flex items-center justify-between px-6 py-4 bg-ui-dark text-white border-b border-white/10 shadow-sm relative z-50">
       <div className="flex flex-1 items-center">
-        <Link href="/" className="flex items-center space-x-2">
-          <div className="w-3 h-3 bg-brand rounded-full"></div>
-          <span className="text-xl font-bold tracking-tight text-gray-900">PROJEIC</span>
+        <Link href="/" className="flex items-center">
+          <Image
+            src={logoTexto}
+            alt="PROJEIC Logo"
+            width={160}
+            height={46}
+            className="w-auto h-10 md:h-12 object-contain"
+            style={{ width: 'auto', height: '100%', maxHeight: '48px' }}
+            priority
+          />
         </Link>
       </div>
 
       <div className="hidden md:flex flex-1 justify-center space-x-6">
-        <Link href="/proyectos" className={`text-sm font-medium px-3 py-1.5 rounded-lg transition-colors ${pathname.startsWith('/proyectos') ? 'bg-brand/10 text-brand' : 'text-gray-600 hover:bg-gray-100 hover:text-brand'}`}>
+        <Link href="/proyectos" className={`text-sm font-medium px-3 py-1.5 rounded-lg transition-colors ${pathname.startsWith('/proyectos') ? 'bg-white/10 text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}>
           Proyectos
         </Link>
-        <Link href="/acerca" className={`text-sm font-medium px-3 py-1.5 rounded-lg transition-colors ${pathname.startsWith('/acerca') ? 'bg-brand/10 text-brand' : 'text-gray-600 hover:bg-gray-100 hover:text-brand'}`}>
+        <Link href="/acerca" className={`text-sm font-medium px-3 py-1.5 rounded-lg transition-colors ${pathname.startsWith('/acerca') ? 'bg-white/10 text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}>
           Acerca de
         </Link>
-        <Link href="/eic" className={`text-sm font-medium px-3 py-1.5 rounded-lg transition-colors ${pathname.startsWith('/eic') ? 'bg-brand/10 text-brand' : 'text-gray-600 hover:bg-gray-100 hover:text-brand'}`}>
+        <Link href="/eic" className={`text-sm font-medium px-3 py-1.5 rounded-lg transition-colors ${pathname.startsWith('/eic') ? 'bg-white/10 text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}>
           EIC
         </Link>
       </div>
@@ -43,24 +52,24 @@ export default function Navbar() {
       <div className="flex flex-1 items-center justify-end space-x-4">
         <div className="hidden md:flex items-center space-x-4">
           {!mounted ? (
-            <div className="w-64 h-10 animate-pulse bg-gray-100 rounded-lg"></div>
+            <div className="w-64 h-10 animate-pulse bg-white/10 rounded-lg"></div>
           ) : isAuthenticated ? (
             <>
-              <Link 
-                href="/misc/profile" 
-                className="text-sm font-medium text-gray-700 hover:text-brand transition-colors"
+              <Link
+                href="/misc/profile"
+                className="text-sm font-medium text-white/90 hover:text-white transition-colors"
               >
                 Hola, {user?.name?.split(' ')[0] || 'Usuario'}
               </Link>
               <Link
                 href="/misc/profile"
-                className="px-4 py-2 text-sm font-medium text-white bg-brand rounded-lg hover:bg-brand-hover transition-colors"
+                className="px-4 py-2 text-sm font-medium text-ui-dark bg-white rounded-lg hover:bg-gray-100 transition-colors shadow-sm"
               >
                 Mi dashboard
               </Link>
               <button
                 onClick={logout}
-                className="px-4 py-2 text-sm font-medium text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-white/80 border border-white/20 rounded-lg hover:bg-white/10 hover:text-white transition-colors"
               >
                 Cerrar sesión
               </button>
@@ -68,13 +77,13 @@ export default function Navbar() {
           ) : (
               <Link
                 href="/auth/login"
-                className="px-4 py-2 text-sm font-medium text-brand border border-brand rounded-lg hover:bg-brand-light transition-colors"
+                className="px-4 py-2 text-sm font-medium text-ui-dark bg-white border border-transparent rounded-lg hover:bg-gray-100 transition-colors shadow-sm"
               >
                 Iniciar sesión
               </Link>
           )}
         </div>
-        <button className="md:hidden p-2 text-gray-600">
+        <button className="md:hidden p-2 text-white/80 hover:text-white">
           <Menu className="w-6 h-6" />
         </button>
       </div>

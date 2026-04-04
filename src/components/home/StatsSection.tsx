@@ -42,19 +42,17 @@ export default function StatsSection() {
   ];
 
   return (
-    <section className="bg-white border-b border-gray-100 py-12 px-6">
-      <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
-        {statsView.map((stat) => (
-          <div key={stat.id} className="text-center">
-            <div className="text-3xl font-bold text-gray-900 mb-2">
-              {stat.value !== null ? stat.value : '-'}
-            </div>
-            <div className="text-sm text-gray-500 font-medium uppercase tracking-wide">
-              {stat.label}
-            </div>
+    <div className="max-w-5xl mx-auto mt-10 md:mt-16 pt-8 pb-10 border-t border-gray-100 flex flex-wrap justify-center gap-6 sm:gap-12">
+      {statsView.map((stat) => (
+        <div key={stat.id} className="text-center px-4">
+          <div className="text-3xl md:text-4xl font-extrabold text-ui-dark mb-1 tracking-tight">
+            {stat.value !== null ? stat.value : '-'}
           </div>
-        ))}
-      </div>
-    </section>
+          <div className="text-[10px] sm:text-xs text-gray-500 font-semibold uppercase tracking-widest">
+            {stat.label}
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }

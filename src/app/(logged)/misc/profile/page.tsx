@@ -15,6 +15,18 @@ interface UserProfile {
   avatarUrl?: string;
 }
 
+interface Project {
+  status: string;
+  myRole?: string;
+  members?: {
+    role: string;
+    status: string;
+    user: {
+      id: string;
+    };
+  }[];
+}
+
 interface DashboardMetrics {
   activeProjects: number | null;
   pendingTasks: number | null;
@@ -54,9 +66,25 @@ export default function ProfileDashboard() {
             if (projectsRes?.myProjects?.items) {
               const items = projectsRes.myProjects.items;
               setProjects(items);
+
+                const leaderProjects = items.filter((p: Project) => {
+                  const activeMembers = p.members?.filter(m => m.status === 'ACTIVE') || [];
+                  const myMembership = activeMembers.find(m => m.user.id === user?.userId);
+                  const role = p.myRole || myMembership?.role;
+                  return role === 'LEADER';
+                });
+
+              const collaboratorIds = new Set<string>();
+              leaderProjects.forEach((p: Project) => {
+                p.members
+                  ?.filter(m => m.status === 'ACTIVE' && m.user.id !== user?.userId)
+                  .forEach(m => collaboratorIds.add(m.user.id));
+              });
+
               setMetrics(prev => ({
                 ...prev,
-                activeProjects: items.filter((p: any) => p.status === 'ACTIVE').length
+                activeProjects: items.filter((p: Project) => p.status === 'ACTIVE').length,
+                collaborators: collaboratorIds.size,
               }));
             }
           }
@@ -82,12 +110,28 @@ export default function ProfileDashboard() {
     ])
       .then(([profileRes, projectsRes]) => {
         if (profileRes?.me && projectsRes?.myProjects?.items) {
-            const items = projectsRes.myProjects.items;
-            setProjects(items);
-            setMetrics(prev => ({
-              ...prev,
-              activeProjects: items.filter((p: any) => p.status === 'ACTIVE').length
-            }));
+          const items = projectsRes.myProjects.items;
+          setProjects(items);
+
+          const leaderProjects = items.filter((p: Project) => {
+            const activeMembers = p.members?.filter(m => m.status === 'ACTIVE') || [];
+            const myMembership = activeMembers.find(m => m.user.id === user?.userId);
+            const role = p.myRole || myMembership?.role;
+            return role === 'LEADER';
+          });
+
+          const collaboratorIds = new Set<string>();
+          leaderProjects.forEach((p: Project) => {
+            p.members
+              ?.filter(m => m.status === 'ACTIVE' && m.user.id !== user?.userId)
+              .forEach(m => collaboratorIds.add(m.user.id));
+          });
+
+          setMetrics(prev => ({
+            ...prev,
+            activeProjects: items.filter((p: Project) => p.status === 'ACTIVE').length,
+            collaborators: collaboratorIds.size,
+          }));
         }
       })
       .finally(() => setIsLoading(false));

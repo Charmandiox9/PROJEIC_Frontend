@@ -1,6 +1,7 @@
 'use client';
 import { usePathname } from 'next/navigation';
 import Navbar from './Navbar';
+import PublicFooter from './layout/PublicFooter';
 
 const PRIVATE_ROUTES = ['/misc'];
 
@@ -22,6 +23,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       <main className="flex-1">
         {children}
       </main>
+      <PublicFooter />
     </div>
   );
 }

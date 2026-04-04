@@ -51,6 +51,7 @@ export const GET_PROJECT_BY_ID = `
       updatedAt
       isArchived
       isInstitutional
+      myRole
       subject {        
         id
         name
@@ -157,6 +158,7 @@ export const GET_MY_PROJECTS = `
         methodology
         isPublic
         isInstitutional
+        myRole
         subject {
           id
           name
@@ -240,3 +242,20 @@ export const RESPOND_TO_INVITATION = `
     }
   }
 `;
+
+export const GET_SUBJECTS = ` 
+  query Subjects {
+    subjects {
+      id
+      name
+      code
+      period
+      professors {
+        id
+        name
+        avatarUrl
+      }
+    }
+  }
+`;
+

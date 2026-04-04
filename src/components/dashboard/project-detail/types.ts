@@ -23,6 +23,7 @@ export interface Project {
   updatedAt: string;
   isArchived: boolean;
   members: ProjectMember[];
+  myRole?: string;
 }
 
 export const STATUS_LABELS: Record<string, string> = {

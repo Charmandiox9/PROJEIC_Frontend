@@ -107,18 +107,25 @@ export default function ProjectDetailPage() {
   if (isLoading) return <div className="min-h-[60vh] flex items-center justify-center"><Loader2 className="w-8 h-8 text-brand animate-spin" /></div>;
   if (error || !project) return <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-4"><p>{error}</p><Link href="/misc/proyectos">Volver</Link></div>;
 
-  const currentUserRole = project?.members.find((m) => m.user.id === user?.userId)?.role ?? null;
+  const actualRole = project?.members?.find((m) => m.user.id === user?.userId)?.role;
+  const currentUserRole = project?.myRole || actualRole || null;
   const isLeader = currentUserRole === 'LEADER';
 
   return (
     <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
-        <nav className="flex items-center gap-1.5 text-sm text-gray-500">
-          <Link href="/misc/proyectos" className="hover:text-gray-900 transition-colors">
+        <nav className="flex items-center gap-3 text-sm text-gray-500 mb-6">
+          <Link 
+            href="/misc/proyectos" 
+            className="flex items-center gap-1.5 hover:text-brand transition-colors font-medium"
+          >
+            <ArrowLeft className="w-4 h-4" />
             Mis proyectos
           </Link>
-          <span>/</span>
-          <span className="text-gray-900 font-medium truncate max-w-[240px]">{project.name}</span>
+          <span className="text-gray-300 text-lg/none">|</span>
+          <span className="text-gray-900 font-medium truncate max-w-[300px]">
+            {project.name}
+          </span>
         </nav>
         <div className="flex items-center gap-2">
           <button

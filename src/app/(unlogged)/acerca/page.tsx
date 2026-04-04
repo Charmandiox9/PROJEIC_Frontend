@@ -1,10 +1,10 @@
-import { Eye, History, Users, Github, Linkedin } from 'lucide-react';
+﻿import { Eye, History, Users, Github, Linkedin } from 'lucide-react';
 
 const PAGE_TEXTS = {
   heroTitle: 'Acerca de PROJEIC',
   heroSubtitle: 'Transparencia y trazabilidad para los proyectos académicos.',
   aboutTitle: '¿Qué es PROJEIC?',
-  aboutDescription: 'PROJEIC es una plataforma de gestión de proyectos académicos desarrollada para la Escuela de Ingeniería Coquimbo de la Universidad Católica del Norte. Su objetivo principal es centralizar el seguimiento, proporcionar visibilidad pública y asegurar la trazabilidad completa del ciclo de vida de los proyectos estudiantiles, conectando a estudiantes, docentes supervisores y la comunidad universitaria en un solo entorno colaborativo.',
+  aboutDescription: 'PROJEIC es una plataforma de gestión de proyectos académicos desarrollada para la Escuela de Ingeniería Coquimbo de la Universidad Católica del Norte. Su objetivo principal es centralizar el seguimiento, proporcionar visibilidad pública y asegurar la trazabilidad completa del ciclo de vida de los proyectos estudiantiles, conectando a estudiantes, docentes supervisores y la comunidad universitaria en un solo entorno colaborativo.',   
   proposalTitle: 'Nuestra propuesta',
   technologyTitle: 'Tecnología',
   developersTitle: 'Desarrolladores'
@@ -58,17 +58,17 @@ const DEVELOPERS = [
     minor: 'Minor: Desarrollo y Arquitectura de Software',
     minorUrl: 'https://drive.google.com/file/d/1vQu27z8fN4BSLSRP-6g9lumdkTk4bzx0/view',
     github: 'https://github.com/Charmandiox9',
-    linkedin: 'https://www.linkedin.com/in/daniel-durán-garcía/'
+    linkedin: 'https://www.linkedin.com/in/daniel-durí¡n-garcí­a/'
   }
 ];
 
 export default function AcercaPage() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      <section className="bg-brand-dark bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white/5 via-transparent to-transparent text-white py-16 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-3xl md:text-5xl font-bold mb-4">{PAGE_TEXTS.heroTitle}</h1>
-          <p className="text-blue-200 text-lg md:text-xl">{PAGE_TEXTS.heroSubtitle}</p>
+<section className="bg-white bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-light/30 via-transparent to-transparent text-ui-dark py-16 px-6 border-b border-gray-100">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-3xl md:text-5xl font-bold mb-4">{PAGE_TEXTS.heroTitle}</h1>
+            <p className="text-gray-500 text-lg md:text-xl font-medium">{PAGE_TEXTS.heroSubtitle}</p>
         </div>
       </section>
 
@@ -174,9 +174,10 @@ export default function AcercaPage() {
         </section>
       </main>
 
-      <footer className="bg-brand-dark text-white/80 py-6 text-center text-sm mt-auto border-t border-white/10">
-        <p>PROJEIC &middot; Escuela de Ingeniería Coquimbo</p>
-      </footer>
     </div>
   );
 }
+
+
+
+

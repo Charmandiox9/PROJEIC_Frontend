@@ -1,12 +1,13 @@
-'use client';
+﻿'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Loader2, UserPlus, AlertCircle } from 'lucide-react';
 import { fetchGraphQL } from '@/lib/graphQLClient';
-import { CREATE_PROJECT, ADD_PROJECT_MEMBER } from '@/graphql/misc/operations';
+import { CREATE_PROJECT, ADD_PROJECT_MEMBER, GET_SUBJECTS } from '@/graphql/misc/operations';
 import Select from '@/components/ui/Select';
 import Input from '@/components/ui/Input';
 import Textarea from '@/components/ui/Textarea';
+import { Subject } from '@/types/project';
 
 interface CreateProjectModalProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ interface ProjectFormData {
   status: string;
   methodology: string;
   isPublic: boolean;
+  subjectId: string;
 }
 
 interface PendingMember {
@@ -50,6 +52,7 @@ const INITIAL_FORM: ProjectFormData = {
   status: 'ACTIVE',
   methodology: 'KANBAN',
   isPublic: false,
+  subjectId: '',
 };
 
 export default function CreateProjectModal({ isOpen, onClose, onSuccess }: CreateProjectModalProps) {
@@ -62,6 +65,26 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
   const [isExternal, setIsExternal] = useState(false);
   const [memberError, setMemberError] = useState<string | null>(null);
   const [pendingMembers, setPendingMembers] = useState<PendingMember[]>([]);
+
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [isLoadingSubjects, setIsLoadingSubjects] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsLoadingSubjects(true);
+      fetchGraphQL({ query: GET_SUBJECTS })
+        .then((res) => {
+          if (res?.subjects) {
+            setSubjects(res.subjects as Subject[]);
+          }
+        })
+        .catch(console.error)
+        .finally(() => setIsLoadingSubjects(false));
+    } else {
+      setFormData(INITIAL_FORM);
+      setPendingMembers([]);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -126,6 +149,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
             status: formData.status,
             methodology: formData.methodology,
             isPublic: formData.isPublic,
+            subjectId: formData.subjectId || undefined,
           },
         },
       });
@@ -214,15 +238,30 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
             placeholder="Un breve resumen de la meta del proyecto..."
           />
 
-          <div className="grid grid-cols-2 gap-4">
+            <Select
+              id="subjectId"
+              label="Asignatura (Opcional)"
+              name="subjectId"
+              value={formData.subjectId}
+              onChange={handleChange}
+              disabled={isLoadingSubjects}
+            >
+              <option value="">Sin asignatura</option>
+              {subjects.map((subject) => (
+                <option key={subject.id} value={subject.id}>
+                  {subject.name} {subject.code ? `(${subject.code})` : ''}
+                </option>
+              ))}
+            </Select>
+
+          <div className="grid md:grid-cols-2 gap-4">
             <Select
               id="status"
-              label="Estado inicial"
+              label="Estado"
               name="status"
               value={formData.status}
               onChange={handleChange}
             >
-              <option value="STARTING">Iniciando</option>
               <option value="ACTIVE">Activo</option>
               <option value="ON_HOLD">En pausa</option>
             </Select>
@@ -234,8 +273,8 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
               onChange={handleChange}
             >
               <option value="KANBAN">Kanban</option>
-              <option value="SCRUM">Scrum</option>
-              <option value="SCRUMBAN">Scrumban</option>
+              <option value="SCRUM" disabled>Scrum (Próximamente)</option>
+              <option value="SCRUMBAN" disabled>Scrumban (Próximamente)</option>
             </Select>
           </div>
 
@@ -378,3 +417,4 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
     </div>
   );
 }
+

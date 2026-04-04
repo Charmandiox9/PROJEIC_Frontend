@@ -196,6 +196,7 @@ export interface Project {
   isArchived: boolean;
   createdAt: string;
   updatedAt: string;
+  myRole?: string;
 }
 
 export interface PaginatedProjects {

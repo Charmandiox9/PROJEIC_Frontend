@@ -1,12 +1,15 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { LayoutDashboard, FolderKanban, Globe, Bell, Settings, ArrowLeft, LogOut, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { useAuth } from '@/context/AuthProvider';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { GET_MY_NOTIFICATIONS } from '@/graphql/misc/operations';
+import logoTexto from '../../../public/Logo__Texto.png';
+import logoIcon from '../../../public/logo.png';
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -73,17 +76,20 @@ export default function Sidebar() {
 
   return (
     <aside className={`sticky top-0 h-screen bg-brand-dark text-white flex flex-col py-6 shrink-0 transition-all duration-200 overflow-hidden ${collapsed ? 'w-16' : 'w-[220px]'}`}>
-      <div className={`flex items-center mb-6 ${collapsed ? 'flex-col gap-4 px-0' : 'px-6 justify-between'}`}>
-        <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 bg-blue-400 rounded-full shrink-0"></div>
-          {!collapsed && <span className="text-xl font-bold tracking-wider truncate">PROJEIC</span>}
+      <div className={`flex items-center mb-6 pl-5 ${collapsed ? 'flex-col gap-4' : 'justify-between pr-4'}`}>
+        <div className={`flex items-center ${collapsed ? 'justify-center w-full pr-5' : ''}`}>
+          {collapsed ? (
+            <Image src={logoIcon} alt="PROJEIC" width={28} height={28} priority />
+          ) : (
+            <Image src={logoTexto} alt="PROJEIC" width={100} height={28} priority />
+          )}
         </div>
-        <button 
+        <button
           onClick={() => setCollapsed(!collapsed)}
           className="text-white/70 hover:text-white transition-colors shrink-0"
           title={collapsed ? "Expandir" : "Colapsar"}
         >
-          {collapsed ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
+          {collapsed ? <PanelLeftOpen className="w-5 h-5 ml-[-20px]" /> : <PanelLeftClose className="w-5 h-5" />}
         </button>
       </div>
 

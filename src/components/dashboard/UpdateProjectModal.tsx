@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { X, Loader2, BookOpen } from 'lucide-react';
@@ -208,8 +208,8 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none bg-white"
               >
                 <option value="KANBAN">Kanban</option>
-                <option value="SCRUM">Scrum</option>
-                <option value="SCRUMBAN">Scrumban</option>
+                <option value="SCRUM" disabled>Scrum (Próximamente)</option>
+                <option value="SCRUMBAN" disabled>Scrumban (Próximamente)</option>
               </select>
             </div>
           </div>

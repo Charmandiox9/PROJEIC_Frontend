@@ -4,8 +4,11 @@ import { AuthProvider } from "@/context/AuthProvider";
 import ClientLayout from "@/components/ClientLayout";
 
 export const metadata: Metadata = {
-  title: "Projeic App | CodeVerse",
+  title: "Projeic App",
   description: "Plataforma centralizada de proyectos",
+  icons: {
+    icon: '/projeic/logo.png',
+  },
 };
 
 export default function RootLayout({
