@@ -10,7 +10,17 @@ import {
   REMOVE_PROJECT_MEMBER,
   UPDATE_PROJECT_MEMBER_ROLE,
 } from '@/graphql/misc/operations';
-import { ArrowLeft, FileDown, Loader2, Layout, Columns, Activity, BarChart2, Users } from 'lucide-react';
+import { 
+  ArrowLeft, 
+  FileDown, 
+  Loader2, 
+  Layout, 
+  Columns, 
+  Activity, 
+  BarChart2, 
+  Users, 
+  Target // 🔥 Nuevo ícono para Resultados Esperados
+} from 'lucide-react';
 import { useAuth } from '@/context/AuthProvider';
 import { Project } from '@/types/project';
 
@@ -21,16 +31,10 @@ import TabMetricas from '@/components/dashboard/projects/tabs/TabMetricas';
 import TabMiembros from '@/components/dashboard/projects/tabs/TabMiembros';
 import ComingSoonTab from '@/components/dashboard/projects/tabs/ComingSoonTab';
 import InviteMemberForm from '@/components/dashboard/projects/members/InviteMemberForm';
+import TabResultados from '@/components/dashboard/projects/tabs/TabResultados';
 
-type TabId = 'resumen' | 'tablero' | 'actividad' | 'metricas' | 'miembros';
-
-const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
-  { id: 'resumen', label: 'Resumen', icon: Layout },
-  { id: 'tablero', label: 'Tablero', icon: Columns },
-  { id: 'actividad', label: 'Actividad', icon: Activity },
-  { id: 'metricas', label: 'Métricas', icon: BarChart2 },
-  { id: 'miembros', label: 'Miembros', icon: Users },
-];
+// 🔥 Agregamos 'resultados' a los tipos de Tab permitidos
+type TabId = 'resumen' | 'tablero' | 'resultados' | 'actividad' | 'metricas' | 'miembros';
 
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -111,6 +115,18 @@ export default function ProjectDetailPage() {
   const currentUserRole = project?.myRole || actualRole || null;
   const isLeader = currentUserRole === 'LEADER';
 
+  // 🔥 GENERACIÓN DINÁMICA DE PESTAÑAS SEGÚN EL MODO
+  const currentTabs: { id: TabId; label: string; icon: React.ElementType }[] = [
+    { id: 'resumen', label: 'Resumen', icon: Layout },
+    // Si es Híbrido, mostramos Resultados. Si es Clásico, mostramos Tablero.
+    project.mode === 'HYBRID' 
+      ? { id: 'resultados', label: 'Resultados', icon: Target }
+      : { id: 'tablero', label: 'Tablero', icon: Columns },
+    { id: 'actividad', label: 'Actividad', icon: Activity },
+    { id: 'metricas', label: 'Métricas', icon: BarChart2 },
+    { id: 'miembros', label: 'Miembros', icon: Users },
+  ];
+
   return (
     <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
@@ -125,6 +141,10 @@ export default function ProjectDetailPage() {
           <span className="text-gray-300 text-lg/none">|</span>
           <span className="text-gray-900 font-medium truncate max-w-[300px]">
             {project.name}
+          </span>
+          {/* Pequeña etiqueta visual del modo */}
+          <span className="hidden sm:inline-flex px-2 py-0.5 ml-2 text-[10px] font-bold uppercase tracking-wider rounded-md bg-gray-100 text-gray-600">
+            {project.mode === 'HYBRID' ? 'Híbrido EIC' : 'Clásico'}
           </span>
         </nav>
         <div className="flex items-center gap-2">
@@ -148,15 +168,15 @@ export default function ProjectDetailPage() {
       {/* NAVEGACIÓN DE TABS */}
       <div className="border-b border-gray-200">
         <div className="flex gap-1 overflow-x-auto">
-          {TABS.map(({ id: tabId, label, icon: Icon }) => (
+          {currentTabs.map(({ id: tabId, label, icon: Icon }) => (
             <button 
-            key={tabId} 
-            onClick={() => setActiveTab(tabId)} 
-            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                activeTab === tabId
-                  ? 'border-brand text-brand'
-                  : 'border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300'
-              }`}>
+              key={tabId} 
+              onClick={() => setActiveTab(tabId)} 
+              className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+                  activeTab === tabId
+                    ? 'border-brand text-brand'
+                    : 'border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300'
+                }`}>
                <Icon className="w-4 h-4" /> {label}
             </button>
           ))}
@@ -177,7 +197,20 @@ export default function ProjectDetailPage() {
             isDeleting={isDeleting}
           />
         )}
-        {activeTab === 'tablero' && <BoardRenderer methodology={project.methodology} projectId={project.id} members={project.members} userRole={currentUserRole} />}
+        {/* Renderizamos Tablero SOLO si es clásico */}
+        {activeTab === 'tablero' && project.mode === 'CLASSIC' && (
+          <BoardRenderer 
+            methodology={project.methodology} 
+            projectId={project.id} 
+            members={project.members} 
+            userRole={currentUserRole} 
+          />
+        )}
+        {/* Renderizamos Resultados SOLO si es híbrido */}
+        {activeTab === 'resultados' && project.mode === 'HYBRID' && (
+          <TabResultados project={project} isLeader={isLeader} />
+        )}
+        
         {activeTab === 'actividad' && <ComingSoonTab label="Feed de actividad" />}
         {activeTab === 'metricas' && <TabMetricas />}
         {activeTab === 'miembros' && (

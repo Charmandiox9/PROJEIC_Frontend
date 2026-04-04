@@ -102,7 +102,7 @@ export default function PublicProjectDetailPage() {
                       </div>
                       <div>
                         <p className="text-xs text-gray-500">Metodología</p>
-                        <p className="text-sm font-semibold text-gray-900 capitalize">{project.methodology.toLowerCase()}</p>
+                        <p className="text-sm font-semibold text-gray-900 capitalize">{project.mode === 'HYBRID' ? 'Orientado a Resultados' : project.methodology}</p>
                       </div>
                     </li>
                     <li className="flex items-center gap-3">

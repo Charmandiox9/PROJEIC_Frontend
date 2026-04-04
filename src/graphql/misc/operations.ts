@@ -51,6 +51,7 @@ export const GET_PROJECT_BY_ID = `
       updatedAt
       isArchived
       isInstitutional
+      mode
       myRole
       subject {        
         id
@@ -89,6 +90,7 @@ export const GET_PUBLIC_PROJECTS = `
         methodology
         isPublic
         isInstitutional
+        mode
         subject {
           id
           name
@@ -121,6 +123,7 @@ export const UPDATE_PROJECT = `
       description
       isInstitutional
       subjectId
+      mode
     }
   }
 `;
@@ -131,6 +134,7 @@ export const CREATE_PROJECT = `
       id
       name
       description
+      mode
     }
   }
 `;
@@ -158,6 +162,7 @@ export const GET_MY_PROJECTS = `
         methodology
         isPublic
         isInstitutional
+        mode
         myRole
         subject {
           id
@@ -258,4 +263,3 @@ export const GET_SUBJECTS = `
     }
   }
 `;
-

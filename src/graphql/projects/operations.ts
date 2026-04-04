@@ -17,6 +17,7 @@ const PROJECT_FIELDS = `
     isArchived
     createdAt
     updatedAt
+    mode
   }
 `;
 

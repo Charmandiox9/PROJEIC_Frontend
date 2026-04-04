@@ -118,7 +118,7 @@ export default function PublicProjectModal({ isOpen, projectId, onClose }: Publi
                         </div>
                         <div>
                           <p className="text-xs text-gray-500">Metodología</p>
-                          <p className="text-sm font-semibold text-gray-900 capitalize">{project.methodology.toLowerCase()}</p>
+                          <p className="text-sm font-semibold text-gray-900 capitalize">{project.mode === 'HYBRID' ? 'Projeic Native' : project.methodology.toLowerCase()}</p>
                         </div>
                       </li>
 

@@ -34,4 +34,5 @@ export interface Project {
   subject?: Subject;
   members: ProjectMember[];
   myRole?: string;
+  mode?: string;
 }

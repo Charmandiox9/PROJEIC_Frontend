@@ -44,6 +44,7 @@ interface Project {
   subject?: Subject;
   members: ProjectMember[];
   myRole?: string;
+  mode?: string;
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -197,7 +198,7 @@ function ProjectCard({ project, currentUserId }: { project: Project; currentUser
           <div className="flex items-center justify-between">
             <MemberAvatars members={activeMembers} />
             <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">
-              {project.methodology}
+              {project.mode === 'HYBRID' ? 'Projeic Native' : project.methodology}
             </span>
           </div>
         </div>

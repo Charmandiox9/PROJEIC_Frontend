@@ -1,10 +1,10 @@
 ﻿'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Loader2, BookOpen } from 'lucide-react';
+import { X, Loader2, BookOpen, CheckCircle2 } from 'lucide-react';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { UPDATE_PROJECT } from '@/graphql/misc/operations';
-import { GET_ALL_SUBJECTS, CREATE_SUBJECT } from '@/graphql/subjects/operations';
+import { GET_ALL_SUBJECTS } from '@/graphql/subjects/operations';
 
 interface UpdateProjectModalProps {
   isOpen: boolean;
@@ -17,7 +17,6 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // 🔥 Nuevo estado para almacenar los ramos disponibles
   const [subjects, setSubjects] = useState<any[]>([]);
   const [isLoadingSubjects, setIsLoadingSubjects] = useState(false);
 
@@ -28,11 +27,11 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
     status: 'ACTIVE',
     methodology: 'KANBAN',
     isPublic: false,
-    isInstitutional: false, // 🔥 Nuevo
-    subjectId: '',          // 🔥 Nuevo
+    isInstitutional: false,
+    subjectId: '',
+    mode: 'CLASSIC',
   });
 
-  // Cargar los ramos disponibles cuando se abre el modal
   useEffect(() => {
     if (isOpen) {
       const loadSubjects = async () => {
@@ -52,7 +51,6 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
     }
   }, [isOpen]);
 
-  // Inicializar el formulario con los datos del proyecto
   useEffect(() => {
     if (project && isOpen) {
       setFormData({
@@ -60,10 +58,11 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
         description: project.description || '',
         color: project.color || '#3B82F6',
         status: project.status || 'ACTIVE',
-        methodology: project.methodology || 'KANBAN',
+        methodology: project.methodology === 'NONE' ? 'KANBAN' : (project.methodology || 'KANBAN'),
         isPublic: project.isPublic || false,
-        isInstitutional: project.isInstitutional || false, // 🔥 Mapear datos
-        subjectId: project.subjectId || '',                // 🔥 Mapear datos
+        isInstitutional: project.isInstitutional || false,
+        subjectId: project.subjectId || '',
+        mode: project.mode || 'CLASSIC', // 🔥 Mapear el modo existente
       });
       setError(null);
     }
@@ -82,12 +81,15 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
     }));
   };
 
+  const handleModeChange = (mode: 'CLASSIC' | 'HYBRID') => {
+    setFormData((prev) => ({ ...prev, mode }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
 
-    // Validación básica: Si es institucional, debe tener un ramo
     if (formData.isInstitutional && !formData.subjectId) {
       setError('Debes seleccionar un ramo si el proyecto es institucional.');
       setIsSubmitting(false);
@@ -104,10 +106,12 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
             description: formData.description || undefined,
             color: formData.color,
             status: formData.status,
-            methodology: formData.methodology,
+            // 🔥 Si cambió a Híbrido, forzamos NONE en la metodología para mantener la integridad de la BD
+            methodology: formData.mode === 'HYBRID' ? 'NONE' : formData.methodology,
             isPublic: formData.isPublic,
             isInstitutional: formData.isInstitutional,
-            subjectId: formData.isInstitutional ? formData.subjectId : null, // Solo enviamos el ID si está marcado
+            subjectId: formData.isInstitutional ? formData.subjectId : null,
+            mode: formData.mode, // 🔥 Enviamos el modo
           }
         }
       });
@@ -127,7 +131,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
           <h2 className="text-xl font-bold text-gray-900">Editar proyecto</h2>
           <button 
@@ -138,12 +142,58 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-5 overflow-y-auto">
+        <form id="update-project-form" onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto custom-scrollbar flex-1">
           {error && (
             <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100">
               {error}
             </div>
           )}
+
+          {/* SELECTOR DE MODALIDAD */}
+          <div className="space-y-3">
+            <label className="text-sm font-semibold text-gray-900 block">
+              Modalidad de Gestión <span className="text-brand">*</span>
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => handleModeChange('CLASSIC')}
+                className={`relative p-4 rounded-xl text-left border-2 transition-all duration-200 flex flex-col gap-1 ${
+                  formData.mode === 'CLASSIC' 
+                    ? 'border-brand bg-brand/5 shadow-sm' 
+                    : 'border-gray-100 hover:border-gray-200 bg-white'
+                }`}
+              >
+                <div className="flex justify-between items-center w-full">
+                  <span className={`font-bold text-sm ${formData.mode === 'CLASSIC' ? 'text-brand' : 'text-gray-700'}`}>Modo Clásico</span>
+                  {formData.mode === 'CLASSIC' && <CheckCircle2 className="w-4 h-4 text-brand" />}
+                </div>
+                <span className="text-xs text-gray-500 leading-relaxed">
+                  Basado en progreso de Tareas y metodologías ágiles (Scrum, Kanban).
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleModeChange('HYBRID')}
+                className={`relative p-4 rounded-xl text-left border-2 transition-all duration-200 flex flex-col gap-1 ${
+                  formData.mode === 'HYBRID' 
+                    ? 'border-brand bg-brand/5 shadow-sm' 
+                    : 'border-gray-100 hover:border-gray-200 bg-white'
+                }`}
+              >
+                <div className="flex justify-between items-center w-full">
+                  <span className={`font-bold text-sm ${formData.mode === 'HYBRID' ? 'text-brand' : 'text-gray-700'}`}>Modo Híbrido (EIC)</span>
+                  {formData.mode === 'HYBRID' && <CheckCircle2 className="w-4 h-4 text-brand" />}
+                </div>
+                <span className="text-xs text-gray-500 leading-relaxed">
+                  Orientado a Resultados Esperados y validación por carga de Evidencias.
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <div className="h-px w-full bg-gray-100"></div>
 
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
@@ -196,25 +246,29 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
                 <option value="CANCELLED">Cancelado</option>
               </select>
             </div>
-            <div>
-              <label htmlFor="methodology" className="block text-sm font-medium text-gray-700 mb-1">
-                Metodología
-              </label>
-              <select
-                id="methodology"
-                name="methodology"
-                value={formData.methodology}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none bg-white"
-              >
-                <option value="KANBAN">Kanban</option>
-                <option value="SCRUM" disabled>Scrum (Próximamente)</option>
-                <option value="SCRUMBAN" disabled>Scrumban (Próximamente)</option>
-              </select>
-            </div>
+
+            {/* Ocultamos la metodología si el modo es HÍBRIDO */}
+            {formData.mode === 'CLASSIC' && (
+              <div>
+                <label htmlFor="methodology" className="block text-sm font-medium text-gray-700 mb-1">
+                  Metodología
+                </label>
+                <select
+                  id="methodology"
+                  name="methodology"
+                  value={formData.methodology}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none bg-white"
+                >
+                  <option value="KANBAN">Kanban</option>
+                  <option value="SCRUM" disabled>Scrum (Próximamente)</option>
+                  <option value="SCRUMBAN" disabled>Scrumban (Próximamente)</option>
+                </select>
+              </div>
+            )}
           </div>
 
-          {/* 🔥 SECCIÓN INSTITUCIONAL */}
+          {/* SECCIÓN INSTITUCIONAL */}
           <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl space-y-4">
             <label className="flex items-center gap-3 cursor-pointer">
               <input
@@ -232,7 +286,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
               </div>
             </label>
 
-            {/* Selector de Ramo (Aparece solo si el checkbox está activo) */}
+            {/* Selector de Ramo */}
             {formData.isInstitutional && (
               <div className="pt-2 animate-in fade-in slide-in-from-top-2">
                 <label htmlFor="subjectId" className="block text-sm font-medium text-gray-700 mb-1">
@@ -258,7 +312,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
             )}
           </div>
 
-          <div className="flex items-center justify-between mt-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
             <div className="flex items-center gap-3">
               <label htmlFor="color" className="block text-sm font-medium text-gray-700">
                 Color de etiqueta:
@@ -286,31 +340,32 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
               <span className="text-sm font-medium text-gray-700">Proyecto público</span>
             </label>
           </div>
-
-          <div className="pt-4 border-t border-gray-100 flex justify-end gap-3 shrink-0">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSubmitting}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-6 py-2 text-sm font-medium text-white bg-brand rounded-lg hover:bg-brand-hover transition-colors disabled:opacity-70 flex items-center gap-2"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" /> Guardando...
-                </>
-              ) : (
-                'Guardar Cambios'
-              )}
-            </button>
-          </div>
         </form>
+
+        <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 shrink-0">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isSubmitting}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            form="update-project-form"
+            disabled={isSubmitting}
+            className="px-6 py-2 text-sm font-medium text-white bg-brand rounded-lg hover:bg-brand-hover transition-colors disabled:opacity-70 flex items-center gap-2 shadow-sm"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" /> Guardando...
+              </>
+            ) : (
+              'Guardar Cambios'
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );

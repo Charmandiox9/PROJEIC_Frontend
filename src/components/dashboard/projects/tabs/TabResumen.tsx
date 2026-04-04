@@ -82,7 +82,7 @@ export default function TabResumen({
               <li className="flex items-center gap-3">
                 <Layout className="w-4 h-4 text-gray-400 shrink-0" />
                 <span className="text-sm text-gray-500 min-w-[120px]">Metodología</span>
-                <span className="text-sm font-medium text-gray-900 capitalize">{project.methodology.toLowerCase()}</span>
+                <span className="text-sm font-medium text-gray-900 capitalize">{project.mode === 'HYBRID' ? 'Projeic Native' : project.methodology.toLowerCase()}</span>
               </li>
   
               {project.isInstitutional && project.subject && (
