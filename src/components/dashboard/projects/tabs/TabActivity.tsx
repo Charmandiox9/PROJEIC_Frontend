@@ -1,5 +1,6 @@
 'use client';
 
+import { Project } from '@/types/project';
 import { useEffect, useState } from 'react';
 import { Loader2, Terminal } from 'lucide-react';
 import { format } from 'date-fns';
@@ -130,7 +131,7 @@ const renderActionDetails = (action: string, entity: string, meta: any) => {
   return null;
 };
 
-export default function ActivityFeed({ projectId }: { projectId: string }) {
+export default function ActivityFeed({ project }: { project: Project }) {
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -139,7 +140,7 @@ export default function ActivityFeed({ projectId }: { projectId: string }) {
       try {
         const data = await fetchGraphQL({
           query: GET_ACTIVITY_LOGS,
-          variables: { projectId }
+          variables: { projectId: project.id }
         });
         setLogs(data.activityLogsByProject);
       } catch (error) {
@@ -149,7 +150,7 @@ export default function ActivityFeed({ projectId }: { projectId: string }) {
       }
     };
     loadLogs();
-  }, [projectId]);
+  }, [project.id]);
 
   if (loading) {
     return (
@@ -180,7 +181,7 @@ export default function ActivityFeed({ projectId }: { projectId: string }) {
           <div className="w-3 h-3 rounded-full bg-error"></div>
           <div className="w-3 h-3 rounded-full bg-warning"></div>
           <div className="w-3 h-3 rounded-full bg-success"></div>
-          <span className="ml-4 text-xs text-gray-500">root@projeic:~/project/{projectId.slice(0,8)}</span>
+          <span className="ml-4 text-xs text-gray-500">root@projeic:~/project/{project.name.slice(0,8)}</span>
         </div>
 
         {/* CUERPO DEL LOG */}

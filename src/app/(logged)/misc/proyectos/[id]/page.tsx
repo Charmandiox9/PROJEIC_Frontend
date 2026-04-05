@@ -211,7 +211,7 @@ export default function ProjectDetailPage() {
           <TabResultados project={project} isLeader={isLeader} />
         )}
         
-        {activeTab === 'actividad' && <ActivityFeed projectId={project.id} />}
+        {activeTab === 'actividad' && <ActivityFeed project={project} />}
         {activeTab === 'metricas' && <TabMetricas />}
         {activeTab === 'miembros' && (
           <TabMiembros
