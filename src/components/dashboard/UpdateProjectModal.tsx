@@ -61,8 +61,8 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
         methodology: project.methodology === 'NONE' ? 'KANBAN' : (project.methodology || 'KANBAN'),
         isPublic: project.isPublic || false,
         isInstitutional: project.isInstitutional || false,
-        subjectId: project.subjectId || '',
-        mode: project.mode || 'CLASSIC', // 🔥 Mapear el modo existente
+        subjectId: project.subject?.id || project.subjectId || '',
+        mode: project.mode || 'CLASSIC',
       });
       setError(null);
     }

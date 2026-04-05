@@ -29,7 +29,7 @@ import BoardRenderer from '@/components/dashboard/boards/BoardRenderer';
 import TabResumen from '@/components/dashboard/projects/tabs/TabResumen';
 import TabMetricas from '@/components/dashboard/projects/tabs/TabMetricas';
 import TabMiembros from '@/components/dashboard/projects/tabs/TabMiembros';
-import ComingSoonTab from '@/components/dashboard/projects/tabs/ComingSoonTab';
+import ActivityFeed from '@/components/dashboard/projects/tabs/TabActivity';
 import InviteMemberForm from '@/components/dashboard/projects/members/InviteMemberForm';
 import TabResultados from '@/components/dashboard/projects/tabs/TabResultados';
 
@@ -211,7 +211,7 @@ export default function ProjectDetailPage() {
           <TabResultados project={project} isLeader={isLeader} />
         )}
         
-        {activeTab === 'actividad' && <ComingSoonTab label="Feed de actividad" />}
+        {activeTab === 'actividad' && <ActivityFeed projectId={project.id} />}
         {activeTab === 'metricas' && <TabMetricas />}
         {activeTab === 'miembros' && (
           <TabMiembros

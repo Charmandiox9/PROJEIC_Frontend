@@ -23,3 +23,15 @@ export const CREATE_SUBJECT = `
     }
   }
 `;
+
+export const COUNT_SEMESTERS = `
+query CountSemesters {
+  countSemesters
+}
+`;
+
+export const COUNT_SUBJECTS = `
+query CountSubjects {
+  countSubjects
+}
+`;

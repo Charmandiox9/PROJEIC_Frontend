@@ -115,6 +115,23 @@ export const GET_PUBLIC_PROJECTS = `
   }
 `;
 
+export const GET_ACTIVITY_LOGS = `
+  query GetActivityLogs($projectId: String!) {
+    activityLogsByProject(projectId: $projectId) {
+      id
+      action
+      entity
+      entityId
+      meta
+      createdAt
+      user {
+        name
+        avatarUrl
+      }
+    }
+  }
+`;
+
 // ─── Mutations ────────────────────────────────────────────────────────────────
 
 /**

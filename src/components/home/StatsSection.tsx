@@ -3,24 +3,32 @@
 import { useEffect, useState } from 'react';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { GET_PUBLIC_PROJECTS } from '@/graphql/misc/operations';
-
-const STATIC_SEMESTERS = 1;
+import { COUNT_SEMESTERS, COUNT_SUBJECTS } from '@/graphql/subjects/operations';
+import { COUNT_PROFESSORS_REGISTERED, COUNT_STUDENTS_REGISTERED } from '@/graphql/users/operations';
 
 interface StatsState {
   totalProjects: number | null;
+  totalProfessors: number | null;
+  totalStudents: number | null;
+  totalSemesters: number | null;
+  totalSubjects: number | null;
 }
 
 const STATS_VIEW = [
   { id: 2, label: 'Docentes supervisores', value: null as null },
   { id: 3, label: 'Estudiantes registrados', value: null as null },
-  { id: 4, label: 'Semestres en uso', value: STATIC_SEMESTERS as number | null },
+  { id: 4, label: 'Semestres en uso', value: null as number | null },
 ];
 
 export default function StatsSection() {
   const [totalProjects, setTotalProjects] = useState<number | null>(null);
+  const [totalProfessors, setTotalProfessors] = useState<number | null>(null);
+  const [totalStudents, setTotalStudents] = useState<number | null>(null);
+  const [totalSemesters, setTotalSemesters] = useState<number | null>(null);
+  const [totalSubjects, setTotalSubjects] = useState<number | null>(null);
 
   useEffect(() => {
-    async function loadProjectCount() {
+    async function loadData() {
       try {
         const data = await fetchGraphQL({
           query: GET_PUBLIC_PROJECTS,
@@ -29,16 +37,43 @@ export default function StatsSection() {
         if (typeof data?.findAll?.total === 'number') {
           setTotalProjects(data.findAll.total);
         }
+        const data2 = await fetchGraphQL({
+          query: COUNT_PROFESSORS_REGISTERED,
+        });
+        if (typeof data2?.countProfessorsRegistered === 'number') {
+          setTotalProfessors(data2.countProfessorsRegistered);
+        }
+        const data3 = await fetchGraphQL({
+          query: COUNT_STUDENTS_REGISTERED,
+        });
+        if (typeof data3?.countStudentsRegistered === 'number') {
+          setTotalStudents(data3.countStudentsRegistered);
+        }
+        const data4 = await fetchGraphQL({
+          query: COUNT_SEMESTERS,
+        });
+        if (typeof data4?.countSemesters === 'number') {
+          setTotalSemesters(data4.countSemesters);
+        }
+        const data5 = await fetchGraphQL({
+          query: COUNT_SUBJECTS,
+        });
+        if (typeof data5?.countSubjects === 'number') {
+          setTotalSubjects(data5.countSubjects);
+        }
       } catch {
-        // Retain dash on error
+        console.error('Error al cargar los datos');
       }
     }
-    loadProjectCount();
+    loadData();
   }, []);
 
   const statsView = [
     { id: 1, label: 'Proyectos activos', value: totalProjects },
-    ...STATS_VIEW,
+    { id: 2, label: 'Docentes supervisores', value: totalProfessors },
+    { id: 3, label: 'Estudiantes registrados', value: totalStudents },
+    { id: 4, label: 'Semestres en uso', value: totalSemesters },
+    { id: 5, label: 'Asignaturas', value: totalSubjects },
   ];
 
   return (
