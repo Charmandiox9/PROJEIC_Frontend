@@ -18,7 +18,7 @@ export async function fetchGraphQL({ query, variables = {} }: GraphQLRequest) {
   }
 
   try {
-    const response = await fetch("http://localhost:4000/projeic/api/graphql", {
+    const response = await fetch("/projeic/api/graphql", {
       method: "POST",
       headers,
       body: JSON.stringify({

@@ -107,14 +107,10 @@ export default function ResultDetailsModal({ isOpen, result, onClose, onRefresh 
   };
 
   const getFileUrl = (fileKey: string) => {
-    console.log("Procesando fileKey:", fileKey);
-    if (!fileKey) return 'http://localhost:4000/error-no-file';;
+    if (!fileKey) return '/projeic/api/error-no-file';
     if (fileKey.startsWith('http')) return fileKey;
-
-    const backendPort = '4000'; 
     const cleanKey = fileKey.startsWith('/') ? fileKey : `/${fileKey}`;
-    
-    return `http://localhost:${backendPort}${cleanKey}`;
+    return `/projeic/api${cleanKey}`;
   };
 
   

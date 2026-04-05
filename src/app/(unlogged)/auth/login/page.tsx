@@ -5,7 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 
 export default function AuthPage() {
   const handleOAuthLogin = () => {
-    window.location.href = process.env.NEXT_PUBLIC_OAUTH_URL ?? 'http://localhost:4000/projeic/api/auth/google';
+    window.location.href = '/projeic/api/auth/google';
   };
 
   return (

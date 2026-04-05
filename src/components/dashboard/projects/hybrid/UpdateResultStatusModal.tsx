@@ -99,7 +99,7 @@ export default function UpdateResultStatusModal({ isOpen, result, onClose, onSuc
         const formData = new FormData();
         formData.append('file', evidenceFile);
 
-        const uploadRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/projeic/api/uploads/evidence`, {
+        const uploadRes = await fetch(`/projeic/api/uploads/evidence`, {
           method: 'POST',
           body: formData,
         });
