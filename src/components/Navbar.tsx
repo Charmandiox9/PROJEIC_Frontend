@@ -28,8 +28,6 @@ export default function Navbar() {
           <Image
             src={logoTexto}
             alt="PROJEIC Logo"
-            width={160}
-            height={46}
             className="w-auto h-10 md:h-12 object-contain"
             style={{ width: 'auto', height: '100%', maxHeight: '48px' }}
             priority

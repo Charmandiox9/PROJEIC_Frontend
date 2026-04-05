@@ -6,7 +6,7 @@ import PublicFooter from './layout/PublicFooter';
 const PRIVATE_ROUTES = ['/misc'];
 
 function isPrivateRoute(pathname: string): boolean {
-  return PRIVATE_ROUTES.some(route => pathname.startsWith(route));
+  return PRIVATE_ROUTES.some(route => pathname.startsWith(route)) || pathname.startsWith('/auth');
 }
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {

@@ -237,7 +237,7 @@ export default function ProfileDashboard() {
                         <div className="flex items-center gap-2">
                           <div 
                             className="w-3 h-3 rounded-full flex-shrink-0"
-                            style={{ backgroundColor: proj.color ?? '#3B82F6' }}
+                              style={{ backgroundColor: proj.color ?? 'var(--color-brand)' }}
                           ></div>
                           <h3 className="font-semibold text-gray-900 leading-tight group-hover:text-brand transition-colors line-clamp-1 text-sm">
                             {proj.name}

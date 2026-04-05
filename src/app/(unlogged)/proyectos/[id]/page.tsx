@@ -65,8 +65,8 @@ export default function PublicProjectDetailPage() {
       <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-6">
         <div className="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden shadow-gray-200/50">
           {/* Color Banner */}
-          <div className="h-32 w-full" style={{ backgroundColor: project.color || '#3B82F6' }}></div>
-          
+          <div className="h-32 w-full" style={{ backgroundColor: project.color || 'var(--color-brand)' }}></div>
+
           <div className="p-8 md:p-12">
             <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-12">
               <div>

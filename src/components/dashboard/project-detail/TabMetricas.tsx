@@ -19,7 +19,7 @@ export default function TabMetricas({ project }: { project: Project }) {
             <circle
               cx="18" cy="18" r="15.9"
               fill="none"
-              stroke="#22c55e"
+              stroke="var(--color-success)"
               strokeWidth="3.5"
               strokeDasharray="0 100"
               strokeLinecap="round"

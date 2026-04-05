@@ -7,7 +7,7 @@ export default function NotFound() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-6 text-center">
       <div className="space-y-6 max-w-lg">
-        <h1 className="text-8xl font-extrabold text-[#1e3a5f] tracking-tight">404</h1>
+        <h1 className="text-8xl font-extrabold text-brand-dark tracking-tight">404</h1>
         <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
           Página no encontrada
         </h2>
@@ -32,7 +32,7 @@ export default function NotFound() {
                 window.location.href = '/projeic';
               }
             }}
-            className="flex items-center justify-center w-full sm:w-auto px-6 py-3 text-sm font-semibold text-[#1e3a5f] border border-[#1e3a5f] rounded-lg hover:bg-gray-100 transition-colors"
+            className="flex items-center justify-center w-full sm:w-auto px-6 py-3 text-sm font-semibold text-brand-dark border border-brand-dark rounded-lg hover:bg-gray-100 transition-colors"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Ir atrás

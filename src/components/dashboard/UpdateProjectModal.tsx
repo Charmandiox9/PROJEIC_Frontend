@@ -23,7 +23,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    color: '#3B82F6',
+    color: '#2596BE',
     status: 'ACTIVE',
     methodology: 'KANBAN',
     isPublic: false,
@@ -56,7 +56,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
       setFormData({
         name: project.name || '',
         description: project.description || '',
-        color: project.color || '#3B82F6',
+        color: project.color || '#2596BE',
         status: project.status || 'ACTIVE',
         methodology: project.methodology === 'NONE' ? 'KANBAN' : (project.methodology || 'KANBAN'),
         isPublic: project.isPublic || false,

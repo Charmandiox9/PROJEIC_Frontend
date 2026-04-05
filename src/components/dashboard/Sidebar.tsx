@@ -79,9 +79,9 @@ export default function Sidebar() {
       <div className={`flex items-center mb-6 pl-5 ${collapsed ? 'flex-col gap-4' : 'justify-between pr-4'}`}>
         <div className={`flex items-center ${collapsed ? 'justify-center w-full pr-5' : ''}`}>
           {collapsed ? (
-            <Image src={logoIcon} alt="PROJEIC" width={28} height={28} priority />
+            <Image src={logoIcon} alt="PROJEIC" width={28} height={28} style={{ width: 'auto', height: 'auto' }} priority />
           ) : (
-            <Image src={logoTexto} alt="PROJEIC" width={100} height={28} priority />
+            <Image src={logoTexto} alt="PROJEIC" width={100} height={28} style={{ width: 'auto', height: 'auto' }} priority />
           )}
         </div>
         <button

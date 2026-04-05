@@ -1,8 +1,19 @@
-﻿import Link from 'next/link';
+﻿'use client';
+
+import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import StatsSection from './StatsSection';
+import { useAuth } from '@/context/AuthProvider';
 
 export default function HeroSection() {
+  const { user } = useAuth();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <section className="bg-white text-ui-dark border-b border-gray-100 min-h-[calc(100vh-64px)] flex flex-col justify-center py-10">
       <div className="max-w-4xl mx-auto text-center px-6">
@@ -17,10 +28,10 @@ export default function HeroSection() {
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link
-            href="/auth/login?tab=register"
+            href={!mounted ? "/auth/login?tab=register" : (user ? "/misc/profile" : "/auth/login?tab=register")}
             className="w-full sm:w-auto px-8 py-3 text-sm font-semibold text-white bg-ui-dark hover:bg-slate-800 border border-transparent rounded-lg shadow-sm transition-colors"
           >
-            Comenzar ahora
+            {!mounted ? "Comenzar ahora" : (user ? "Ir al panel" : "Comenzar ahora")}
           </Link>
           <Link
             href="/proyectos"

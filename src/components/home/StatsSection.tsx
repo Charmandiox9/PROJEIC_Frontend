@@ -77,7 +77,7 @@ export default function StatsSection() {
   ];
 
   return (
-    <div className="max-w-5xl mx-auto mt-10 md:mt-16 pt-8 pb-10 border-t border-gray-100 flex flex-wrap justify-center gap-6 sm:gap-12">
+    <div className="max-w-5xl mx-auto mt-10 md:mt-16 pt-8 pb-10 border-t border-gray-100 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-12 justify-center items-center">
       {statsView.map((stat) => (
         <div key={stat.id} className="text-center px-4">
           <div className="text-3xl md:text-4xl font-extrabold text-ui-dark mb-1 tracking-tight">

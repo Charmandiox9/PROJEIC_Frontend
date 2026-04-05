@@ -173,13 +173,13 @@ export default function ActivityFeed({ projectId }: { projectId: string }) {
   return (
     <div className="max-w-full mx-auto py-8 px-4 w-full">
       {/* VENTANA DE TERMINAL */}
-      <div className="bg-[#0D1117] rounded-lg border border-gray-800 shadow-2xl overflow-hidden font-mono text-sm">
-        
+<div className="bg-brand-dark rounded-lg border border-gray-800 shadow-2xl overflow-hidden font-mono text-sm">
+
         {/* HEADER FALSO TIPO MACOS/LINUX */}
-        <div className="bg-[#161B22] px-4 py-2 border-b border-gray-800 flex items-center gap-2 select-none">
-          <div className="w-3 h-3 rounded-full bg-[#FF5F56]"></div>
-          <div className="w-3 h-3 rounded-full bg-[#FFBD2E]"></div>
-          <div className="w-3 h-3 rounded-full bg-[#27C93F]"></div>
+        <div className="bg-ui-dark-hover px-4 py-2 border-b border-gray-800 flex items-center gap-2 select-none">
+          <div className="w-3 h-3 rounded-full bg-error"></div>
+          <div className="w-3 h-3 rounded-full bg-warning"></div>
+          <div className="w-3 h-3 rounded-full bg-success"></div>
           <span className="ml-4 text-xs text-gray-500">root@projeic:~/project/{projectId.slice(0,8)}</span>
         </div>
 

@@ -78,8 +78,8 @@ export default function PublicProjectModal({ isOpen, projectId, onClose }: Publi
         ) : (
           <div className="flex-1 overflow-y-auto w-full custom-scrollbar">
             {/* Color Banner */}
-            <div className="h-40 w-full shrink-0" style={{ backgroundColor: project.color || '#3B82F6' }}></div>
-            
+            <div className="h-40 w-full shrink-0" style={{ backgroundColor: project.color || 'var(--color-brand)' }}></div>
+
             <div className="p-6 sm:p-10">
               <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-10">
                 <div>

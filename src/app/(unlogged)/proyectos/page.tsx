@@ -155,45 +155,15 @@ export default function ProyectosPage() {
               const activeMembers = project.members?.filter(m => m.status === 'ACTIVE') ?? [];
 
               return (
-                <button 
+                <button
                   onClick={() => setSelectedProjectId(project.id)}
-                  key={project.id} 
-                  className="block text-left w-full bg-white border border-gray-200 rounded-xl p-6 hover:shadow-xl hover:border-brand/40 hover:-translate-y-1 transition-all duration-300 ring-offset-2 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent min-w-0 relative"
+                  key={project.id}
+                  className="flex flex-col text-left w-full min-h-[200px] bg-white border border-gray-200 rounded-xl p-6 hover:shadow-xl hover:border-brand/40 hover:-translate-y-1 transition-all duration-300 ring-offset-2 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent min-w-0 relative"
                 >
-                  {project.isInstitutional && project.subject && (
-                    <div className="absolute top-4 right-4 text-gray-300 transition-colors" title={`Ramo: ${project.subject.name}`}>
-                      <BookOpen className="w-4 h-4" />
-                    </div>
-                  )}
-
-                  <div className="flex justify-between items-start mb-4 gap-3 pr-6">
-                    <div className="flex flex-col gap-2 w-full">
-                      <h3 className="font-bold text-lg text-gray-900 line-clamp-2 decoration-brand group-hover:underline break-words">
-                        {project.name}
-                      </h3>
-                      
-                      {project.isInstitutional && project.subject && (
-                        <div className="flex flex-col gap-1.5 mt-1 bg-gray-50/80 p-2.5 rounded-lg border border-gray-100 w-fit pr-4">
-                          <div className="flex items-center gap-1.5">
-                            <BookOpen className="w-3.5 h-3.5 text-brand shrink-0" />
-                            <p className="text-xs font-semibold text-brand truncate">
-                              {project.subject.name} <span className="font-normal text-gray-400 ml-1">• {project.subject.period}</span>
-                            </p>
-                          </div>
-                          
-                          {project.subject.professors && project.subject.professors.length > 0 && (
-                            <div className="flex items-start gap-1.5 pl-0.5">
-                              <GraduationCap className="w-3.5 h-3.5 text-gray-400 shrink-0 mt-0.5" />
-                              <p className="text-[11px] text-gray-600 line-clamp-1">
-                                <span className="font-medium text-gray-500 mr-1">Prof:</span> 
-                                {project.subject.professors.map(p => p.name).join(', ')}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    
+                  <div className="flex justify-between items-start mb-4 gap-3 w-full">
+                    <h3 className="font-bold text-lg text-gray-900 line-clamp-2 decoration-brand group-hover:underline break-words w-full">
+                      {project.name}
+                    </h3>
                     <span className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap shrink-0 ${
                       project.status === 'ACTIVE' ? 'bg-green-100 text-green-700' :
                       project.status === 'COMPLETED' ? 'bg-gray-100 text-gray-700' :
@@ -202,9 +172,30 @@ export default function ProyectosPage() {
                       {getStatusLabel(project.status)}
                     </span>
                   </div>
-                  
+
+                  {project.isInstitutional && project.subject && (
+                    <div className="flex flex-col gap-1.5 mb-4 bg-gray-50/80 p-2.5 rounded-lg border border-gray-100 w-fit pr-4">
+                      <div className="flex items-center gap-1.5">
+                        <BookOpen className="w-3.5 h-3.5 text-brand shrink-0" />
+                        <p className="text-xs font-semibold text-brand truncate">
+                          {project.subject.name} <span className="font-normal text-gray-400 ml-1">• {project.subject.period}</span>
+                        </p>
+                      </div>
+
+                      {project.subject.professors && project.subject.professors.length > 0 && (
+                        <div className="flex items-start gap-1.5 pl-0.5">
+                          <GraduationCap className="w-3.5 h-3.5 text-gray-400 shrink-0 mt-0.5" />
+                          <p className="text-[11px] text-gray-600 line-clamp-1">
+                            <span className="font-medium text-gray-500 mr-1">Prof:</span>
+                            {project.subject.professors.map(p => p.name).join(', ')}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <p className="text-gray-600 text-sm mb-6 line-clamp-3">{project.description || 'Sin descripción detallada.'}</p>
-                  
+
                   <div className="flex items-center -space-x-2 relative z-0 mt-auto">
                     {activeMembers.slice(0, 4).map((member) => (
                       <img

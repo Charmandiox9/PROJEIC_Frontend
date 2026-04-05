@@ -49,7 +49,7 @@ const EXTERNAL_ROLE = { value: 'EXTERNAL', label: 'Externo' };
 const INITIAL_FORM: ProjectFormData = {
   name: '',
   description: '',
-  color: '#3B82F6',
+  color: '#2596BE',
   status: 'ACTIVE',
   methodology: 'KANBAN',
   isPublic: false,

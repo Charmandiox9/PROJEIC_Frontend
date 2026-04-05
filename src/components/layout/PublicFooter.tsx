@@ -11,8 +11,6 @@ export default function PublicFooter() {
           <Image
             src={logoTexto}
             alt="PROJEIC Logo"
-            width={160}
-            height={46}
             className="w-40 h-auto object-contain"
           />
           <p className="text-sm text-white/50 mt-2">
