@@ -2,61 +2,92 @@
 
 import { useEffect, useState } from 'react';
 import { fetchGraphQL } from '@/lib/graphQLClient';
-import { GET_PLATFORM_STATS } from '@/graphql/misc/operations';
+import { GET_PUBLIC_PROJECTS } from '@/graphql/misc/operations';
+import { COUNT_SEMESTERS, COUNT_SUBJECTS } from '@/graphql/subjects/operations';
+import { COUNT_PROFESSORS_REGISTERED, COUNT_STUDENTS_REGISTERED } from '@/graphql/users/operations';
 
-interface PlatformStats {
-  activeProjects: number | string;
-  supervisors: number | string;
-  students: number | string;
-  semesters: number | string;
+interface StatsState {
+  totalProjects: number | null;
+  totalProfessors: number | null;
+  totalStudents: number | null;
+  totalSemesters: number | null;
+  totalSubjects: number | null;
 }
 
+const STATS_VIEW = [
+  { id: 2, label: 'Docentes supervisores', value: null as null },
+  { id: 3, label: 'Estudiantes registrados', value: null as null },
+  { id: 4, label: 'Semestres en uso', value: null as number | null },
+];
+
 export default function StatsSection() {
-  const [stats, setStats] = useState<PlatformStats>({
-    activeProjects: '-',
-    supervisors: '-',
-    students: '-',
-    semesters: '-'
-  });
+  const [totalProjects, setTotalProjects] = useState<number | null>(null);
+  const [totalProfessors, setTotalProfessors] = useState<number | null>(null);
+  const [totalStudents, setTotalStudents] = useState<number | null>(null);
+  const [totalSemesters, setTotalSemesters] = useState<number | null>(null);
+  const [totalSubjects, setTotalSubjects] = useState<number | null>(null);
 
   useEffect(() => {
-    async function loadStats() {
+    async function loadData() {
       try {
-        const data = await fetchGraphQL({ query: GET_PLATFORM_STATS });
-        if (data?.platformStats) {
-          setStats({
-            activeProjects: data.platformStats.activeProjects,
-            supervisors: data.platformStats.supervisors,
-            students: data.platformStats.students,
-            semesters: data.platformStats.semesters
-          });
+        const data = await fetchGraphQL({
+          query: GET_PUBLIC_PROJECTS,
+          variables: { skip: 0, take: 1 },
+        });
+        if (typeof data?.findAll?.total === 'number') {
+          setTotalProjects(data.findAll.total);
         }
-      } catch (error) {
-        // En caso de error se retiene el estado con los guiones
+        const data2 = await fetchGraphQL({
+          query: COUNT_PROFESSORS_REGISTERED,
+        });
+        if (typeof data2?.countProfessorsRegistered === 'number') {
+          setTotalProfessors(data2.countProfessorsRegistered);
+        }
+        const data3 = await fetchGraphQL({
+          query: COUNT_STUDENTS_REGISTERED,
+        });
+        if (typeof data3?.countStudentsRegistered === 'number') {
+          setTotalStudents(data3.countStudentsRegistered);
+        }
+        const data4 = await fetchGraphQL({
+          query: COUNT_SEMESTERS,
+        });
+        if (typeof data4?.countSemesters === 'number') {
+          setTotalSemesters(data4.countSemesters);
+        }
+        const data5 = await fetchGraphQL({
+          query: COUNT_SUBJECTS,
+        });
+        if (typeof data5?.countSubjects === 'number') {
+          setTotalSubjects(data5.countSubjects);
+        }
+      } catch {
+        console.error('Error al cargar los datos');
       }
     }
-    loadStats();
+    loadData();
   }, []);
 
   const statsView = [
-    { id: 1, label: 'Proyectos activos', value: stats.activeProjects },
-    { id: 2, label: 'Docentes supervisores', value: stats.supervisors },
-    { id: 3, label: 'Estudiantes registrados', value: stats.students },
-    { id: 4, label: 'Semestres en uso', value: stats.semesters },
+    { id: 1, label: 'Proyectos activos', value: totalProjects },
+    { id: 2, label: 'Docentes supervisores', value: totalProfessors },
+    { id: 3, label: 'Estudiantes registrados', value: totalStudents },
+    { id: 4, label: 'Semestres en uso', value: totalSemesters },
+    { id: 5, label: 'Asignaturas', value: totalSubjects },
   ];
 
   return (
-    <section className="bg-white border-b border-gray-100 py-12 px-6">
-      <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
-        {statsView.map((stat) => (
-          <div key={stat.id} className="text-center">
-            <div className="text-3xl font-bold text-gray-900 mb-2">{stat.value}</div>
-            <div className="text-sm text-gray-500 font-medium uppercase tracking-wide">
-              {stat.label}
-            </div>
+    <div className="max-w-5xl mx-auto mt-10 md:mt-16 pt-8 pb-10 border-t border-gray-100 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-12 justify-center items-center">
+      {statsView.map((stat) => (
+        <div key={stat.id} className="text-center px-4">
+          <div className="text-3xl md:text-4xl font-extrabold text-ui-dark mb-1 tracking-tight">
+            {stat.value !== null ? stat.value : '-'}
           </div>
-        ))}
-      </div>
-    </section>
+          <div className="text-[10px] sm:text-xs text-gray-500 font-semibold uppercase tracking-widest">
+            {stat.label}
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }

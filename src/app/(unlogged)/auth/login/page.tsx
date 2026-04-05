@@ -1,244 +1,124 @@
-'use client';
+﻿'use client';
 
-import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import { GraduationCap, ArrowLeft } from 'lucide-react';
-import { fetchGraphQL } from '@/lib/graphQLClient';
-import { LOGIN_MUTATION, REGISTER_MUTATION } from '@/graphql/auth/operations';
-
-function AuthContent() {
-  const searchParams = useSearchParams();
-  const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
-
-  useEffect(() => {
-    if (searchParams.get('tab') === 'register') {
-      setActiveTab('register');
-    } else {
-      setActiveTab('login');
-    }
-  }, [searchParams]);
-
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-  });
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
-  };
-
-  const handleOAuthLogin = () => {
-    window.location.href = process.env.NEXT_PUBLIC_OAUTH_URL ?? 'http://localhost:4000/projeic/api/auth/google';
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setErrorMsg('');
-
-    try {
-      if (activeTab === 'login') {
-        const data = await fetchGraphQL({
-          query: LOGIN_MUTATION,
-          variables: { email: form.email, password: form.password }
-        });
-        if (data?.login?.accessToken) {
-          localStorage.setItem('projeic_accessToken', data.login.accessToken);
-          window.location.href = '/projeic';
-        } else {
-          throw new Error('Credenciales inválidas');
-        }
-      } else {
-        if (form.password !== form.confirmPassword) {
-          throw new Error('Las contraseñas no coinciden');
-        }
-        const data = await fetchGraphQL({
-          query: REGISTER_MUTATION,
-          variables: { name: form.name, email: form.email, password: form.password }
-        });
-        if (data?.register?.accessToken) {
-          localStorage.setItem('projeic_accessToken', data.register.accessToken);
-          window.location.href = '/projeic';
-        } else {
-          throw new Error('Error al registrar usuario');
-        }
-      }
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Error desconocido';
-      setErrorMsg(message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-[#1e3a5f] flex flex-col items-center justify-center p-4 relative">
-      <Link 
-        href="/" 
-        className="absolute top-6 left-6 flex items-center space-x-2 text-white/70 hover:text-white transition-colors text-sm font-medium"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        <span>Volver al inicio</span>
-      </Link>
-
-      <div className="flex items-center space-x-2 mb-4">
-        <div className="w-2.5 h-2.5 bg-blue-400 rounded-full"></div>
-        <span className="text-xl font-bold tracking-tight text-white">PROJEIC</span>
-      </div>
-
-      <div className="bg-white w-full max-w-md rounded-2xl shadow-xl p-6">
-        <div className="text-center mb-5">
-          <h1 className="text-xl font-bold text-gray-900 mb-1">Bienvenido</h1>
-          <p className="text-xs text-gray-500">Plataforma de proyectos &middot; EIC</p>
-        </div>
-
-        <div className="flex p-1 bg-gray-100 rounded-lg mb-4">
-          <button
-            onClick={() => { setActiveTab('login'); setErrorMsg(''); }}
-            className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${
-              activeTab === 'login' ? 'bg-white shadow-sm text-gray-900 border border-gray-200' : 'text-gray-500 hover:text-gray-700'
-            }`}
-            type="button"
-          >
-            Iniciar sesión
-          </button>
-          <button
-            onClick={() => { setActiveTab('register'); setErrorMsg(''); }}
-            className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${
-              activeTab === 'register' ? 'bg-white shadow-sm text-gray-900 border border-gray-200' : 'text-gray-500 hover:text-gray-700'
-            }`}
-            type="button"
-          >
-            Registrarse
-          </button>
-        </div>
-
-        {errorMsg && (
-          <div className="mb-4 p-3 bg-red-50 text-red-700 text-sm rounded-lg text-center">
-            {errorMsg}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-3">
-          {activeTab === 'register' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nombre completo</label>
-              <input
-                type="text"
-                name="name"
-                required
-                value={form.name}
-                onChange={handleChange}
-                className="w-full px-4 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors text-sm text-gray-900"
-                placeholder="Juan Pérez"
-              />
-            </div>
-          )}
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Correo institucional</label>
-            <input
-              type="email"
-              name="email"
-              required
-              value={form.email}
-              onChange={handleChange}
-              className="w-full px-4 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors text-sm text-gray-900"
-              placeholder="usuario@ucn.cl"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
-            <input
-              type="password"
-              name="password"
-              required
-              value={form.password}
-              onChange={handleChange}
-              className="w-full px-4 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors text-sm text-gray-900"
-              placeholder="••••••••"
-            />
-          </div>
-
-          {activeTab === 'register' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar contraseña</label>
-              <input
-                type="password"
-                name="confirmPassword"
-                required
-                value={form.confirmPassword}
-                onChange={handleChange}
-                className="w-full px-4 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors text-sm text-gray-900"
-                placeholder="••••••••"
-              />
-            </div>
-          )}
-
-          {activeTab === 'login' && (
-            <div className="flex items-center justify-between text-sm py-1">
-              <label className="flex items-center space-x-2 text-gray-600 cursor-pointer">
-                <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                <span>Recordar sesión</span>
-              </label>
-              <button type="button" className="text-blue-600 hover:text-blue-800 font-medium">
-                ¿Olvidaste tu contraseña?
-              </button>
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full py-2 px-4 bg-[#1e3a5f] hover:bg-blue-900 text-white font-medium rounded-lg transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-blue-900 disabled:opacity-50 text-sm"
-          >
-            {isLoading ? 'Cargando...' : activeTab === 'login' ? 'Ingresar a PROJEIC' : 'Crear cuenta'}
-          </button>
-        </form>
-
-        <div className="relative my-4 text-center">
-           <div className="absolute inset-0 flex items-center">
-             <div className="w-full border-t border-gray-200"></div>
-           </div>
-           <div className="relative inline-block bg-white px-4 text-xs text-gray-500">
-             o
-           </div>
-        </div>
-
-        <button
-          onClick={handleOAuthLogin}
-          type="button"
-          className="w-full flex items-center justify-center space-x-2 py-2 px-4 border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium rounded-lg transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 text-sm"
-        >
-          <GraduationCap className="w-4 h-4" />
-          <span>Ingresar con cuenta UCN</span>
-        </button>
-
-        <p className="mt-4 text-center text-xs text-gray-500">
-          Solo para miembros de la comunidad EIC
-        </p>
-      </div>
-    </div>
-  );
-}
+import Image from 'next/image';
+import { ArrowLeft, LayoutDashboard, Users, Bell, Shield } from 'lucide-react';
+import logoTexto from '../../../../../public/Logo__Texto.png';
+import logoIcon from '../../../../../public/logo.png';
 
 export default function AuthPage() {
+  const handleOAuthLogin = () => {
+    window.location.href = '/projeic/api/auth/google';
+  };
+
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-[#1e3a5f] flex items-center justify-center p-4">
-        <div className="flex items-center space-x-2">
-          <div className="w-2.5 h-2.5 bg-blue-400 rounded-full animate-pulse"></div>
-          <span className="text-xl font-bold tracking-tight text-white">PROJEIC</span>
+    <div className="min-h-screen flex w-full">
+      {/* Columna izquierda (oculta en mobile, visible en md) */}
+      <div className="hidden md:flex flex-col flex-1 bg-gradient-to-br from-[#0f2942] via-[#153a5c] to-[#0a1f33] animate-gradient relative overflow-hidden py-12 px-12 lg:px-24">
+
+        <div className="relative z-10 flex">
+          <Link
+            href="/"
+            className="flex items-center space-x-2 text-white/80 hover:text-white transition-colors text-sm font-medium"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span>Volver al inicio</span>
+          </Link>
+        </div>
+
+        {/* Formas decorativas */}
+        <div className="absolute top-20 left-10 w-32 h-32 bg-white/5 rounded-full blur-2xl animate-pulse"></div>
+        <div className="absolute bottom-32 right-12 w-64 h-64 bg-white/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s', animationDuration: '4s' }}></div>
+        <div className="absolute top-1/2 left-1/4 w-40 h-40 bg-white/5 rounded-full blur-xl animate-pulse" style={{ animationDelay: '2s' }}></div>        
+
+        <div className="relative z-10 flex flex-col justify-center flex-1 max-w-lg">
+          <Image
+            src={logoTexto}
+            alt="PROJEIC"
+            className="mb-12"
+            style={{ width: '200px', height: 'auto' }}
+            priority
+          />
+
+          <h1 className="text-3xl lg:text-4xl font-bold text-white mb-4 leading-snug">
+            Gestión estructurada para tus proyectos
+          </h1>
+          <p className="text-white/80 text-lg mb-12">
+            Centraliza la información, colabora con tu equipo y mantén el control de cada etapa de desarrollo.
+          </p>
+
+          <div className="space-y-6">
+            <div className="flex items-center space-x-4 text-white/80">
+              <div className="bg-white/10 p-3 rounded-lg">
+                <LayoutDashboard className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-base font-medium">Tableros Kanban</span>
+            </div>
+            
+            <div className="flex items-center space-x-4 text-white/80">
+              <div className="bg-white/10 p-3 rounded-lg">
+                <Users className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-base font-medium">Gestión de Equipos</span>
+            </div>
+
+            <div className="flex items-center space-x-4 text-white/80">
+              <div className="bg-white/10 p-3 rounded-lg">
+                <Bell className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-base font-medium">Notificaciones en tiempo real</span>
+            </div>
+          </div>
         </div>
       </div>
-    }>
-      <AuthContent />
-    </Suspense>
+
+      {/* Columna derecha (100% width en mobile, 50% en desktop) */}
+      <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-8 bg-white relative animate-fade-in-up shrink-0">
+        
+        <Link
+          href="/"
+          className="md:hidden absolute top-6 left-6 flex items-center space-x-2 text-gray-500 hover:text-gray-900 transition-colors text-sm font-medium"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <span>Volver al inicio</span>
+        </Link>
+
+        <div className="w-full max-w-sm flex flex-col items-center text-center">
+          <Image 
+            src={logoIcon} 
+            alt="PROJEIC Icon" 
+            width={60} 
+            height={60} 
+            className="mb-8"
+            style={{ height: 'auto' }} 
+            priority
+          />
+          
+          <div className="flex items-center space-x-2 bg-brand/5 text-brand px-3 py-1 rounded-full mb-6">
+            <Shield className="w-4 h-4" />
+            <span className="text-xs font-semibold tracking-wider">DESARROLLO AUTENTICADO</span>
+          </div>
+
+          <h2 className="text-3xl font-bold text-gray-900 mb-3">Bienvenido</h2>
+          <p className="text-gray-500 text-sm mb-10 leading-relaxed">
+            Accede directamente al panel de proyectos utilizando tu identidad universitaria provista por la red EIC UCN.
+          </p>
+
+          <button
+            onClick={handleOAuthLogin}
+            type="button"
+            className="shimmer-btn w-full flex items-center justify-center gap-3 py-3.5 px-4 border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium rounded-xl transition-all shadow-sm hover:shadow-md focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 text-base"
+          >
+            <svg viewBox="0 0 24 24" className="w-6 h-6 shrink-0">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            <span>Continuar con Google</span>
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -1,6 +1,6 @@
-﻿'use client';
+'use client';
 
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { jwtDecode } from 'jwt-decode';
 
@@ -11,7 +11,7 @@ interface GoogleUserPayload {
   avatar?: string;
 }
 
-export default function AuthSuccessPage() {
+function AuthSuccessInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -25,9 +25,9 @@ export default function AuthSuccessPage() {
         const decoded = jwtDecode<GoogleUserPayload>(token);
 
         const userData = {
-          id: decoded.sub,
+          userId: decoded.sub,
           email: decoded.email,
-          nombre: decoded.name,
+          name: decoded.name,
           avatarUrl: decoded.avatar
         };
 
@@ -44,7 +44,21 @@ export default function AuthSuccessPage() {
 
   return (
     <div className="flex justify-center items-center h-screen bg-gray-50">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand"></div>
     </div>
+  );
+}
+
+export default function AuthSuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center items-center h-screen bg-gray-50">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand"></div>
+        </div>
+      }
+    >
+      <AuthSuccessInner />
+    </Suspense>
   );
 }

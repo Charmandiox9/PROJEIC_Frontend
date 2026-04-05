@@ -1,19 +1,107 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  /* ========================================= */
+  /*  COLORES BASE (Modifica esto para alterar todo el proyecto) */
+  /* ========================================= */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Colores Neutrales (Fondos, Textos y Bordes Generales) - Modifican bg-white, text-gray-500, etc */
+  --color-white: #ffffff;
+  --color-black: #000000;
+  
+  --color-gray-50:  #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+
+  /* Aliasing Zinc a Gray para uniformidad total en el proyecto (shadcn/ui usa zing a veces) */
+  --color-zinc-50:  var(--color-gray-50);
+  --color-zinc-100: var(--color-gray-100);
+  --color-zinc-200: var(--color-gray-200);
+  --color-zinc-300: var(--color-gray-300);
+  --color-zinc-400: var(--color-gray-400);
+  --color-zinc-500: var(--color-gray-500);
+  --color-zinc-600: var(--color-gray-600);
+  --color-zinc-700: var(--color-gray-700);
+  --color-zinc-800: var(--color-gray-800);
+  --color-zinc-900: var(--color-gray-900);
+
+  /* Color principal de marca */
+  --color-brand: #2596BE;
+  --color-brand-hover: #1a7a9e;
+  --color-brand-light: #e0f2fe;
+
+  /* Temas de interfaz Oscura (Modifican el Sidebar, Footer y Navbar) */
+  --color-brand-dark: #0f2942;
+  --color-brand-dark-hover: #0a1f33;
+  --color-ui-dark: #0f2942;
+  --color-ui-dark-hover: #0a1f33;
+
+  /* Estados Dinamicos y botones standart de tailwind */
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-error: #dc2626;
+
+  /* Alterando clases default de Tailwind usadas en el proyecto */
+  --color-red-500: var(--color-error);
+  --color-red-600: #b91c1c;
+  --color-green-500: var(--color-success);
+  --color-green-600: #15803d;
+  --color-blue-500: var(--color-brand);
+  --color-blue-600: var(--color-brand-hover);
+
+  /* Carreras */
+  --color-career-cs: #3b82f6;
+  --color-career-industrial: #f97316;
+  --color-career-ti: #22c55e;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background-color: var(--color-gray-50);
+  color: var(--color-gray-900);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradientShift 8s ease infinite;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+.shimmer-btn {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer-btn::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transform: translateX(-100%);
+}
+.shimmer-btn:hover::after {
+  animation: shimmer 0.6s ease forwards;
 }

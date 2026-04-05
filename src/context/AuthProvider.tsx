@@ -3,6 +3,7 @@ import { createContext, useContext, useState, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface User {
+  userId: string;
   email: string;
   name: string;
   avatarUrl?: string;
@@ -24,11 +25,7 @@ function readUserFromStorage(): User | null {
   const token = localStorage.getItem('projeic_accessToken');
   if (!stored || !token) return null;
   try {
-    const parsed = JSON.parse(stored);
-    return {
-      ...parsed,
-      name: parsed.name || parsed.nombre // Fallback if local storage still has the old 'nombre'
-    };
+    return JSON.parse(stored) as User;
   } catch {
     return null;
   }

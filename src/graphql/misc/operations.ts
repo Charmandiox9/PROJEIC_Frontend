@@ -1,4 +1,3 @@
-// NOTA TÉCNICA: El backend aún no implementa el query recentProjects ni sus tipos resultantes.
 export const GET_RECENT_PROJECTS = `
   query GetRecentProjects {
     recentProjects {
@@ -15,7 +14,6 @@ export const GET_RECENT_PROJECTS = `
   }
 `;
 
-// NOTA TÉCNICA: El backend aún no implementa el query platformStats.
 export const GET_PLATFORM_STATS = `
   query GetPlatformStats {
     platformStats {
@@ -30,9 +28,238 @@ export const GET_PLATFORM_STATS = `
 export const GET_PROFILE = `
   query Me {
     me {
-      name
+      userId
       email
+      name
       avatarUrl
+      isAdmin
+    }
+  }
+`;
+
+export const GET_PROJECT_BY_ID = `
+  query FindOne($id: String!) {
+    findOne(id: $id) {
+      id
+      name
+      description
+      color
+      status
+      methodology
+      isPublic
+      createdAt
+      updatedAt
+      isArchived
+      isInstitutional
+      mode
+      myRole
+      subject {        
+        id
+        name
+        code
+        period
+        professors {
+          id
+          name
+        }
+      }
+      members {
+        id
+        role
+        status
+        user {
+          id
+          name
+          avatarUrl
+        }
+      }
+    }
+  }
+`;
+
+export const GET_PUBLIC_PROJECTS = `
+  query GetPublicProjects($skip: Int, $take: Int) {
+    findAll(filter: { skip: $skip, take: $take, isPublic: true }, includeMembers: true) {
+      total
+      items {
+        id
+        name
+        description
+        color
+        status
+        methodology
+        isPublic
+        isInstitutional
+        mode
+        subject {
+          id
+          name
+          period
+          professors {
+            id
+            name
+          }
+        }
+        members {
+          id
+          role
+          status
+          user {
+            id
+            name
+            avatarUrl
+          }
+        }
+      }
+    }
+  }
+`;
+
+export const UPDATE_PROJECT = `
+  mutation UpdateProject($input: UpdateProjectInput!) {
+    updateProject(input: $input) {
+      id
+      name
+      description
+      isInstitutional
+      subjectId
+      mode
+    }
+  }
+`;
+
+export const CREATE_PROJECT = `
+  mutation CreateProject($input: CreateProjectInput!) {
+    createProject(input: $input) {
+      id
+      name
+      description
+      mode
+    }
+  }
+`;
+
+export const ADD_PROJECT_MEMBER = `
+  mutation AddProjectMember($input: AddProjectMemberInput!) {
+    addProjectMember(input: $input) {
+      id
+      role
+      status
+    }
+  }
+`;
+
+export const GET_MY_PROJECTS = `
+  query MyProjects($skip: Int, $take: Int) {
+    myProjects(filter: { skip: $skip, take: $take }, includeMembers: true) {
+      total
+      items {
+        id
+        name
+        description
+        color
+        status
+        methodology
+        isPublic
+        isInstitutional
+        mode
+        myRole
+        subject {
+          id
+          name
+          period
+          professors {
+            id
+            name
+          }
+        }
+        members {
+          id
+          role
+          status
+          user {
+            id
+            name
+            avatarUrl
+          }
+        }
+      }
+    }
+  }
+`;
+
+export const UPDATE_PROJECT_MEMBER_ROLE = `
+  mutation UpdateProjectMemberRole($input: UpdateProjectMemberInput!) {
+    updateProjectMemberRole(input: $input) {
+      id
+      role
+    }
+  }
+`;
+
+export const REMOVE_PROJECT_MEMBER = `
+  mutation RemoveProjectMember($memberId: ID!) {
+    removeProjectMember(memberId: $memberId)
+  }
+`;
+
+export const DELETE_PROJECT = `
+  mutation DeleteProject($id: ID!) {
+    deleteProject(id: $id) {
+      id
+    }
+  }
+`;
+
+export const GET_MY_NOTIFICATIONS = `
+  query MyNotifications($unreadOnly: Boolean) {
+    myNotifications(unreadOnly: $unreadOnly) {
+      id
+      type
+      message
+      isRead
+      createdAt
+      entityId
+    }
+  }
+`;
+
+export const MARK_NOTIFICATION_READ = `
+  mutation MarkNotificationAsRead($id: ID!) {
+    markNotificationAsRead(id: $id) {
+      id
+      isRead
+    }
+  }
+`;
+
+export const MARK_ALL_READ = `
+  mutation MarkAllNotificationsAsRead {
+    markAllNotificationsAsRead
+  }
+`;
+
+export const RESPOND_TO_INVITATION = `
+  mutation RespondToInvitation($projectId: ID!, $accept: Boolean!) {
+    respondToInvitation(projectId: $projectId, accept: $accept) {
+      id
+      role
+    }
+  }
+`;
+
+export const GET_SUBJECTS = ` 
+  query Subjects {
+    subjects {
+      id
+      name
+      code
+      period
+      professors {
+        id
+        name
+        avatarUrl
+      }
     }
   }
 `;
