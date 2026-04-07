@@ -10,6 +10,7 @@ export const CREATE_TASK = `
       dueDate
       boardId
       assigneeId
+      sprintId
       expectedResultId
       createdAt
     }
@@ -28,6 +29,7 @@ export const UPDATE_TASK = `
       dueDate
       boardId
       assigneeId
+      sprintId
       expectedResultId
       updatedAt
     }
@@ -43,8 +45,28 @@ export const REMOVE_TASK = `
 `;
 
 export const GET_TASKS_BY_PROJECT = `
-  query GetTasksByProject($projectId: String!) {
-    tasksByProject(projectId: $projectId) {
+  query GetTasksByProject($projectId: String!, $sprintId: String) {
+    tasksByProject(projectId: $projectId, sprintId: $sprintId) {
+      id
+      title
+      description
+      status
+      priority
+      position
+      dueDate
+      boardId
+      assigneeId
+      sprintId 
+      expectedResultId
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const GET_PENDING_TASKS_BY_USER = `
+  query GetPendingTasksByUserId {
+    pendingTasksByUserId {
       id
       title
       description

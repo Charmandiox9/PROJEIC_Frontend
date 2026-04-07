@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthProvider';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { GET_PROFILE, GET_MY_PROJECTS } from '@/graphql/misc/operations';
+import { GET_PENDING_TASKS_BY_USER } from '@/graphql/tasks/operations';
 import { Plus, Briefcase, CheckSquare, Activity, Users, FolderKanban, Clock, ArrowRight } from 'lucide-react';
 import CreateProjectModal from '@/components/dashboard/CreateProjectModal';
 
@@ -54,9 +55,10 @@ export default function ProfileDashboard() {
 
     const loadData = async () => {
       try {
-        const [profileRes, projectsRes] = await Promise.all([
+        const [profileRes, projectsRes, tasksRes] = await Promise.all([
           fetchGraphQL({ query: GET_PROFILE }),
-          fetchGraphQL({ query: GET_MY_PROJECTS, variables: { skip: 0, take: 50 } })
+          fetchGraphQL({ query: GET_MY_PROJECTS, variables: { skip: 0, take: 50 } }),
+          fetchGraphQL({ query: GET_PENDING_TASKS_BY_USER })
         ]);
 
         if (isSubscribed) {
@@ -81,10 +83,13 @@ export default function ProfileDashboard() {
                   .forEach(m => collaboratorIds.add(m.user.id));
               });
 
+              const pendingTasksCount = tasksRes?.pendingTasksByUserId?.length || 0;
+
               setMetrics(prev => ({
                 ...prev,
                 activeProjects: items.filter((p: Project) => p.status === 'ACTIVE').length,
                 collaborators: collaboratorIds.size,
+                pendingTasks: pendingTasksCount,
               }));
             }
           }

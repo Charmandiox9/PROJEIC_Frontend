@@ -331,7 +331,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
                   onChange={handleChange}
                 >
                   <option value="KANBAN">Kanban</option>
-                  <option value="SCRUM" disabled>Scrum (Próximamente)</option>
+                  <option value="SCRUM">Scrum (Próximamente)</option>
                   <option value="SCRUMBAN" disabled>Scrumban (Próximamente)</option>
                 </Select>
               )}

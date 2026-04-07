@@ -24,6 +24,7 @@ interface TaskFormData {
   assigneeId: string;
   priority: string;
   dueDate: string;
+  tags?: string[];
 }
 
 interface CreateTaskModalProps {
@@ -81,6 +82,7 @@ export default function CreateTaskModal({
   const [formData, setFormData] = useState<TaskFormData>(buildInitialForm());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tagInput, setTagInput] = useState('');
 
   useEffect(() => {
     if (isOpen) {
@@ -146,6 +148,26 @@ export default function CreateTaskModal({
     }
   };
 
+  const addTag = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const tag = tagInput.trim().toLowerCase();
+      if (tag && !formData.tags?.includes(tag)) {
+        setFormData(prev => ({ ...prev, tags: [...(prev.tags || []), tag] }));
+      }
+      setTagInput('');
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setFormData(prev => ({
+      ...prev,
+      tags: prev.tags?.filter(t => t !== tagToRemove)
+    }));
+  };
+
+
+
   const isEditing = !!taskToEdit;
 
   return (
@@ -184,6 +206,25 @@ export default function CreateTaskModal({
               ))}
             </Select>
             <Input id="task-due-date" label="Fecha" name="dueDate" type="date" value={formData.dueDate} onChange={handleChange} />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-gray-700">Etiquetas (Enter para añadir)</label>
+            <div className="flex flex-wrap gap-2 p-2 border border-gray-300 rounded-lg min-h-[42px] bg-white focus-within:ring-2 focus-within:ring-brand transition-shadow">
+              {formData.tags?.map(tag => (
+                <span key={tag} className="flex items-center gap-1 px-2 py-1 bg-brand/10 text-brand text-xs font-bold rounded-md">
+                  {tag}
+                  <button type="button" onClick={() => removeTag(tag)} className="hover:text-brand-dark">×</button>
+                </span>
+              ))}
+              <input
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={addTag}
+                className="flex-1 outline-none text-sm min-w-[100px]"
+                placeholder="prio, bug, frontend..."
+              />
+            </div>
           </div>
 
           <div className="pt-4 border-t flex justify-end gap-3">
