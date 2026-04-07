@@ -263,3 +263,27 @@ export const GET_SUBJECTS = `
     }
   }
 `;
+
+export const GET_PROJECT_METRICS = `
+  query GetProjectMetrics($projectId: String!) {
+    projectMetrics(projectId: $projectId) {
+      totalTasks
+      completedTasks
+      overdueTasksCount
+      inReviewTasks
+      activityLast7Days
+      tasksByColumn {
+        boardId
+        name
+        count
+        color
+      }
+      overdueTasksList {
+        id
+        title
+        dueDate
+        status
+      }
+    }
+  }
+`;

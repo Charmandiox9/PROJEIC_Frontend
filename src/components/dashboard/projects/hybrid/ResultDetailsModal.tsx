@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale/es';
 import { useAuth } from '@/context/AuthProvider';
 import { fetchGraphQL } from '@/lib/graphQLClient';
-import { CREATE_TASK, UPDATE_TASK, REMOVE_TASK } from '@/graphql/hybrid/operations';
+import { CREATE_TASK, UPDATE_TASK, REMOVE_TASK } from '@/graphql/tasks/operations';
 
 interface ResultDetailsModalProps {
   isOpen: boolean;

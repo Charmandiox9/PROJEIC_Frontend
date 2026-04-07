@@ -55,31 +55,3 @@ export const UPDATE_RESULT_STATUS = `
     }
   }
 `;
-
-export const CREATE_TASK = `
-  mutation CreateTask($input: CreateTaskInput!) {
-    createTask(createTaskInput: $input) {
-      id
-      title
-      status
-    }
-  }
-`;
-
-export const UPDATE_TASK = `
-  mutation UpdateTask($input: UpdateTaskInput!) {
-    updateTask(updateTaskInput: $input) {
-      id
-      title
-      status
-    }
-  }
-`;
-
-export const REMOVE_TASK = `
-  mutation RemoveTask($id: String!) {
-    removeTask(id: $id) {
-      id
-    }
-  }
-`;

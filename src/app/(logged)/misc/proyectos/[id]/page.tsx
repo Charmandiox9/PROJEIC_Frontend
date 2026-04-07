@@ -19,7 +19,7 @@ import {
   Activity, 
   BarChart2, 
   Users, 
-  Target // 🔥 Nuevo ícono para Resultados Esperados
+  Target
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthProvider';
 import { Project } from '@/types/project';
@@ -212,7 +212,7 @@ export default function ProjectDetailPage() {
         )}
         
         {activeTab === 'actividad' && <ActivityFeed project={project} />}
-        {activeTab === 'metricas' && <TabMetricas />}
+        {activeTab === 'metricas' && <TabMetricas projectId={project.id} />}
         {activeTab === 'miembros' && (
           <TabMiembros
             project={project}
