@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { X, Loader2, AlertCircle, UploadCloud, Link as LinkIcon, FileCheck } from 'lucide-react';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { UPDATE_RESULT_STATUS } from '@/graphql/hybrid/operations';
+import { GET_UPLOAD_PRESIGNED_URL } from '@/graphql/hybrid/operations';
 import Select from '@/components/ui/Select';
 import Input from '@/components/ui/Input';
 
@@ -63,6 +64,35 @@ export default function UpdateResultStatusModal({ isOpen, result, onClose, onSuc
   
   const isEvidenceRequired = isAdvancing && REQUIRES_EVIDENCE.includes(status);
 
+  const uploadFileToS3 = async (file: File): Promise<string> => {
+    const presignRes = await fetchGraphQL({
+      query: GET_UPLOAD_PRESIGNED_URL,
+      variables: { fileName: file.name, contentType: file.type }
+    });
+
+    if (presignRes.errors || !presignRes.getUploadPresignedUrl) {
+      console.error(presignRes.errors);
+      throw new Error("Error al obtener credenciales de subida del servidor.");
+    }
+    
+    const { uploadUrl, fileKey } = presignRes.getUploadPresignedUrl;
+
+    const uploadRes = await fetch(uploadUrl, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': file.type,
+      },
+      body: file, 
+    });
+
+    if (!uploadRes.ok) {
+      throw new Error('Error al enviar el archivo a la nube (R2/MinIO).');
+    }
+
+    // PASO 3: Retornar la llave para guardarla en la BD de PROJEIC
+    return fileKey; 
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -96,18 +126,7 @@ export default function UpdateResultStatusModal({ isOpen, result, onClose, onSuc
       let uploadedFileKey = null;
 
       if (evidenceType === 'FILE' && evidenceFile) {
-        const formData = new FormData();
-        formData.append('file', evidenceFile);
-
-        const uploadRes = await fetch(`/projeic/api/uploads/evidence`, {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!uploadRes.ok) throw new Error('Error al subir el archivo al servidor');
-        
-        const uploadData = await uploadRes.json();
-        uploadedFileKey = uploadData.fileKey;
+        uploadedFileKey = await uploadFileToS3(evidenceFile);
       }
 
       const response = await fetchGraphQL({

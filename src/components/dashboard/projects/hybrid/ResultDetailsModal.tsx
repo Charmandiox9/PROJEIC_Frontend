@@ -104,13 +104,17 @@ export default function ResultDetailsModal({ isOpen, result, onClose, onRefresh 
   };
 
   const getFileUrl = (fileKey: string) => {
-    if (!fileKey) return '/projeic/api/error-no-file';
+    if (!fileKey) return '/placeholder-error.png';
+    
     if (fileKey.startsWith('http')) return fileKey;
-    const cleanKey = fileKey.startsWith('/') ? fileKey : `/${fileKey}`;
-    return `/projeic/api${cleanKey}`;
+
+    const baseUrl = process.env.NEXT_PUBLIC_BUCKET_URL; 
+    
+    const cleanKey = fileKey.startsWith('/') ? fileKey.slice(1) : fileKey;
+    
+    return `${baseUrl}/${cleanKey}`;
   };
 
-  // 🔥 FUNCIÓN PARA DETECTAR SI ES IMAGEN
   const isImageFile = (fileKey: string) => {
     if (!fileKey) return false;
     const ext = fileKey.split('.').pop()?.toLowerCase();

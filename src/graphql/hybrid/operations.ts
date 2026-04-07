@@ -55,3 +55,12 @@ export const UPDATE_RESULT_STATUS = `
     }
   }
 `;
+
+export const GET_UPLOAD_PRESIGNED_URL = `
+  mutation GetUploadPresignedUrl($fileName: String!, $contentType: String!) {
+    getUploadPresignedUrl(fileName: $fileName, contentType: $contentType) {
+      uploadUrl
+      fileKey
+    }
+  }
+`;
