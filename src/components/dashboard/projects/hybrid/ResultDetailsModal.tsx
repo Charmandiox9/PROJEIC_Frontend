@@ -268,11 +268,11 @@ export default function ResultDetailsModal({ isOpen, result, onClose, onRefresh 
                           </a>
                         ) : isImageFile(ev.fileKey) ? (
                           <div 
-                            onClick={() => setSelectedImage(getFileUrl(ev.fileKey))}
+                            onClick={() => setSelectedImage(ev.url)} // Usamos ev.url directamente
                             className="relative w-full h-32 mt-2 rounded-lg border border-gray-200 overflow-hidden cursor-zoom-in group bg-gray-100"
                           >
                             <img 
-                              src={getFileUrl(ev.fileKey)} 
+                              src={ev.url} // Usamos ev.url directamente
                               alt="Evidencia adjunta" 
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             />
@@ -282,7 +282,7 @@ export default function ResultDetailsModal({ isOpen, result, onClose, onRefresh 
                           </div>
                         ) : (
                           <a 
-                            href={getFileUrl(ev.fileKey)} 
+                            href={ev.url} // Usamos ev.url directamente
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="flex items-center justify-center gap-2 text-sm font-medium text-gray-700 hover:text-brand bg-gray-50 p-3 rounded-lg border border-gray-200 hover:border-brand/30 transition-colors mt-2"
