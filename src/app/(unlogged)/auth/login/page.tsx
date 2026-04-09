@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import Image from 'next/image';
@@ -8,7 +8,8 @@ import logoIcon from '../../../../../public/logo.png';
 
 export default function AuthPage() {
   const handleOAuthLogin = () => {
-    window.location.href = '/projeic/api/auth/google';
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
+    window.location.href = `${backendUrl}/projeic/api/auth/google`;
   };
 
   return (
