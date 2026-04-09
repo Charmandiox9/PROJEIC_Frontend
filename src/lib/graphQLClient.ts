@@ -18,8 +18,17 @@ export async function fetchGraphQL({ query, variables = {} }: GraphQLRequest) {
   }
 
   try {
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
-    console.log("DEBUG - Backend URL:", backendUrl);
+    const backendUrl =
+      process.env.NEXT_PUBLIC_BACKEND_URL ||
+      (typeof window !== "undefined" && window.location.hostname === "localhost"
+        ? "http://localhost:4000"
+        : "");
+
+    console.log(
+      "DEBUG - Hostname actual:",
+      typeof window !== "undefined" ? window.location.hostname : "server",
+    );
+    console.log("DEBUG - Backend URL detectada:", backendUrl);
     const response = await fetch(`${backendUrl}/projeic/api/graphql`, {
       method: "POST",
       headers,
