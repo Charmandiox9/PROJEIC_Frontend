@@ -19,7 +19,7 @@ export async function fetchGraphQL({ query, variables = {} }: GraphQLRequest) {
 
   try {
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
-    const response = await fetch(`${backendUrl}/projeic/api/graphql`, {
+    const response = await fetch(`${backendUrl}/graphql`, {
       method: "POST",
       headers,
       body: JSON.stringify({
