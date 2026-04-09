@@ -8,7 +8,19 @@ import logoIcon from '../../../../../public/logo.png';
 
 export default function AuthPage() {
   const handleOAuthLogin = () => {
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
+    // 1. Intentamos obtener la variable
+    let backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+    // 2. Si la variable falla pero estamos en Railway, la forzamos
+    if (!backendUrl && typeof window !== 'undefined') {
+      if (window.location.hostname.includes('railway.app')) {
+        backendUrl = 'https://projeicbackend-production.up.railway.app';
+      } else {
+        backendUrl = 'http://localhost:4000'; // Tu puerto local de NestJS
+      }
+    }
+
+    console.log("Redirigiendo a:", `${backendUrl}/projeic/api/auth/google`);
     window.location.href = `${backendUrl}/projeic/api/auth/google`;
   };
 
