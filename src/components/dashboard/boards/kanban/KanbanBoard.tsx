@@ -50,10 +50,9 @@ export default function KanbanBoard({ projectId, members, userRole, sprintId }: 
   const [tasks, setTasks] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 🔥 Estados de Filtros
   const [searchTerm, setSearchTerm] = useState('');
   const [assigneeFilter, setAssigneeFilter] = useState('');
-  const [tagFilter, setTagFilter] = useState(''); // 🔥 Nuevo filtro por tag
+  const [tagFilter, setTagFilter] = useState('');
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [defaultBoardId, setDefaultBoardId] = useState<string | undefined>(undefined);
@@ -97,30 +96,45 @@ export default function KanbanBoard({ projectId, members, userRole, sprintId }: 
   };
 
   const handleDrop = async (e: React.DragEvent, targetBoardId: string) => {
-    e.preventDefault();
-    const taskId = e.dataTransfer.getData('taskId');
-    if (!taskId) return;
+  e.preventDefault();
+  const taskId = e.dataTransfer.getData('taskId');
+  if (!taskId) return;
 
-    const task = tasks.find(t => t.id === taskId);
-    if (!task || task.boardId === targetBoardId) return;
+  const task = tasks.find(t => t.id === taskId);
+  if (!task || task.boardId === targetBoardId) return;
 
-    const targetBoard = boards.find(b => b.id === targetBoardId);
-    const newStatus = targetBoard ? getStatusFromBoardName(targetBoard.name) : task.status;
+  const originalBoardId = task.boardId;
+  const originalStatus = task.status;
 
-    setTasks(prev => prev.map(t => 
-      t.id === taskId ? { ...t, boardId: targetBoardId, status: newStatus } : t
-    ));
+  const targetBoard = boards.find(b => b.id === targetBoardId);
+  const newStatus = targetBoard ? getStatusFromBoardName(targetBoard.name) : task.status;
 
-    try {
-      await fetchGraphQL({
-        query: UPDATE_TASK,
-        variables: { input: { id: taskId, boardId: targetBoardId, status: newStatus } }
-      });
-    } catch (error) {
-      console.error("Error moviendo tarea:", error);
-      loadKanbanData();
+  setTasks(prev => prev.map(t => 
+    t.id === taskId ? { ...t, boardId: targetBoardId, status: newStatus } : t
+  ));
+
+  try {
+    const response = await fetchGraphQL({
+      query: UPDATE_TASK,
+      variables: { input: { id: taskId, boardId: targetBoardId, status: newStatus } }
+    });
+
+    if (response?.errors && response.errors.length > 0) {
+      throw new Error(response.errors[0].message);
     }
-  };
+
+  } catch (error: any) {
+    console.error("Error moviendo tarea:", error);
+    
+    alert(`No se pudo mover la tarea:\n${error.message || "Límite WIP excedido o error de red."}`);
+    
+    setTasks(prev => prev.map(t => 
+      t.id === taskId ? { ...t, boardId: originalBoardId, status: originalStatus } : t
+    ));
+    
+    loadKanbanData(); 
+  }
+};
 
   const handleDeleteTask = async (taskId: string) => {
     if (!confirm('¿Estás seguro de eliminar esta tarea?')) return;

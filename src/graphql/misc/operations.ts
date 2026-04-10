@@ -287,3 +287,23 @@ export const GET_PROJECT_METRICS = `
     }
   }
 `;
+
+export const GET_DASHBOARD_ACTIVITY = `
+  query GetDashboardActivity {
+    myWeeklyActivityPoints
+    myRecentFeed {
+      id
+      action
+      entity
+      createdAt
+      meta
+      user {
+        name
+        avatarUrl
+      }
+      project {
+        name
+      }
+    }
+  }
+`;

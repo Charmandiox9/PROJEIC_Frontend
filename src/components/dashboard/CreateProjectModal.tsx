@@ -23,7 +23,9 @@ interface ProjectFormData {
   methodology: string;
   isPublic: boolean;
   subjectId: string;
-  mode: string; // 🔥 Nuevo campo
+  mode: string;
+  isInstitutional: boolean;
+  professorId: string;
 }
 
 interface PendingMember {
@@ -54,7 +56,9 @@ const INITIAL_FORM: ProjectFormData = {
   methodology: 'KANBAN',
   isPublic: false,
   subjectId: '',
-  mode: 'CLASSIC', // 🔥 Por defecto clásico
+  mode: 'CLASSIC',
+  isInstitutional: false,
+  professorId: '',
 };
 
 export default function CreateProjectModal({ isOpen, onClose, onSuccess }: CreateProjectModalProps) {
@@ -155,8 +159,10 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
             status: formData.status,
             methodology: formData.methodology,
             isPublic: formData.isPublic,
+            mode: formData.mode,
+            isInstitutional: formData.isInstitutional,
             subjectId: formData.subjectId || undefined,
-            mode: formData.mode, // 🔥 Enviamos el modo al backend
+            professorId: formData.isInstitutional ? formData.professorId : undefined,
           },
         },
       });
@@ -293,21 +299,67 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
               placeholder="Un breve resumen de la meta del proyecto..."
             />
 
-            <Select
-              id="subjectId"
-              label="Asignatura (Opcional)"
-              name="subjectId"
-              value={formData.subjectId}
-              onChange={handleChange}
-              disabled={isLoadingSubjects}
-            >
-              <option value="">Sin asignatura</option>
-              {subjects.map((subject) => (
-                <option key={subject.id} value={subject.id}>
-                  {subject.name} {subject.code ? `(${subject.code})` : ''}
-                </option>
-              ))}
-            </Select>
+            <label className="flex items-center gap-2 cursor-pointer mt-4">
+              <input
+                type="checkbox"
+                name="isInstitutional"
+                checked={formData.isInstitutional}
+                onChange={(e) => {
+                  handleChange(e);
+                  // Si desmarcan, limpiamos los campos
+                  if (!e.target.checked) {
+                    setFormData(prev => ({ ...prev, subjectId: '', professorId: '' }));
+                  }
+                }}
+                className="w-4 h-4 text-brand border-gray-300 rounded focus:ring-brand"
+              />
+              <span className="text-sm font-semibold text-gray-800">Este es un proyecto de Asignatura (Institucional)</span>
+            </label>
+
+            {formData.isInstitutional && (
+              <div className="grid md:grid-cols-2 gap-4 p-4 bg-brand/5 border border-brand/10 rounded-xl animate-in fade-in slide-in-from-top-2">
+                <Select
+                  id="subjectId"
+                  label="Asignatura *"
+                  name="subjectId"
+                  value={formData.subjectId}
+                  onChange={(e) => {
+                    handleChange(e);
+                    // Reseteamos el profesor si cambian de ramo
+                    setFormData(prev => ({ ...prev, professorId: '' })); 
+                  }}
+                  disabled={isLoadingSubjects}
+                  required={formData.isInstitutional}
+                >
+                  <option value="">Selecciona un ramo</option>
+                  {subjects.map((subject) => (
+                    <option key={subject.id} value={subject.id}>
+                      {subject.name} {subject.code ? `(${subject.code})` : ''}
+                    </option>
+                  ))}
+                </Select>
+
+                <Select
+                  id="professorId"
+                  label="Profesor a cargo *"
+                  name="professorId"
+                  value={formData.professorId}
+                  onChange={handleChange}
+                  disabled={!formData.subjectId}
+                  required={formData.isInstitutional}
+                >
+                  <option value="">Selecciona un profesor</option>
+                  {/* Buscamos el ramo seleccionado y mapeamos sus profesores */}
+                  {subjects
+                    .find(s => s.id === formData.subjectId)
+                    ?.professors?.map((prof: any) => (
+                      <option key={prof.id} value={prof.id}>
+                        {prof.name}
+                      </option>
+                    ))}
+                </Select>
+              </div>
+            )}
 
             <div className="grid md:grid-cols-2 gap-4">
               <Select
