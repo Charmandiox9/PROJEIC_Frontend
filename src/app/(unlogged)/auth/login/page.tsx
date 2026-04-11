@@ -42,9 +42,9 @@ export default function AuthPage() {
         </div>
 
         {/* Formas decorativas */}
-        <div className="absolute top-20 left-10 w-32 h-32 bg-white/5 rounded-full blur-2xl animate-pulse"></div>
-        <div className="absolute bottom-32 right-12 w-64 h-64 bg-white/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s', animationDuration: '4s' }}></div>
-        <div className="absolute top-1/2 left-1/4 w-40 h-40 bg-white/5 rounded-full blur-xl animate-pulse" style={{ animationDelay: '2s' }}></div>        
+        <div className="absolute top-20 left-10 w-32 h-32 bg-surface-primary/5 rounded-full blur-2xl animate-pulse"></div>
+        <div className="absolute bottom-32 right-12 w-64 h-64 bg-surface-primary/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s', animationDuration: '4s' }}></div>
+        <div className="absolute top-1/2 left-1/4 w-40 h-40 bg-surface-primary/5 rounded-full blur-xl animate-pulse" style={{ animationDelay: '2s' }}></div>        
 
         <div className="relative z-10 flex flex-col justify-center flex-1 max-w-lg">
           <Image
@@ -64,21 +64,21 @@ export default function AuthPage() {
 
           <div className="space-y-6">
             <div className="flex items-center space-x-4 text-white/80">
-              <div className="bg-white/10 p-3 rounded-lg">
+              <div className="bg-surface-primary/10 p-3 rounded-lg">
                 <LayoutDashboard className="w-6 h-6 text-white" />
               </div>
               <span className="text-base font-medium">Tableros Kanban</span>
             </div>
             
             <div className="flex items-center space-x-4 text-white/80">
-              <div className="bg-white/10 p-3 rounded-lg">
+              <div className="bg-surface-primary/10 p-3 rounded-lg">
                 <Users className="w-6 h-6 text-white" />
               </div>
               <span className="text-base font-medium">Gestión de Equipos</span>
             </div>
 
             <div className="flex items-center space-x-4 text-white/80">
-              <div className="bg-white/10 p-3 rounded-lg">
+              <div className="bg-surface-primary/10 p-3 rounded-lg">
                 <Bell className="w-6 h-6 text-white" />
               </div>
               <span className="text-base font-medium">Notificaciones en tiempo real</span>
@@ -88,11 +88,11 @@ export default function AuthPage() {
       </div>
 
       {/* Columna derecha (100% width en mobile, 50% en desktop) */}
-      <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-8 bg-white relative animate-fade-in-up shrink-0">
+      <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-8 bg-surface-primary relative animate-fade-in-up shrink-0">
         
         <Link
           href="/"
-          className="md:hidden absolute top-6 left-6 flex items-center space-x-2 text-gray-500 hover:text-gray-900 transition-colors text-sm font-medium"
+          className="md:hidden absolute top-6 left-6 flex items-center space-x-2 text-text-muted hover:text-text-primary transition-colors text-sm font-medium"
         >
           <ArrowLeft className="w-5 h-5" />
           <span>Volver al inicio</span>
@@ -114,15 +114,15 @@ export default function AuthPage() {
             <span className="text-xs font-semibold tracking-wider">DESARROLLO AUTENTICADO</span>
           </div>
 
-          <h2 className="text-3xl font-bold text-gray-900 mb-3">Bienvenido</h2>
-          <p className="text-gray-500 text-sm mb-10 leading-relaxed">
+          <h2 className="text-3xl font-bold text-text-primary mb-3">Bienvenido</h2>
+          <p className="text-text-muted text-sm mb-10 leading-relaxed">
             Accede directamente al panel de proyectos utilizando tu identidad universitaria provista por la red EIC UCN.
           </p>
 
           <button
             onClick={handleOAuthLogin}
             type="button"
-            className="shimmer-btn w-full flex items-center justify-center gap-3 py-3.5 px-4 border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium rounded-xl transition-all shadow-sm hover:shadow-md focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 text-base"
+            className="shimmer-btn w-full flex items-center justify-center gap-3 py-3.5 px-4 border border-border-primary hover:bg-surface-secondary text-text-secondary font-medium rounded-xl transition-all shadow-sm hover:shadow-md focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 text-base"
           >
             <svg viewBox="0 0 24 24" className="w-6 h-6 shrink-0">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

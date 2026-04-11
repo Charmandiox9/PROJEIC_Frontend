@@ -94,18 +94,18 @@ export default function ProyectosPublicosLogeadoPage() {
       (project.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
       (project.subject?.name.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
       (project.subject?.professors?.some(p => p.name.toLowerCase().includes(searchTerm.toLowerCase())) ?? false);
-    
+
     const matchesStatus = statusFilter === 'Todos' || project.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   return (
-    <div className="flex flex-col flex-1 h-full min-h-screen bg-gray-50/50">
-      <div className="bg-white border-b border-gray-200 px-6 py-6 sticky top-0 z-10">
+    <div className="flex flex-col flex-1 h-full min-h-screen bg-surface-page">
+      <div className="bg-surface-primary border-b border-border-primary px-6 py-6 sticky top-0 z-10">
         <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
           <div className="flex flex-col shrink-0">
-            <h1 className="text-2xl font-bold text-gray-900">Proyectos Públicos</h1>
-            <p className="text-sm text-gray-500 mt-1">Explora iniciativas abiertas a la comunidad</p>
+            <h1 className="text-2xl font-bold text-text-primary">Proyectos Publicos</h1>
+            <p className="text-sm text-text-muted mt-1">Explora iniciativas abiertas a la comunidad</p>
           </div>
           <div className="flex flex-col md:flex-row w-full md:w-auto gap-4 items-center">
             <div className="relative w-full md:w-64">
@@ -115,7 +115,7 @@ export default function ProyectosPublicosLogeadoPage() {
                 placeholder="Buscar proyectos, ramos o profesores..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-brand focus:border-brand outline-none transition-colors"
+                className="w-full pl-10 pr-4 py-2 border border-border-secondary rounded-lg text-sm text-text-primary focus:ring-2 focus:ring-brand focus:border-brand outline-none transition-colors bg-surface-primary placeholder:text-text-muted"
               />
             </div>
             <div className="flex gap-2 text-sm w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
@@ -123,11 +123,10 @@ export default function ProyectosPublicosLogeadoPage() {
                 <button
                   key={status}
                   onClick={() => setStatusFilter(status)}
-                  className={`whitespace-nowrap px-4 py-2 rounded-lg font-medium transition-colors ${
-                    statusFilter === status
-                      ? 'bg-brand text-white'
-                      : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
-                  }`}
+                  className={`whitespace-nowrap px-4 py-2 rounded-lg font-medium transition-colors ${statusFilter === status
+                    ? 'bg-brand text-white'
+                    : 'bg-surface-primary border border-border-secondary text-text-secondary hover:bg-surface-tertiary'
+                    }`}
                 >
                   {status === 'Todos' ? 'Todos' : getStatusLabel(status)}
                 </button>
@@ -143,11 +142,11 @@ export default function ProyectosPublicosLogeadoPage() {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand"></div>
           </div>
         ) : error ? (
-          <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
+          <div className="text-center py-20 bg-surface-primary rounded-xl border border-border-primary">
             <p className="text-gray-500">Ocurrió un error al cargar los proyectos.</p>
           </div>
         ) : filteredProjects.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
+          <div className="text-center py-20 bg-surface-primary rounded-xl border border-border-primary">
             <p className="text-gray-500">No se encontraron proyectos públicos.</p>
           </div>
         ) : (
@@ -157,9 +156,9 @@ export default function ProyectosPublicosLogeadoPage() {
               const isMember = project.members?.some((m) => m.user.userId === user?.userId && m.status === 'ACTIVE') ?? false;
 
               return (
-                <div 
-                  key={project.id} 
-                  className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-xl hover:border-brand/40 transition-all duration-300 flex flex-col min-h-0 relative"
+                <div
+                  key={project.id}
+                  className="bg-surface-primary border border-border-primary rounded-xl p-6 hover:shadow-xl hover:border-brand/40 transition-all duration-300 flex flex-col min-h-0 relative"
                 >
                   {/* Etiqueta de Miembro en esquina superior derecha */}
                   {isMember && (
@@ -173,22 +172,22 @@ export default function ProyectosPublicosLogeadoPage() {
                   <div className="flex flex-col mb-4 gap-3 pr-2">
                     <div className="flex justify-between items-start gap-3 w-full">
                       <div className="flex flex-col gap-2 w-full">
-                        <h3 className="font-bold text-lg text-gray-900 line-clamp-2 break-words leading-tight">{project.name}</h3>
-                        
+                        <h3 className="font-bold text-lg text-text-primary line-clamp-2 break-words leading-tight">{project.name}</h3>
+
                         {project.isInstitutional && project.subject && (
-                          <div className="flex flex-col gap-1.5 mt-1 bg-gray-50/80 p-2.5 rounded-lg border border-gray-100">
+                          <div className="flex flex-col gap-1.5 mt-1 bg-surface-secondary p-2.5 rounded-lg border border-border-secondary">
                             <div className="flex items-center gap-1.5">
                               <BookOpen className="w-3.5 h-3.5 text-brand shrink-0" />
                               <p className="text-xs font-semibold text-brand truncate">
                                 {project.subject.name} <span className="font-normal text-gray-400 ml-1">• {project.subject.period}</span>
                               </p>
                             </div>
-                            
+
                             {project.subject.professors && project.subject.professors.length > 0 && (
                               <div className="flex items-start gap-1.5 pl-0.5">
                                 <GraduationCap className="w-3.5 h-3.5 text-gray-400 shrink-0 mt-0.5" />
-                                <p className="text-[11px] text-gray-600 line-clamp-1">
-                                  <span className="font-medium text-gray-500 mr-1">Prof:</span> 
+                                <p className="text-[11px] text-text-secondary line-clamp-1">
+                                  <span className="font-medium text-gray-500 mr-1">Prof:</span>
                                   {project.subject.professors.map(p => p.name).join(', ')}
                                 </p>
                               </div>
@@ -196,20 +195,19 @@ export default function ProyectosPublicosLogeadoPage() {
                           </div>
                         )}
                       </div>
-                      
-                      <span className={`px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md whitespace-nowrap shrink-0 ${
-                        project.status === 'ACTIVE' ? 'bg-green-50 text-green-700' :
+
+                      <span className={`px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md whitespace-nowrap shrink-0 ${project.status === 'ACTIVE' ? 'bg-green-50 text-green-700' :
                         project.status === 'COMPLETED' ? 'bg-gray-100 text-gray-700' :
-                        'bg-brand/10 text-brand'
-                      }`}>
+                          'bg-brand/10 text-brand'
+                        }`}>
                         {getStatusLabel(project.status)}
                       </span>
                     </div>
                   </div>
-                  
-                  <p className="text-gray-500 text-sm mb-6 line-clamp-3 flex-1">{project.description || 'Sin descripción detallada.'}</p>
-                  
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-auto">
+
+                  <p className="text-text-muted text-sm mb-6 line-clamp-3 flex-1">{project.description || 'Sin descripcion detallada.'}</p>
+
+                  <div className="flex items-center justify-between pt-4 border-t border-border-primary mt-auto">
                     <div className="flex items-center -space-x-2 relative z-0">
                       {activeMembers.slice(0, 3).map((member) => (
                         <img

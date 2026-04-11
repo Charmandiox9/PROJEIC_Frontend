@@ -43,7 +43,7 @@ function AuthSuccessInner() {
   }, [router, searchParams]);
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-50">
+    <div className="flex justify-center items-center h-screen bg-surface-secondary">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand"></div>
     </div>
   );
@@ -53,7 +53,7 @@ export default function AuthSuccessPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex justify-center items-center h-screen bg-gray-50">
+        <div className="flex justify-center items-center h-screen bg-surface-secondary">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand"></div>
         </div>
       }

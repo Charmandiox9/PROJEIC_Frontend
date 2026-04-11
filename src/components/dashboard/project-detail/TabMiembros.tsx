@@ -86,7 +86,7 @@ export default function TabMiembros({
 
   return (
     <div className={`grid grid-cols-1 ${isLeader ? 'lg:grid-cols-3' : ''} gap-6`}>
-      <div className={`${isLeader ? 'md:col-span-2' : ''} bg-white rounded-xl border border-gray-100 p-6 space-y-4`}>
+      <div className={`${isLeader ? 'md:col-span-2' : ''} bg-surface-primary rounded-xl border border-border-primary p-6 space-y-4`}>
         <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Integrantes ({activeMembers.length})</h3>
         {activeMembers.length === 0 ? (
           <div className="text-center py-12">
@@ -96,11 +96,11 @@ export default function TabMiembros({
         ) : (
           <ul className="space-y-3">
             {activeMembers.map((m) => (
-              <li key={m.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
+              <li key={m.id} className="flex items-center justify-between p-3 bg-surface-secondary rounded-lg border border-border-secondary">
                 <div className="flex items-center gap-3 min-w-0">
                   <MemberAvatar member={m} />
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 truncate max-w-[200px]">
+                    <p className="text-sm font-semibold text-text-primary truncate max-w-[200px]">
                       {m.user.name}
                     </p>
                     {m.status === 'PENDING' && (
@@ -140,12 +140,12 @@ export default function TabMiembros({
       {isLeader && (
         <div className="space-y-4 min-w-0 overflow-hidden">
           {success ? (
-            <div className="bg-white rounded-xl border border-green-200 p-8 text-center space-y-4 shadow-sm animate-in fade-in duration-300">
+            <div className="bg-surface-primary rounded-xl border border-green-200 dark:border-green-700 p-8 text-center space-y-4 shadow-sm animate-in fade-in duration-300">
               <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto">
                 <Check className="w-8 h-8" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900">¡Invitación enviada!</h3>
+                <h3 className="text-lg font-bold text-text-primary">¡Invitacion enviada!</h3>
                 <p className="text-sm text-gray-500 mt-1">El usuario ha sido invitado exitosamente.</p>
               </div>
               <button
@@ -156,7 +156,7 @@ export default function TabMiembros({
               </button>
             </div>
           ) : (
-            <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-4">
+            <div className="bg-surface-primary rounded-xl border border-border-primary p-6 space-y-4">
               <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Agregar miembro</h3>
 
               <label className="flex items-center gap-1.5 text-xs text-gray-600 cursor-pointer select-none">
@@ -175,7 +175,7 @@ export default function TabMiembros({
                 onChange={(e) => setEmail(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleInvite()}
                 placeholder={isExternal ? 'correo@externo.com' : 'correo@alumnos.ucn.cl'}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none"
+                className="w-full px-3 py-2 text-sm border border-border-secondary rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none bg-surface-primary text-text-primary placeholder:text-text-muted"
               />
 
               {!isExternal && (
@@ -206,11 +206,11 @@ export default function TabMiembros({
             </div>
           )}
 
-          <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-3 overflow-y-auto max-h-64">
+          <div className="bg-surface-primary rounded-xl border border-border-primary p-6 space-y-3 overflow-y-auto max-h-64">
             <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Roles disponibles</h3>
             {ROLE_DESCRIPTIONS.map((r) => (
               <div key={r.role}>
-                <p className="text-xs font-bold text-gray-700">{r.role}</p>
+                <p className="text-xs font-bold text-text-secondary">{r.role}</p>
                 <p className="text-xs text-gray-400 leading-relaxed">{r.desc}</p>
               </div>
             ))}

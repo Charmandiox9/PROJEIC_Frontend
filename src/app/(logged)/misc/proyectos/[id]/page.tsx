@@ -10,15 +10,15 @@ import {
   REMOVE_PROJECT_MEMBER,
   UPDATE_PROJECT_MEMBER_ROLE,
 } from '@/graphql/misc/operations';
-import { 
-  ArrowLeft, 
-  FileDown, 
-  Loader2, 
-  Layout, 
-  Columns, 
-  Activity, 
-  BarChart2, 
-  Users, 
+import {
+  ArrowLeft,
+  FileDown,
+  Loader2,
+  Layout,
+  Columns,
+  Activity,
+  BarChart2,
+  Users,
   Target
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthProvider';
@@ -119,7 +119,7 @@ export default function ProjectDetailPage() {
   const currentTabs: { id: TabId; label: string; icon: React.ElementType }[] = [
     { id: 'resumen', label: 'Resumen', icon: Layout },
     // Si es Híbrido, mostramos Resultados. Si es Clásico, mostramos Tablero.
-    project.mode === 'HYBRID' 
+    project.mode === 'HYBRID'
       ? { id: 'resultados', label: 'Resultados', icon: Target }
       : { id: 'tablero', label: 'Tablero', icon: Columns },
     { id: 'actividad', label: 'Actividad', icon: Activity },
@@ -131,19 +131,19 @@ export default function ProjectDetailPage() {
     <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <nav className="flex items-center gap-3 text-sm text-gray-500 mb-6">
-          <Link 
-            href="/misc/proyectos" 
+          <Link
+            href="/misc/proyectos"
             className="flex items-center gap-1.5 hover:text-brand transition-colors font-medium"
           >
             <ArrowLeft className="w-4 h-4" />
             Mis proyectos
           </Link>
           <span className="text-gray-300 text-lg/none">|</span>
-          <span className="text-gray-900 font-medium truncate max-w-[300px]">
+          <span className="text-text-primary font-medium truncate max-w-[300px]">
             {project.name}
           </span>
           {/* Pequeña etiqueta visual del modo */}
-          <span className="hidden sm:inline-flex px-2 py-0.5 ml-2 text-[10px] font-bold uppercase tracking-wider rounded-md bg-gray-100 text-gray-600">
+          <span className="hidden sm:inline-flex px-2 py-0.5 ml-2 text-[10px] font-bold uppercase tracking-wider rounded-md bg-surface-secondary text-text-secondary">
             {project.mode === 'HYBRID' ? 'Híbrido EIC' : 'Clásico'}
           </span>
         </nav>
@@ -166,18 +166,17 @@ export default function ProjectDetailPage() {
       </div>
 
       {/* NAVEGACIÓN DE TABS */}
-      <div className="border-b border-gray-200">
+      <div className="border-b border-border-primary">
         <div className="flex gap-1 overflow-x-auto">
           {currentTabs.map(({ id: tabId, label, icon: Icon }) => (
-            <button 
-              key={tabId} 
-              onClick={() => setActiveTab(tabId)} 
-              className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                  activeTab === tabId
-                    ? 'border-brand text-brand'
-                    : 'border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300'
+            <button
+              key={tabId}
+              onClick={() => setActiveTab(tabId)}
+              className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === tabId
+                  ? 'border-brand text-brand'
+                  : 'border-transparent text-gray-500 hover:text-text-primary hover:border-border-secondary'
                 }`}>
-               <Icon className="w-4 h-4" /> {label}
+              <Icon className="w-4 h-4" /> {label}
             </button>
           ))}
         </div>
@@ -199,18 +198,18 @@ export default function ProjectDetailPage() {
         )}
         {/* Renderizamos Tablero SOLO si es clásico */}
         {activeTab === 'tablero' && project.mode === 'CLASSIC' && (
-          <BoardRenderer 
-            methodology={project.methodology} 
-            projectId={project.id} 
-            members={project.members} 
-            userRole={currentUserRole} 
+          <BoardRenderer
+            methodology={project.methodology}
+            projectId={project.id}
+            members={project.members}
+            userRole={currentUserRole}
           />
         )}
         {/* Renderizamos Resultados SOLO si es híbrido */}
         {activeTab === 'resultados' && project.mode === 'HYBRID' && (
           <TabResultados project={project} isLeader={isLeader} />
         )}
-        
+
         {activeTab === 'actividad' && <ActivityFeed project={project} />}
         {activeTab === 'metricas' && <TabMetricas projectId={project.id} />}
         {activeTab === 'miembros' && (

@@ -37,9 +37,9 @@ const OFFICIAL_LINKS: LinkItem[] = [
     label: 'Sitio oficial UCN',
     url: 'https://www.ucn.cl',
     icon: Building2,
-    colorClass: 'text-blue-500',
-    bgClass: 'bg-blue-50',
-    hoverClass: 'hover:border-blue-500',
+    colorClass: 'text-blue-500 dark:text-blue-400',
+    bgClass: 'bg-blue-50 dark:bg-blue-500/10',
+    hoverClass: 'hover:border-blue-500 dark:hover:border-blue-400',
     groupHoverClass: 'group-hover:bg-blue-500 group-hover:text-white',
   },
   {
@@ -48,8 +48,8 @@ const OFFICIAL_LINKS: LinkItem[] = [
     url: 'https://eic.ucn.cl',
     icon: Cpu,
     colorClass: 'text-brand',
-    bgClass: 'bg-brand-light',
-    hoverClass: 'hover:border-brand',
+    bgClass: 'bg-brand-light dark:bg-brand/10',
+    hoverClass: 'hover:border-brand dark:hover:border-brand-light',
     groupHoverClass: 'group-hover:bg-brand group-hover:text-white',
   },
   {
@@ -57,9 +57,9 @@ const OFFICIAL_LINKS: LinkItem[] = [
     label: 'Campus Virtual',
     url: 'https://campusvirtual.ucn.cl/login/index.php',
     icon: Laptop,
-    colorClass: 'text-orange-500',
-    bgClass: 'bg-orange-50',
-    hoverClass: 'hover:border-orange-500',
+    colorClass: 'text-orange-500 dark:text-orange-400',
+    bgClass: 'bg-orange-50 dark:bg-orange-500/10',
+    hoverClass: 'hover:border-orange-500 dark:hover:border-orange-400',
     groupHoverClass: 'group-hover:bg-orange-500 group-hover:text-white',
   }
 ];
@@ -99,67 +99,68 @@ const CAREERS: CareerItem[] = [
 
 export default function EicPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-<section className="bg-white bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-light/30 via-transparent to-transparent text-ui-dark py-16 px-6 border-b border-gray-100">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-3xl md:text-5xl font-bold mb-4">{PAGE_TEXTS.heroTitle}</h1>
-            <p className="text-gray-500 text-lg md:text-xl font-medium">{PAGE_TEXTS.heroSubtitle}</p>
+    <div className="min-h-screen flex flex-col bg-surface-primary dark:bg-brand-dark">
+      <section className="bg-surface-primary dark:bg-brand-dark bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-light/30 via-transparent to-transparent text-ui-dark dark:text-text-primary py-16 px-6 border-b border-border-primary dark:border-border-primary">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-3xl md:text-5xl font-bold mb-4">{PAGE_TEXTS.heroTitle}</h1>
+          <p className="text-text-muted dark:text-text-muted text-lg md:text-xl font-medium">{PAGE_TEXTS.heroSubtitle}</p>
         </div>
       </section>
 
       <main className="flex-grow max-w-5xl mx-auto w-full px-6 py-16 space-y-16">
-        
-        <section className="bg-gray-50 border border-gray-100 p-8 md:p-10 rounded-2xl">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">{PAGE_TEXTS.aboutTitle}</h2>
-          <p className="text-gray-700 leading-relaxed text-lg">
+
+        <section className="bg-surface-secondary dark:bg-surface-primary border border-border-primary dark:border-border-primary p-8 md:p-10 rounded-2xl">
+          <h2 className="text-2xl font-bold text-text-primary dark:text-text-primary mb-6">{PAGE_TEXTS.aboutTitle}</h2>
+          <p className="text-text-secondary dark:text-text-secondary leading-relaxed text-lg">
             {PAGE_TEXTS.aboutDescription}
           </p>
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 mb-8">{PAGE_TEXTS.linksTitle}</h2>
+          <h2 className="text-2xl font-bold text-text-primary dark:text-text-primary mb-8">{PAGE_TEXTS.linksTitle}</h2>
           <div className="grid md:grid-cols-3 gap-6">
             {OFFICIAL_LINKS.map((link) => {
               const Icon = link.icon;
               return (
-              <a 
-                key={link.id} 
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`group flex flex-col items-center justify-center p-8 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ${link.hoverClass}`}
-              >
-                <div className={`w-16 h-16 rounded-2xl mb-5 flex items-center justify-center transition-colors duration-300 ${link.bgClass} ${link.colorClass} ${link.groupHoverClass}`}>
-                  <Icon className="w-8 h-8" />
-                </div>
-                <span className="font-bold text-gray-900 text-lg mb-2 text-center transition-colors">
-                  {link.label}
-                </span>
-                <div className="flex items-center text-sm font-medium text-gray-400 group-hover:text-gray-600 transition-colors">
-                  <span>Visitar plataforma</span>
-                  <ExternalLink className="w-4 h-4 ml-1" />
-                </div>
-              </a>
-            )})}
+                <a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`group flex flex-col items-center justify-center p-8 bg-surface-primary dark:bg-surface-primary border border-border-primary dark:border-border-primary rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ${link.hoverClass}`}
+                >
+                  <div className={`w-16 h-16 rounded-2xl mb-5 flex items-center justify-center transition-colors duration-300 ${link.bgClass} ${link.colorClass} ${link.groupHoverClass}`}>
+                    <Icon className="w-8 h-8" />
+                  </div>
+                  <span className="font-bold text-text-primary dark:text-text-primary text-lg mb-2 text-center transition-colors">
+                    {link.label}
+                  </span>
+                  <div className="flex items-center text-sm font-medium text-text-muted group-hover:text-text-secondary transition-colors">
+                    <span>Visitar plataforma</span>
+                    <ExternalLink className="w-4 h-4 ml-1" />
+                  </div>
+                </a>
+              )
+            })}
           </div>
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 mb-8">{PAGE_TEXTS.careersTitle}</h2>
+          <h2 className="text-2xl font-bold text-text-primary dark:text-text-primary mb-8">{PAGE_TEXTS.careersTitle}</h2>
           <div className="grid md:grid-cols-3 gap-6">
             {CAREERS.map((career) => (
-              <a 
+              <a
                 key={career.id}
                 href={career.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`flex flex-col p-6 bg-white border border-gray-100 rounded-xl shadow-sm ${career.hoverBorderClass} hover:shadow-lg hover:-translate-y-1 transition-all duration-200 group h-full focus-visible:ring-2 focus-visible:outline-none focus:ring-brand`}
+                className={`flex flex-col p-6 bg-surface-primary dark:bg-surface-primary border border-border-primary dark:border-border-primary rounded-xl shadow-sm ${career.hoverBorderClass} hover:shadow-lg hover:-translate-y-1 transition-all duration-200 group h-full focus-visible:ring-2 focus-visible:outline-none focus:ring-brand`}
               >
                 <div className={`${career.bgClass} ${career.textClass} p-3 rounded-lg mb-4 self-start transition-colors`}>
                   <BookOpen className="w-6 h-6" />
                 </div>
                 <div className="flex-grow flex flex-col justify-between">
-                  <h3 className={`font-bold text-gray-900 leading-tight ${career.groupHoverTextClass} transition-colors mb-4`}>
+                  <h3 className={`font-bold text-text-primary dark:text-text-primary leading-tight ${career.groupHoverTextClass} transition-colors mb-4`}>
                     {career.name}
                   </h3>
                   <div className={`flex justify-between items-center text-sm font-medium ${career.textClass} transition-colors`}>

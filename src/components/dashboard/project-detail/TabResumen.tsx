@@ -36,17 +36,17 @@ export default function TabResumen({
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+      <div className="bg-surface-primary rounded-xl border border-border-primary overflow-hidden">
         <div className="h-2 w-full" style={{ backgroundColor: project.color }} />
         <div className="p-6 flex flex-col md:flex-row md:items-start justify-between gap-4">
           <div className="space-y-1 min-w-0">
             <div className="flex flex-wrap items-center gap-3">
-              <h2 className="text-2xl font-bold text-gray-900 tracking-tight">{project.name}</h2>
-              <span className={`text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${STATUS_COLORS[project.status] ?? 'bg-gray-100 text-gray-600'}`}>
+              <h2 className="text-2xl font-bold text-text-primary tracking-tight">{project.name}</h2>
+              <span className={`text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${STATUS_COLORS[project.status] ?? 'bg-surface-secondary text-text-secondary'}`}>
                 {STATUS_LABELS[project.status] ?? project.status}
               </span>
             </div>
-            <p className="text-gray-500 text-sm leading-relaxed max-w-2xl">
+            <p className="text-text-muted text-sm leading-relaxed max-w-2xl">
               {project.description ?? 'Sin descripción detallada.'}
             </p>
           </div>
@@ -54,7 +54,7 @@ export default function TabResumen({
             <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={onEdit}
-                className="px-3 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-1.5"
+                className="px-3 py-2 bg-surface-primary border border-border-secondary text-text-primary text-sm font-medium rounded-lg hover:bg-surface-tertiary transition-colors flex items-center gap-1.5"
               >
                 <Edit3 className="w-4 h-4" /> Editar
               </button>
@@ -72,36 +72,36 @@ export default function TabResumen({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-4">
-          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Detalles del Proyecto</h3>
+        <div className="bg-surface-primary rounded-xl border border-border-primary p-6 space-y-4">
+          <h3 className="text-sm font-bold text-text-muted uppercase tracking-widest">Detalles del Proyecto</h3>
           <ul className="space-y-3">
             <li className="flex items-center gap-3">
-              <Calendar className="w-4 h-4 text-gray-400 shrink-0" />
-              <span className="text-sm text-gray-500 min-w-[120px]">Creado el</span>
-              <span className="text-sm font-medium text-gray-900">{creationDate}</span>
+              <Calendar className="w-4 h-4 text-text-muted shrink-0" />
+              <span className="text-sm text-text-muted min-w-[120px]">Creado el</span>
+              <span className="text-sm font-medium text-text-primary">{creationDate}</span>
             </li>
             <li className="flex items-center gap-3">
-              <Layout className="w-4 h-4 text-gray-400 shrink-0" />
-              <span className="text-sm text-gray-500 min-w-[120px]">Metodología</span>
-              <span className="text-sm font-medium text-gray-900 capitalize">{project.methodology.toLowerCase()}</span>
+              <Layout className="w-4 h-4 text-text-muted shrink-0" />
+              <span className="text-sm text-text-muted min-w-[120px]">Metodología</span>
+              <span className="text-sm font-medium text-text-primary capitalize">{project.methodology.toLowerCase()}</span>
             </li>
             <li className="flex items-center gap-3">
               {project.isPublic ? (
-                <Globe className="w-4 h-4 text-gray-400 shrink-0" />
+                <Globe className="w-4 h-4 text-text-muted shrink-0" />
               ) : (
-                <Lock className="w-4 h-4 text-gray-400 shrink-0" />
+                <Lock className="w-4 h-4 text-text-muted shrink-0" />
               )}
-              <span className="text-sm text-gray-500 min-w-[120px]">Visibilidad</span>
-              <span className={`text-xs font-bold px-2 py-0.5 rounded-md ${project.isPublic ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+              <span className="text-sm text-text-muted min-w-[120px]">Visibilidad</span>
+              <span className={`text-xs font-bold px-2 py-0.5 rounded-md ${project.isPublic ? 'bg-green-100 text-green-700' : 'bg-surface-secondary text-text-secondary'}`}>
                 {project.isPublic ? 'Público' : 'Privado'}
               </span>
             </li>
           </ul>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-4">
+        <div className="bg-surface-primary rounded-xl border border-border-primary p-6 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">
+            <h3 className="text-sm font-bold text-text-muted uppercase tracking-widest">
               Equipo ({activeMembers.length})
             </h3>
             {isLeader && (
@@ -117,11 +117,11 @@ export default function TabResumen({
           {activeMembers.length > 0 ? (
             <ul className="space-y-2">
               {activeMembers.map((member) => (
-                <li key={member.id} className="flex items-center justify-between p-2.5 bg-gray-50 rounded-lg border border-gray-100">
+                <li key={member.id} className="flex items-center justify-between p-2.5 bg-surface-secondary rounded-lg border border-border-secondary">
                   <div className="flex items-center gap-3 min-w-0">
                     <MemberAvatar member={member} />
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 truncate max-w-[200px]">
+                      <p className="text-sm font-semibold text-text-primary truncate max-w-[200px]">
                         {member.user.name}
                       </p>
                       {member.status === 'PENDING' && (
@@ -129,16 +129,16 @@ export default function TabResumen({
                           <Loader2 className="w-3 h-3 animate-spin" /> Pendiente
                         </span>
                       )}
-                  <Select
-                    value={member.role}
-                    onChange={(e) => onUpdateRole(member.id, e.target.value)}
-                    disabled={!isLeader}
-                    className="mt-0.5 text-[11px] font-bold text-brand bg-brand/5 border-brand/20 w-auto"
-                  >
-                    {ROLE_OPTIONS.map((r) => (
-                      <option key={r.value} value={r.value}>{r.label}</option>
-                    ))}
-                  </Select>
+                      <Select
+                        value={member.role}
+                        onChange={(e) => onUpdateRole(member.id, e.target.value)}
+                        disabled={!isLeader}
+                        className="mt-0.5 text-[11px] font-bold text-brand bg-brand/5 border-brand/20 w-auto"
+                      >
+                        {ROLE_OPTIONS.map((r) => (
+                          <option key={r.value} value={r.value}>{r.label}</option>
+                        ))}
+                      </Select>
                     </div>
                   </div>
                   {isLeader && (
@@ -154,9 +154,9 @@ export default function TabResumen({
               ))}
             </ul>
           ) : (
-            <div className="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-200">
-              <User className="w-5 h-5 text-gray-300 mx-auto mb-2" />
-              <p className="text-xs text-gray-400">No hay miembros registrados.</p>
+            <div className="text-center py-8 bg-surface-secondary rounded-lg border border-dashed border-border-primary">
+              <User className="w-5 h-5 text-text-secondary mx-auto mb-2" />
+              <p className="text-xs text-text-muted">No hay miembros registrados.</p>
             </div>
           )}
         </div>

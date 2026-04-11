@@ -29,11 +29,11 @@ const FEATURES = [
 
 export default function FeaturesSection() {
   return (
-    <section className="py-20 px-6 bg-gray-50">
+    <section className="py-20 px-6 bg-gray-50 dark:bg-gray-900">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">¿Qué ofrece PROJEIC?</h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">Que ofrece PROJEIC?</h2>
+          <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             Herramientas diseñadas para los ritmos y necesidades de la comunidad EIC
           </p>
         </div>
@@ -41,12 +41,12 @@ export default function FeaturesSection() {
           {FEATURES.map((feature) => {
             const Icon = feature.icon;
             return (
-              <div key={feature.id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+              <div key={feature.id} className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
                 <div className="w-12 h-12 bg-brand-light text-brand rounded-lg flex items-center justify-center mb-6">
                   <Icon className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3">{feature.title}</h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
                   {feature.description}
                 </p>
               </div>

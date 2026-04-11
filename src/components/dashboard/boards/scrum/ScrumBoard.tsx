@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { GET_SPRINTS_BY_PROJECT, COMPLETE_SPRINT } from '@/graphql/sprints/operations';
-import ScrumPlanning from './ScrumPlanning'; 
-import KanbanBoard from '../kanban/KanbanBoard'; 
+import ScrumPlanning from './ScrumPlanning';
+import KanbanBoard from '../kanban/KanbanBoard';
 import SprintTimeline from './SprintTimeline';
 import BurndownChart from './BurndownChart';
 import { Loader2, Layout, History, LineChart } from 'lucide-react';
@@ -17,18 +17,18 @@ export default function ScrumBoard({ projectId, members, userRole }: any) {
   const [currentView, setCurrentView] = useState<'board' | 'timeline' | 'burndown'>('board');
 
   const loadSprints = async () => {
-    if (!projectId) return; 
+    if (!projectId) return;
 
     setIsLoading(true);
     try {
-      const res = await fetchGraphQL({ 
-        query: GET_SPRINTS_BY_PROJECT, 
-        variables: { projectId } 
+      const res = await fetchGraphQL({
+        query: GET_SPRINTS_BY_PROJECT,
+        variables: { projectId }
       });
-      
+
       const sprints = res.sprintsByProject || [];
       setAllSprints(sprints);
-      
+
       const active = sprints.find((s: any) => s.status === 'ACTIVE');
       setActiveSprint(active || null);
     } catch (e) {
@@ -44,7 +44,7 @@ export default function ScrumBoard({ projectId, members, userRole }: any) {
     if (!confirm('¿Estás seguro de finalizar este Sprint?')) return;
     try {
       await fetchGraphQL({ query: COMPLETE_SPRINT, variables: { id: activeSprint.id } });
-      loadSprints(); 
+      loadSprints();
     } catch (error) {
       console.error("Error finalizando sprint:", error);
     }
@@ -60,38 +60,35 @@ export default function ScrumBoard({ projectId, members, userRole }: any) {
 
   return (
     <div className="space-y-6">
-      
+
       {/* SUB-MENÚ ESTILO JIRA */}
-      <div className="flex items-center gap-1 bg-gray-50/50 p-1 rounded-xl border border-gray-100 w-fit">
+      <div className="flex items-center gap-1 bg-gray-50/50 dark:bg-gray-800/50 p-1 rounded-xl border border-gray-100 dark:border-gray-700 w-fit">
         <button
           onClick={() => setCurrentView('board')}
-          className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
-            currentView === 'board' 
-              ? 'bg-white text-brand shadow-sm border border-gray-200/50' 
-              : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
-          }`}
+          className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ${currentView === 'board'
+              ? 'bg-white dark:bg-gray-700 text-brand shadow-sm border border-gray-200/50 dark:border-gray-600'
+              : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
         >
           <Layout className="w-4 h-4" />
           {activeSprint ? 'Sprint Activo' : 'Planificación (Backlog)'}
         </button>
         <button
           onClick={() => setCurrentView('timeline')}
-          className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
-            currentView === 'timeline' 
-              ? 'bg-white text-brand shadow-sm border border-gray-200/50' 
-              : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
-          }`}
+          className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ${currentView === 'timeline'
+              ? 'bg-white dark:bg-gray-700 text-brand shadow-sm border border-gray-200/50 dark:border-gray-600'
+              : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
         >
           <History className="w-4 h-4" />
           Cronograma / Historial
         </button>
         <button
           onClick={() => setCurrentView('burndown')}
-          className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
-            currentView === 'burndown' 
-              ? 'bg-white text-brand shadow-sm border border-gray-200/50' 
-              : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
-          }`}
+          className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ${currentView === 'burndown'
+              ? 'bg-white dark:bg-gray-700 text-brand shadow-sm border border-gray-200/50 dark:border-gray-600'
+              : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
         >
           <LineChart className="w-4 h-4" />
           Burndown
@@ -100,8 +97,8 @@ export default function ScrumBoard({ projectId, members, userRole }: any) {
 
       {/* RENDERIZADO CONDICIONAL DE LA VISTA */}
       {currentView === 'timeline' ? (
-        <SprintTimeline 
-          sprints={allSprints} 
+        <SprintTimeline
+          sprints={allSprints}
           projectId={projectId}
           members={members || []}
         />
@@ -125,27 +122,27 @@ export default function ScrumBoard({ projectId, members, userRole }: any) {
               </h2>
               <p className="text-xs text-gray-500 mt-0.5">{activeSprint.goal || 'Sin meta definida'}</p>
             </div>
-            <button 
+            <button
               onClick={handleCompleteSprint}
-              className="text-xs font-bold text-red-600 bg-white border border-red-200 px-4 py-2 rounded-lg hover:bg-red-50 hover:border-red-300 transition-all shadow-sm"
+              className="text-xs font-bold text-red-600 bg-white dark:bg-gray-800 border border-red-200 dark:border-red-700 px-4 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950 hover:border-red-300 transition-all shadow-sm"
             >
               Finalizar Sprint
             </button>
           </div>
-          
-          <KanbanBoard 
-            projectId={projectId} 
-            members={members || []} 
+
+          <KanbanBoard
+            projectId={projectId}
+            members={members || []}
             userRole={userRole}
             sprintId={activeSprint.id}
           />
         </div>
       ) : (
         <div className="animate-in fade-in">
-          <ScrumPlanning 
-            projectId={projectId} 
-            members={members || []} 
-            onSprintStarted={loadSprints} 
+          <ScrumPlanning
+            projectId={projectId}
+            members={members || []}
+            onSprintStarted={loadSprints}
           />
         </div>
       )}

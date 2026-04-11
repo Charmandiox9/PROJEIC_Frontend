@@ -7,7 +7,7 @@ import Textarea from '@/components/ui/Textarea';
 import Select from '@/components/ui/Select';
 import { useAuth } from '@/context/AuthProvider';
 import { fetchGraphQL } from '@/lib/graphQLClient';
-import { CREATE_TASK, UPDATE_TASK } from '@/graphql/tasks/operations'; 
+import { CREATE_TASK, UPDATE_TASK } from '@/graphql/tasks/operations';
 
 interface ProjectMember {
   id: string;
@@ -172,12 +172,12 @@ export default function CreateTaskModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 sticky top-0 bg-white z-10">
-          <h2 className="text-lg font-bold text-gray-900">
+      <div className="bg-surface-primary rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-primary sticky top-0 bg-surface-primary z-10">
+          <h2 className="text-lg font-bold text-text-primary">
             {isEditing ? 'Editar tarea' : 'Nueva tarea'}
           </h2>
-          <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full">
+          <button onClick={onClose} className="p-2 text-gray-400 hover:text-text-primary hover:bg-surface-tertiary rounded-full">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -209,8 +209,8 @@ export default function CreateTaskModal({
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-semibold text-gray-700">Etiquetas (Enter para añadir)</label>
-            <div className="flex flex-wrap gap-2 p-2 border border-gray-300 rounded-lg min-h-[42px] bg-white focus-within:ring-2 focus-within:ring-brand transition-shadow">
+            <label className="block text-sm font-semibold text-text-secondary">Etiquetas (Enter para anadir)</label>
+            <div className="flex flex-wrap gap-2 p-2 border border-border-secondary rounded-lg min-h-[42px] bg-surface-primary focus-within:ring-2 focus-within:ring-brand transition-shadow">
               {formData.tags?.map(tag => (
                 <span key={tag} className="flex items-center gap-1 px-2 py-1 bg-brand/10 text-brand text-xs font-bold rounded-md">
                   {tag}
@@ -221,14 +221,14 @@ export default function CreateTaskModal({
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={addTag}
-                className="flex-1 outline-none text-sm min-w-[100px]"
+                className="flex-1 outline-none text-sm min-w-[100px] bg-transparent text-text-primary placeholder:text-text-muted"
                 placeholder="prio, bug, frontend..."
               />
             </div>
           </div>
 
-          <div className="pt-4 border-t flex justify-end gap-3">
-            <button type="button" onClick={onClose} disabled={isSubmitting} className="px-4 py-2 text-sm text-gray-700 border rounded-lg hover:bg-gray-50">Cancelar</button>
+          <div className="pt-4 border-t border-border-primary flex justify-end gap-3">
+            <button type="button" onClick={onClose} disabled={isSubmitting} className="px-4 py-2 text-sm text-text-primary border border-border-secondary rounded-lg hover:bg-surface-tertiary bg-surface-primary">Cancelar</button>
             <button type="submit" disabled={isSubmitting} className="px-6 py-2 text-sm text-white bg-brand rounded-lg hover:bg-brand-dark flex items-center gap-2">
               {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</> : isEditing ? 'Guardar cambios' : 'Crear tarea'}
             </button>

@@ -1,15 +1,17 @@
 @import "tailwindcss";
 
-@theme {
-  /* ========================================= */
-  /*  COLORES BASE (Modifica esto para alterar todo el proyecto) */
-  /* ========================================= */
+@custom-variant dark (&:where(.dark, .dark *));
 
-  /* Colores Neutrales (Fondos, Textos y Bordes Generales) - Modifican bg-white, text-gray-500, etc */
+* {
+  transition: background-color 0.3s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+@theme {
+  /* Colores Neutrales */
   --color-white: #ffffff;
   --color-black: #000000;
-  
-  --color-gray-50:  #f9fafb;
+
+  --color-gray-50: #f9fafb;
   --color-gray-100: #f3f4f6;
   --color-gray-200: #e5e7eb;
   --color-gray-300: #d1d5db;
@@ -20,8 +22,8 @@
   --color-gray-800: #1f2937;
   --color-gray-900: #111827;
 
-  /* Aliasing Zinc a Gray para uniformidad total en el proyecto (shadcn/ui usa zing a veces) */
-  --color-zinc-50:  var(--color-gray-50);
+  /* Aliasing Zinc a Gray */
+  --color-zinc-50: var(--color-gray-50);
   --color-zinc-100: var(--color-gray-100);
   --color-zinc-200: var(--color-gray-200);
   --color-zinc-300: var(--color-gray-300);
@@ -37,18 +39,19 @@
   --color-brand-hover: #1a7a9e;
   --color-brand-light: #e0f2fe;
 
-  /* Temas de interfaz Oscura (Modifican el Sidebar, Footer y Navbar) */
+  /* Temas de interfaz Oscura */
   --color-brand-dark: #0f2942;
   --color-brand-dark-hover: #0a1f33;
   --color-ui-dark: #0f2942;
   --color-ui-dark-hover: #0a1f33;
+  --color-ui-darker: #091a2a;
 
-  /* Estados Dinamicos y botones standart de tailwind */
+  /* Estados Dinámicos */
   --color-success: #16a34a;
   --color-warning: #d97706;
   --color-error: #dc2626;
 
-  /* Alterando clases default de Tailwind usadas en el proyecto */
+  /* Clases predeterminadas de Tailwind */
   --color-red-500: var(--color-error);
   --color-red-600: #b91c1c;
   --color-green-500: var(--color-success);
@@ -60,6 +63,26 @@
   --color-career-cs: #3b82f6;
   --color-career-industrial: #f97316;
   --color-career-ti: #22c55e;
+
+  /* Tokens semánticos */
+  --color-surface-page: var(--surface-page);
+  --color-surface-primary: var(--surface-primary);
+  --color-surface-secondary: var(--surface-secondary);
+  --color-surface-tertiary: var(--surface-tertiary);
+  --color-surface-nav: var(--surface-nav);
+  --color-surface-nav-active: var(--surface-nav-active);
+  --color-surface-nav-hover: var(--surface-nav-hover);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-text-muted: var(--text-muted);
+  --color-border-primary: var(--border-primary);
+  --color-border-secondary: var(--border-secondary);
+  --color-border-subtle: var(--border-subtle);
+
+  --color-surface-btn: var(--surface-btn);
+  --color-surface-btn-hover: var(--surface-btn-hover);
+  --color-text-btn: var(--text-btn);
 }
 
 body {
@@ -69,39 +92,135 @@ body {
 }
 
 @keyframes gradientShift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
 }
+
 .animate-gradient {
   background-size: 200% 200%;
   animation: gradientShift 8s ease infinite;
 }
 
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
+
 .animate-fade-in-up {
   animation: fadeInUp 0.5s ease forwards;
 }
 
 @keyframes shimmer {
-  from { transform: translateX(-100%); }
-  to { transform: translateX(100%); }
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(100%);
+  }
 }
+
 .shimmer-btn {
   position: relative;
   overflow: hidden;
 }
+
 .shimmer-btn::after {
   content: '';
   position: absolute;
-  top: 0; left: 0;
+  top: 0;
+  left: 0;
   width: 50%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
   transform: translateX(-100%);
 }
+
 .shimmer-btn:hover::after {
   animation: shimmer 0.6s ease forwards;
+}
+
+.dark body {
+  background-color: var(--color-brand-dark);
+  color: var(--color-gray-100);
+}
+
+/* Tokens semánticos para variables de modo oscuro */
+
+:root {
+  /* ── Superficies ── */
+  --surface-page: var(--color-gray-50);
+  --surface-primary: #ffffff;
+  --surface-secondary: var(--color-gray-50);
+  --surface-tertiary: var(--color-gray-100);
+  --surface-nav: var(--color-ui-dark);
+  --surface-nav-active: rgba(255, 255, 255, 0.1);
+  --surface-nav-hover: rgba(255, 255, 255, 0.05);
+  --surface-overlay: rgba(17, 24, 39, 0.5);
+
+  /* ── Botones Generales ── */
+  --surface-btn: var(--color-white);
+  --surface-btn-hover: var(--color-gray-100);
+  --text-btn: var(--color-ui-dark);
+
+  /* ── Bordes ── */
+  --border-primary: var(--color-gray-100);
+  --border-secondary: var(--color-gray-200);
+  --border-subtle: var(--color-gray-50);
+
+  /* ── Textos ── */
+  --text-primary: var(--color-gray-900);
+  --text-secondary: var(--color-gray-600);
+  --text-tertiary: var(--color-gray-500);
+  --text-muted: var(--color-gray-400);
+
+  /* ── Badge Institucional (Ramo/Materia) ── */
+  --badge-inst-bg: rgba(249, 250, 251, 0.8);
+  --badge-inst-border: var(--color-gray-100);
+}
+
+.dark {
+  /* Superficies — más contraste entre fondo y cards */
+  --surface-page: #0a1929;
+  --surface-primary: #0f2942;
+  --surface-secondary: #1a3a5c;
+  --surface-tertiary: #1e4470;
+  --surface-nav: #061420;
+  --surface-nav-active: rgba(37, 150, 190, 0.2);
+  --surface-nav-hover: rgba(37, 150, 190, 0.1);
+  --surface-overlay: rgba(0, 0, 0, 0.7);
+
+  /* ── Botones Generales ── */
+  --surface-btn: var(--color-brand);
+  --surface-btn-hover: var(--color-brand-hover);
+  --text-btn: #ffffff;
+
+  /* Bordes — más visibles sobre fondos oscuros */
+  --border-primary: rgba(37, 150, 190, 0.2);
+  --border-secondary: rgba(37, 150, 190, 0.15);
+  --border-subtle: rgba(255, 255, 255, 0.05);
+
+  /* Textos — jerarquía clara */
+  --text-primary: #f0f9ff;
+  --text-secondary: #93c5fd;
+  --text-tertiary: #64a8c8;
+  --text-muted: #4a7f9e;
+
+  /* Badge Institucional */
+  --badge-inst-bg: rgba(37, 150, 190, 0.15);
+  --badge-inst-border: rgba(37, 150, 190, 0.3);
 }

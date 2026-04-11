@@ -39,22 +39,22 @@ export default function BurndownChart({ sprintId }: { sprintId: string }) {
   if (data.length === 0) return <div className="h-64 flex justify-center items-center text-gray-400 text-sm">No hay datos suficientes para el gráfico</div>;
 
   return (
-    <div className="h-72 w-full bg-white p-5 rounded-xl border border-gray-100 shadow-sm animate-in fade-in">
+    <div className="h-72 w-full bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm animate-in fade-in">
       <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">Burndown Chart (Progreso)</h3>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
           <XAxis dataKey="dayLabel" fontSize={10} axisLine={false} tickLine={false} tickMargin={10} />
           <YAxis fontSize={10} axisLine={false} tickLine={false} tickCount={5} allowDecimals={false} />
-          <Tooltip 
+          <Tooltip
             contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
             labelStyle={{ fontWeight: 'bold', color: '#374151', marginBottom: '4px' }}
           />
           <Legend iconType="circle" wrapperStyle={{ fontSize: '11px', paddingTop: '15px' }} />
-          
+
           {/* Línea Ideal (La meta matemática) */}
           <Line name="Ritmo Ideal" type="linear" dataKey="ideal" stroke="#94a3b8" strokeDasharray="5 5" dot={false} strokeWidth={2} />
-          
+
           {/* Línea Real (El equipo real) */}
           <Line name="Tareas Restantes" type="stepAfter" dataKey="real" stroke="#3B82F6" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} connectNulls={false} />
         </LineChart>

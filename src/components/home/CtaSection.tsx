@@ -22,7 +22,7 @@ export default function CtaSection() {
         </div>
         <Link
           href={!mounted ? "/auth/login?tab=register" : (user ? "/misc/proyectos" : "/auth/login?tab=register")}
-          className="flex items-center px-6 py-3 text-sm font-semibold text-brand-dark bg-white rounded-lg hover:bg-gray-100 transition-colors whitespace-nowrap"
+          className="flex items-center px-6 py-3 text-sm font-semibold text-brand-dark bg-surface-primary rounded-lg hover:bg-surface-secondary transition-colors whitespace-nowrap"
         >
           {!mounted ? "Crear proyecto" : (user ? "Ir a mis proyectos" : "Crear proyecto")}
           <ArrowRight className="w-4 h-4 ml-2" />

@@ -88,7 +88,7 @@ export default function NotificacionesPage() {
 
     try {
       setProcessingId(notif.id);
-      
+
       try {
         await fetchGraphQL({
           query: RESPOND_TO_INVITATION,
@@ -118,10 +118,10 @@ export default function NotificacionesPage() {
   };
 
   return (
-    <div className="flex flex-col flex-1 h-full min-h-screen bg-gray-50/50">
-      <div className="bg-white border-b border-gray-200 px-6 py-6 sticky top-0 z-10">
+    <div className="flex flex-col flex-1 h-full min-h-screen bg-surface-page">
+      <div className="bg-surface-primary border-b border-border-primary px-6 py-6 sticky top-0 z-10">
         <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
             <Bell className="w-6 h-6 text-brand" />
             Notificaciones
           </h1>
@@ -137,17 +137,15 @@ export default function NotificacionesPage() {
         <div className="flex items-center gap-4 mt-6">
           <button
             onClick={() => setFilter('ALL')}
-            className={`text-sm font-medium pb-2 border-b-2 transition-colors ${
-              filter === 'ALL' ? 'border-brand text-brand' : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}
+            className={`text-sm font-medium pb-2 border-b-2 transition-colors ${filter === 'ALL' ? 'border-brand text-brand' : 'border-transparent text-text-muted hover:text-text-secondary'
+              }`}
           >
             Todas
           </button>
           <button
             onClick={() => setFilter('UNREAD')}
-            className={`text-sm font-medium pb-2 border-b-2 transition-colors ${
-              filter === 'UNREAD' ? 'border-brand text-brand' : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}
+            className={`text-sm font-medium pb-2 border-b-2 transition-colors ${filter === 'UNREAD' ? 'border-brand text-brand' : 'border-transparent text-text-muted hover:text-text-secondary'
+              }`}
           >
             No leídas
           </button>
@@ -158,7 +156,7 @@ export default function NotificacionesPage() {
         {isLoading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white border border-gray-100 rounded-xl p-4 animate-pulse flex items-start gap-4">
+              <div key={i} className="bg-surface-primary border border-border-primary rounded-xl p-4 animate-pulse flex items-start gap-4">
                 <div className="w-10 h-10 bg-gray-200 rounded-full shrink-0"></div>
                 <div className="flex-1 space-y-2 py-1">
                   <div className="h-4 bg-gray-200 rounded w-3/4"></div>
@@ -168,11 +166,11 @@ export default function NotificacionesPage() {
             ))}
           </div>
         ) : notifications.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-xl border border-gray-100">
-            <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Bell className="w-8 h-8 text-gray-300" />
+          <div className="text-center py-20 bg-surface-primary rounded-xl border border-border-primary">
+            <div className="w-16 h-16 bg-surface-secondary rounded-full flex items-center justify-center mx-auto mb-4">
+              <Bell className="w-8 h-8 text-text-secondary" />
             </div>
-            <p className="text-gray-500">No tienes notificaciones pendientes.</p>
+            <p className="text-text-muted">No tienes notificaciones pendientes.</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -185,29 +183,27 @@ export default function NotificacionesPage() {
                 <div
                   key={notif.id}
                   onClick={() => handleNotificationClick(notif)}
-                  className={`relative border rounded-xl p-5 flex items-start gap-4 transition-all duration-300 ${
-                    notif.isRead
-                      ? 'border-gray-100 bg-gray-50/60 opacity-80'
-                      : 'border-brand/30 shadow-md cursor-pointer hover:border-brand/50 hover:shadow-lg bg-white border-l-4 border-l-brand'
-                  }`}
+                  className={`relative border rounded-xl p-5 flex items-start gap-4 transition-all duration-300 ${notif.isRead
+                      ? 'border-border-primary bg-surface-secondary/60 dark:bg-surface-primary/60 opacity-80'
+                      : 'border-brand/30 shadow-md cursor-pointer hover:border-brand/50 hover:shadow-lg bg-surface-primary border-l-4 border-l-brand'
+                    }`}
                 >
                   {!notif.isRead && (
                     <span className="absolute top-5 right-5 w-2.5 h-2.5 rounded-full bg-brand ring-4 ring-brand/20 animate-pulse"></span>
                   )}
-                  
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
-                    notif.isRead
-                      ? 'bg-gray-200 text-gray-500'
+
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${notif.isRead
+                      ? 'bg-gray-200 text-text-muted'
                       : isInvitation ? 'bg-blue-100 text-blue-600' : 'bg-brand/10 text-brand'
-                  }`}>
+                    }`}>
                     <Icon className="w-5 h-5" />
                   </div>
 
                   <div className="flex-1 min-w-0 pr-6">
-                    <p className={`text-sm ${notif.isRead ? 'text-gray-500 font-normal' : 'text-gray-900 font-bold'}`}>
+                    <p className={`text-sm ${notif.isRead ? 'text-text-muted font-normal' : 'text-text-primary font-bold'}`}>
                       {notif.message}
                     </p>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-text-muted mt-1">
                       {formatTimeAgo(notif.createdAt)}
                     </p>
 
@@ -223,7 +219,7 @@ export default function NotificacionesPage() {
                         <button
                           onClick={(e) => handleRespondInvitation(notif, false, e)}
                           disabled={isProcessing}
-                          className="px-4 py-1.5 text-xs font-bold text-gray-600 bg-gray-200 hover:bg-gray-300 rounded-md transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                          className="px-4 py-1.5 text-xs font-bold text-text-secondary bg-gray-200 hover:bg-gray-300 rounded-md transition-colors disabled:opacity-50 flex items-center gap-1.5"
                         >
                           <X className="w-3.5 h-3.5" /> Rechazar
                         </button>

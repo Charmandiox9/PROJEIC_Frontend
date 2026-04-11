@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale/es';
 import Select from '@/components/ui/Select';
 import { fetchGraphQL } from '@/lib/graphQLClient';
-import { GET_BOARDS_BY_PROJECT } from '@/graphql/boards/operations'; 
+import { GET_BOARDS_BY_PROJECT } from '@/graphql/boards/operations';
 import { GET_TASKS_BY_PROJECT, REMOVE_TASK, UPDATE_TASK } from '@/graphql/tasks/operations';
 import CreateTaskModal from '../../CreateTaskModal';
 
@@ -25,7 +25,7 @@ interface KanbanBoardProps {
 }
 
 const priorityStyles: Record<string, string> = {
-  LOW: 'bg-gray-100 text-gray-600',
+  LOW: 'bg-surface-secondary text-text-secondary',
   MEDIUM: 'bg-blue-100 text-blue-700',
   HIGH: 'bg-orange-100 text-orange-700',
   URGENT: 'bg-red-100 text-red-700',
@@ -53,10 +53,10 @@ export default function KanbanBoard({ projectId, members, userRole, sprintId }: 
   const [searchTerm, setSearchTerm] = useState('');
   const [assigneeFilter, setAssigneeFilter] = useState('');
   const [tagFilter, setTagFilter] = useState('');
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [defaultBoardId, setDefaultBoardId] = useState<string | undefined>(undefined);
-  
+
   const [taskToEdit, setTaskToEdit] = useState<any | null>(null);
   const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
 
@@ -66,11 +66,11 @@ export default function KanbanBoard({ projectId, members, userRole, sprintId }: 
     setIsLoading(true);
     try {
       const boardsRes = await fetchGraphQL({ query: GET_BOARDS_BY_PROJECT, variables: { projectId } });
-      const tasksRes = await fetchGraphQL({ 
-        query: GET_TASKS_BY_PROJECT, 
-        variables: { projectId, sprintId } 
+      const tasksRes = await fetchGraphQL({
+        query: GET_TASKS_BY_PROJECT,
+        variables: { projectId, sprintId }
       });
-      
+
       if (boardsRes?.boardsByProject) setBoards(boardsRes.boardsByProject);
       if (tasksRes?.tasksByProject) setTasks(tasksRes.tasksByProject);
     } catch (error) {
@@ -96,45 +96,45 @@ export default function KanbanBoard({ projectId, members, userRole, sprintId }: 
   };
 
   const handleDrop = async (e: React.DragEvent, targetBoardId: string) => {
-  e.preventDefault();
-  const taskId = e.dataTransfer.getData('taskId');
-  if (!taskId) return;
+    e.preventDefault();
+    const taskId = e.dataTransfer.getData('taskId');
+    if (!taskId) return;
 
-  const task = tasks.find(t => t.id === taskId);
-  if (!task || task.boardId === targetBoardId) return;
+    const task = tasks.find(t => t.id === taskId);
+    if (!task || task.boardId === targetBoardId) return;
 
-  const originalBoardId = task.boardId;
-  const originalStatus = task.status;
+    const originalBoardId = task.boardId;
+    const originalStatus = task.status;
 
-  const targetBoard = boards.find(b => b.id === targetBoardId);
-  const newStatus = targetBoard ? getStatusFromBoardName(targetBoard.name) : task.status;
+    const targetBoard = boards.find(b => b.id === targetBoardId);
+    const newStatus = targetBoard ? getStatusFromBoardName(targetBoard.name) : task.status;
 
-  setTasks(prev => prev.map(t => 
-    t.id === taskId ? { ...t, boardId: targetBoardId, status: newStatus } : t
-  ));
-
-  try {
-    const response = await fetchGraphQL({
-      query: UPDATE_TASK,
-      variables: { input: { id: taskId, boardId: targetBoardId, status: newStatus } }
-    });
-
-    if (response?.errors && response.errors.length > 0) {
-      throw new Error(response.errors[0].message);
-    }
-
-  } catch (error: any) {
-    console.error("Error moviendo tarea:", error);
-    
-    alert(`No se pudo mover la tarea:\n${error.message || "Límite WIP excedido o error de red."}`);
-    
-    setTasks(prev => prev.map(t => 
-      t.id === taskId ? { ...t, boardId: originalBoardId, status: originalStatus } : t
+    setTasks(prev => prev.map(t =>
+      t.id === taskId ? { ...t, boardId: targetBoardId, status: newStatus } : t
     ));
-    
-    loadKanbanData(); 
-  }
-};
+
+    try {
+      const response = await fetchGraphQL({
+        query: UPDATE_TASK,
+        variables: { input: { id: taskId, boardId: targetBoardId, status: newStatus } }
+      });
+
+      if (response?.errors && response.errors.length > 0) {
+        throw new Error(response.errors[0].message);
+      }
+
+    } catch (error: any) {
+      console.error("Error moviendo tarea:", error);
+
+      alert(`No se pudo mover la tarea:\n${error.message || "Límite WIP excedido o error de red."}`);
+
+      setTasks(prev => prev.map(t =>
+        t.id === taskId ? { ...t, boardId: originalBoardId, status: originalStatus } : t
+      ));
+
+      loadKanbanData();
+    }
+  };
 
   const handleDeleteTask = async (taskId: string) => {
     if (!confirm('¿Estás seguro de eliminar esta tarea?')) return;
@@ -157,8 +157,8 @@ export default function KanbanBoard({ projectId, members, userRole, sprintId }: 
     const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesAssignee = assigneeFilter ? task.assigneeId === assigneeFilter : true;
 
-    const matchesTag = tagFilter 
-      ? task.tags?.some((tag: string) => tag.toLowerCase().includes(tagFilter.toLowerCase())) 
+    const matchesTag = tagFilter
+      ? task.tags?.some((tag: string) => tag.toLowerCase().includes(tagFilter.toLowerCase()))
       : true;
 
     return matchesSearch && matchesAssignee && matchesTag;
@@ -169,29 +169,29 @@ export default function KanbanBoard({ projectId, members, userRole, sprintId }: 
   return (
     <div className="space-y-6 animate-in fade-in">
       {/* ─── BARRA DE HERRAMIENTAS Y FILTROS ─── */}
-      <div className="flex flex-wrap items-end gap-3 bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
-        
+      <div className="flex flex-wrap items-end gap-3 bg-surface-primary p-4 rounded-xl border border-border-primary shadow-sm">
+
         {/* Buscador de texto */}
         <div className="relative flex-1 min-w-[180px] max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
           <input
             type="text"
             placeholder="Buscar tareas..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none transition-shadow"
+            className="w-full pl-9 pr-4 py-2 text-sm border border-border-secondary rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none transition-shadow bg-surface-primary text-text-primary placeholder:text-text-muted"
           />
         </div>
 
         {/* Buscador de Etiquetas */}
         <div className="relative w-36 sm:w-44">
-          <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
           <input
             type="text"
             placeholder="Filtrar por tag..."
             value={tagFilter}
             onChange={(e) => setTagFilter(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none transition-shadow"
+            className="w-full pl-9 pr-4 py-2 text-sm border border-border-secondary rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none transition-shadow bg-surface-primary text-text-primary placeholder:text-text-muted"
           />
         </div>
 
@@ -215,7 +215,7 @@ export default function KanbanBoard({ projectId, members, userRole, sprintId }: 
       {/* ─── TABLERO KANBAN ─── */}
       <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar items-start">
         {boards.length === 0 ? (
-          <div className="w-full text-center py-20 text-gray-500">No hay columnas configuradas.</div>
+          <div className="w-full text-center py-20 text-text-muted">No hay columnas configuradas.</div>
         ) : (
           boards.map((board) => {
             const boardTasks = filteredTasks.filter(t => t.boardId === board.id);
@@ -223,24 +223,24 @@ export default function KanbanBoard({ projectId, members, userRole, sprintId }: 
             const boardColor = board.color || '#3B82F6';
 
             return (
-              <div 
-                key={board.id} 
-                className={`flex flex-col rounded-xl border shrink-0 w-80 max-h-[75vh] transition-colors shadow-sm ${isOverWip ? 'bg-red-50/50 border-red-200' : 'bg-gray-50/80 border-gray-200'}`}
+              <div
+                key={board.id}
+                className={`flex flex-col rounded-xl border shrink-0 w-80 max-h-[75vh] transition-colors shadow-sm ${isOverWip ? 'bg-red-50/50 dark:bg-red-950/30 border-red-200 dark:border-red-800' : 'bg-surface-secondary border-border-secondary'}`}
                 onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, board.id)} 
+                onDrop={(e) => handleDrop(e, board.id)}
               >
                 {/* Cabecera de Columna */}
-                <div 
-                  className={`flex items-center justify-between px-4 py-3 border-b bg-white rounded-t-xl ${isOverWip ? 'border-red-200' : 'border-gray-200'}`}
+                <div
+                  className={`flex items-center justify-between px-4 py-3 border-b bg-surface-primary rounded-t-xl ${isOverWip ? 'border-red-200 dark:border-red-800' : 'border-border-primary'}`}
                   style={{ borderTop: `4px solid ${isOverWip ? '#ef4444' : boardColor}` }}
                 >
                   <div className="flex flex-col min-w-0 pr-2">
-                    <h3 className={`text-sm font-bold truncate ${isOverWip ? 'text-red-600' : 'text-gray-800'}`}>
+                    <h3 className={`text-sm font-bold truncate ${isOverWip ? 'text-red-600 dark:text-red-400' : 'text-text-primary'}`}>
                       {board.name}
                     </h3>
                     {isOverWip && <span className="text-[10px] font-bold text-red-500 uppercase tracking-tighter">Límite excedido</span>}
                   </div>
-                  <span className={`text-xs font-bold px-2 py-1 rounded-md shrink-0 ${isOverWip ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500'}`}>
+                  <span className={`text-xs font-bold px-2 py-1 rounded-md shrink-0 ${isOverWip ? 'bg-red-100 text-red-700' : 'bg-surface-secondary text-text-muted'}`}>
                     {boardTasks.length} {board.wipLimit ? `/ ${board.wipLimit}` : ''}
                   </span>
                 </div>
@@ -248,31 +248,30 @@ export default function KanbanBoard({ projectId, members, userRole, sprintId }: 
                 {/* Zona de Tarjetas */}
                 <div className="flex-1 p-3 overflow-y-auto custom-scrollbar space-y-3 min-h-[150px]">
                   {boardTasks.length === 0 ? (
-                    <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg pointer-events-none bg-white/50">
-                      <p className="text-xs text-gray-400 font-medium">Arrastra tareas aquí</p>
+                    <div className="text-center py-8 border-2 border-dashed border-border-secondary rounded-lg pointer-events-none bg-surface-primary/50">
+                      <p className="text-xs text-text-muted font-medium">Arrastra tareas aquí</p>
                     </div>
                   ) : (
                     boardTasks.map((task) => {
                       const assigneeMember = members.find(m => m.user.id === task.assigneeId);
                       const isDragging = draggingTaskId === task.id;
-                      
+
                       return (
-                        <div 
-                          key={task.id} 
+                        <div
+                          key={task.id}
                           draggable={canManageTasks}
                           onDragStart={(e) => handleDragStart(e, task.id)}
                           onDragEnd={handleDragEnd}
-                          className={`group bg-white p-4 rounded-lg border shadow-sm transition-all relative ${
-                            isDragging ? 'opacity-50 border-brand scale-95' : 'border-gray-200 hover:shadow-md hover:border-brand/40 cursor-grab active:cursor-grabbing'
-                          }`}
+                          className={`group bg-surface-primary p-4 rounded-lg border shadow-sm transition-all relative ${isDragging ? 'opacity-50 border-brand scale-95' : 'border-border-secondary hover:shadow-md hover:border-brand/40 cursor-grab active:cursor-grabbing'
+                            }`}
                         >
                           {/* Botones Flotantes */}
                           {canManageTasks && !isDragging && (
-                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex bg-white shadow-sm border border-gray-100 rounded-md overflow-hidden">
-                              <button onClick={() => openModal(undefined, task)} className="p-1.5 text-gray-400 hover:text-brand hover:bg-brand/5" title="Editar">
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex bg-surface-primary shadow-sm border border-border-secondary rounded-md overflow-hidden">
+                              <button onClick={() => openModal(undefined, task)} className="p-1.5 text-text-muted hover:text-brand hover:bg-brand/5" title="Editar">
                                 <Edit2 className="w-3.5 h-3.5" />
                               </button>
-                              <button onClick={() => handleDeleteTask(task.id)} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50" title="Eliminar">
+                              <button onClick={() => handleDeleteTask(task.id)} className="p-1.5 text-text-muted hover:text-red-500 hover:bg-red-50" title="Eliminar">
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             </div>
@@ -283,25 +282,25 @@ export default function KanbanBoard({ projectId, members, userRole, sprintId }: 
                             <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${priorityStyles[task.priority] || priorityStyles.MEDIUM}`}>
                               {priorityLabels[task.priority] || 'Media'}
                             </span>
-                            
+
                             {/* Renderizado de Etiquetas (Tags) */}
                             {task.tags && task.tags.map((tag: string) => (
-                              <span key={tag} className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 border border-gray-200">
+                              <span key={tag} className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-surface-secondary text-text-muted border border-border-primary">
                                 {tag}
                               </span>
                             ))}
                           </div>
 
-                          <h4 className="text-sm font-semibold text-gray-900 mb-3">{task.title}</h4>
+                          <h4 className="text-sm font-semibold text-text-primary mb-3">{task.title}</h4>
 
                           {/* Pie de tarjeta */}
-                          <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-100">
+                          <div className="flex items-center justify-between mt-auto pt-3 border-t border-border-primary">
                             {task.dueDate ? (
-                              <div className="flex items-center gap-1.5 text-xs font-medium text-gray-500">
+                              <div className="flex items-center gap-1.5 text-xs font-medium text-text-muted">
                                 <Calendar className="w-3.5 h-3.5" /> {format(new Date(task.dueDate), "d MMM", { locale: es })}
                               </div>
                             ) : <div />}
-                            
+
                             {assigneeMember ? (
                               <div className="w-6 h-6 rounded-full bg-brand/10 flex items-center justify-center border border-brand/20 shadow-sm">
                                 {assigneeMember.user.avatarUrl ? (
@@ -311,8 +310,8 @@ export default function KanbanBoard({ projectId, members, userRole, sprintId }: 
                                 )}
                               </div>
                             ) : (
-                              <div className="w-6 h-6 rounded-full border border-dashed border-gray-300 flex items-center justify-center bg-gray-50">
-                                <UserIcon className="w-3 h-3 text-gray-400" />
+                              <div className="w-6 h-6 rounded-full border border-dashed border-border-secondary flex items-center justify-center bg-surface-secondary">
+                                <UserIcon className="w-3 h-3 text-text-muted" />
                               </div>
                             )}
                           </div>
@@ -324,8 +323,8 @@ export default function KanbanBoard({ projectId, members, userRole, sprintId }: 
 
                 {/* Botón inferior */}
                 {canManageTasks && (
-                  <div className="p-2 pt-0 mt-auto bg-white/50 rounded-b-xl">
-                    <button onClick={() => openModal(board.id)} className="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-500 rounded-lg hover:bg-gray-200 hover:text-gray-700 transition-colors">
+                  <div className="p-2 pt-0 mt-auto bg-surface-primary/50 rounded-b-xl">
+                    <button onClick={() => openModal(board.id)} className="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-text-muted rounded-lg hover:bg-surface-tertiary hover:text-text-primary transition-colors">
                       <Plus className="w-3.5 h-3.5" /> Añadir tarjeta
                     </button>
                   </div>

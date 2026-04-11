@@ -54,11 +54,11 @@ export default function RecentProjectsSection() {
   }, []);
 
   return (
-    <section className="py-20 px-6 bg-white">
+    <section className="py-20 px-6 bg-white dark:bg-brand-dark">
       <div className="max-w-6xl mx-auto">
         <div className="mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Proyectos recientes de la EIC</h2>
-          <p className="text-gray-600">Iniciativas visibles de la comunidad</p>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Proyectos recientes de la EIC</h2>
+          <p className="text-gray-600 dark:text-gray-400">Iniciativas visibles de la comunidad</p>
         </div>
 
         {loading ? (
@@ -72,18 +72,17 @@ export default function RecentProjectsSection() {
         ) : (
           <div className="grid md:grid-cols-3 gap-6">
             {projects.map((project) => (
-              <div key={project.id} className="border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
+              <div key={project.id} className="border border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:shadow-md transition-shadow bg-white dark:bg-gray-800">
                 <div className="flex justify-between items-start mb-4">
-                  <h3 className="font-bold text-lg text-gray-900 line-clamp-2">{project.name}</h3>
-                  <span className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ml-3 ${
-                    project.status === 'ACTIVE' ? 'bg-green-100 text-green-700' :
-                    project.status === 'COMPLETED' ? 'bg-gray-100 text-gray-700' :
-                    'bg-brand-light text-brand'
-                  }`}>
+                  <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100 line-clamp-2">{project.name}</h3>
+                  <span className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ml-3 ${project.status === 'ACTIVE' ? 'bg-green-100 text-green-700' :
+                      project.status === 'COMPLETED' ? 'bg-gray-100 text-gray-700' :
+                        'bg-brand-light text-brand'
+                    }`}>
                     {project.status}
                   </span>
                 </div>
-                <p className="text-gray-600 text-sm mb-6 line-clamp-3">{project.description}</p>
+                <p className="text-gray-600 dark:text-gray-400 text-sm mb-6 line-clamp-3">{project.description}</p>
                 <div className="flex -space-x-2">
                   {project.members?.filter(m => m.status === 'ACTIVE').map((member) => (
                     <img

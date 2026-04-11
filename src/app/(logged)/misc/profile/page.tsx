@@ -68,17 +68,17 @@ export default function ProfileDashboard() {
         if (isSubscribed) {
           if (profileRes?.me) {
             setProfile(profileRes.me);
-            
+
             if (projectsRes?.myProjects?.items) {
               const items = projectsRes.myProjects.items;
               setProjects(items);
 
-                const leaderProjects = items.filter((p: Project) => {
-                  const activeMembers = p.members?.filter(m => m.status === 'ACTIVE') || [];
-                  const myMembership = activeMembers.find(m => m.user.id === user?.userId);
-                  const role = p.myRole || myMembership?.role;
-                  return role === 'LEADER';
-                });
+              const leaderProjects = items.filter((p: Project) => {
+                const activeMembers = p.members?.filter(m => m.status === 'ACTIVE') || [];
+                const myMembership = activeMembers.find(m => m.user.id === user?.userId);
+                const role = p.myRole || myMembership?.role;
+                return role === 'LEADER';
+              });
 
               const collaboratorIds = new Set<string>();
               leaderProjects.forEach((p: Project) => {
@@ -170,60 +170,60 @@ export default function ProfileDashboard() {
   };
 
   const getFeedMessage = (log: any) => {
-  const userName = log.user?.name.split(' ')[0] || 'Alguien';
-  
-  let metaData: any = {};
-  if (log.meta) {
-    try {
-      metaData = typeof log.meta === 'string' ? JSON.parse(log.meta) : log.meta;
-    } catch (e) {
-      console.error("Error leyendo los metadatos", e);
-    }
-  }
+    const userName = log.user?.name.split(' ')[0] || 'Alguien';
 
-  const itemName = metaData.title ? `"${metaData.title}"` : 'un elemento';
+    let metaData: any = {};
+    if (log.meta) {
+      try {
+        metaData = typeof log.meta === 'string' ? JSON.parse(log.meta) : log.meta;
+      } catch (e) {
+        console.error("Error leyendo los metadatos", e);
+      }
+    }
+
+    const itemName = metaData.title ? `"${metaData.title}"` : 'un elemento';
     switch (log.action) {
       case 'CREATED':
-        if (log.entity === 'TASK') return <span><span className="font-medium text-gray-900">{userName}</span> creó la tarea {itemName}</span>;
-        if (log.entity === 'PROJECT') return <span><span className="font-medium text-gray-900">{userName}</span> creó el proyecto {itemName}</span>;
-        if (log.entity === 'EXPECTED_RESULT') return <span><span className="font-medium text-gray-900">{userName}</span> creó el resultado {itemName}</span>;
-        return <span><span className="font-medium text-gray-900">{userName}</span> creó {itemName}</span>;
-      
+        if (log.entity === 'TASK') return <span><span className="font-medium text-text-primary">{userName}</span> creó la tarea {itemName}</span>;
+        if (log.entity === 'PROJECT') return <span><span className="font-medium text-text-primary">{userName}</span> creó el proyecto {itemName}</span>;
+        if (log.entity === 'EXPECTED_RESULT') return <span><span className="font-medium text-text-primary">{userName}</span> creó el resultado {itemName}</span>;
+        return <span><span className="font-medium text-text-primary">{userName}</span> creó {itemName}</span>;
+
       case 'UPDATED':
         if (metaData.newStatus) {
-          return <span><span className="font-medium text-gray-900">{userName}</span> actualizó el estado de {itemName} a <span className="font-medium">{metaData.newStatus}</span></span>;
+          return <span><span className="font-medium text-text-primary">{userName}</span> actualizó el estado de {itemName} a <span className="font-medium">{metaData.newStatus}</span></span>;
         }
-        return <span><span className="font-medium text-gray-900">{userName}</span> actualizó {itemName}</span>;
-      
+        return <span><span className="font-medium text-text-primary">{userName}</span> actualizó {itemName}</span>;
+
       case 'MOVED':
-        return <span><span className="font-medium text-gray-900">{userName}</span> movió la tarea {itemName}</span>;
-      
+        return <span><span className="font-medium text-text-primary">{userName}</span> movió la tarea {itemName}</span>;
+
       case 'COMMENTED':
-        return <span><span className="font-medium text-gray-900">{userName}</span> comentó en {itemName}</span>;
-      
+        return <span><span className="font-medium text-text-primary">{userName}</span> comentó en {itemName}</span>;
+
       case 'JOINED':
-        return <span><span className="font-medium text-gray-900">{userName}</span> se unió al proyecto</span>;
-      
+        return <span><span className="font-medium text-text-primary">{userName}</span> se unió al proyecto</span>;
+
       case 'ASSIGNED':
-        return <span><span className="font-medium text-gray-900">{userName}</span> reasignó la tarea {itemName}</span>;
-      
+        return <span><span className="font-medium text-text-primary">{userName}</span> reasignó la tarea {itemName}</span>;
+
       default:
-        return <span><span className="font-medium text-gray-900">{userName}</span> interactuó con {itemName}</span>;
+        return <span><span className="font-medium text-text-primary">{userName}</span> interactuó con {itemName}</span>;
     }
   };
 
   return (
-    <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-8">
+    <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-8 bg-surface-page">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+          <h1 className="text-2xl font-bold text-text-primary tracking-tight">
             Bienvenido, {mounted ? getFirstName(user?.name ?? profile?.name) : '...'}
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-text-muted mt-1">
             {mounted ? getFormattedDate() : 'Cargando...'}
           </p>
         </div>
-        <button 
+        <button
           onClick={() => setIsModalOpen(true)}
           className="flex items-center justify-center gap-2 bg-brand-dark hover:bg-brand-dark-hover text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors"
         >
@@ -232,25 +232,25 @@ export default function ProfileDashboard() {
         </button>
       </header>
 
-      <CreateProjectModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onSuccess={handleProjectCreated} 
+      <CreateProjectModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={handleProjectCreated}
       />
 
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Proyectos activos', value: metrics.activeProjects, icon: Briefcase, color: 'text-brand', bg: 'bg-brand-light' },
-          { label: 'Tareas pendientes', value: metrics.pendingTasks, icon: CheckSquare, color: 'text-orange-600', bg: 'bg-orange-50' },
-          { label: 'Actividad (7 días)', value: metrics.activityPoints, icon: Activity, color: 'text-green-600', bg: 'bg-green-50' },
-          { label: 'Colaboradores', value: metrics.collaborators, icon: Users, color: 'text-purple-600', bg: 'bg-purple-50' },
+          { label: 'Proyectos activos', value: metrics.activeProjects, icon: Briefcase, color: 'text-brand dark:text-brand-light', bg: 'bg-brand-light dark:bg-brand/20' },
+          { label: 'Tareas pendientes', value: metrics.pendingTasks, icon: CheckSquare, color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-500/20' },
+          { label: 'Actividad (7 días)', value: metrics.activityPoints, icon: Activity, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-500/20' },
+          { label: 'Colaboradores', value: metrics.collaborators, icon: Users, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50 dark:bg-purple-500/20' },
         ].map((stat, idx) => {
           const Icon = stat.icon;
           return (
-            <div key={idx} className="bg-white border text-left border-gray-100 p-5 rounded-xl shadow-sm flex items-center justify-between">
+            <div key={idx} className="bg-surface-primary border text-left border-border-primary p-5 rounded-xl shadow-sm flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500">{stat.label}</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{renderMetricValue(stat.value)}</p>
+                <p className="text-sm font-medium text-text-muted">{stat.label}</p>
+                <p className="text-2xl font-bold text-text-primary mt-1">{renderMetricValue(stat.value)}</p>
               </div>
               <div className={`p-3 rounded-lg ${stat.bg}`}>
                 <Icon className={`w-5 h-5 ${stat.color}`} />
@@ -262,25 +262,25 @@ export default function ProfileDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <section className="col-span-1 lg:col-span-2">
-          <div className="bg-white border border-gray-100 rounded-xl shadow-sm h-full flex flex-col">
-            <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
-              <h2 className="text-base font-semibold text-gray-900">Mis proyectos</h2>
+          <div className="bg-surface-primary border border-border-primary rounded-xl shadow-sm h-full flex flex-col">
+            <div className="px-6 py-5 border-b border-border-primary flex items-center justify-between">
+              <h2 className="text-base font-semibold text-text-primary">Mis proyectos</h2>
             </div>
             <div className="p-6 flex-1 flex flex-col">
               {isLoading ? (
                 <div className="flex-1 flex items-center justify-center text-gray-400">
                   <div className="animate-pulse w-full max-w-sm space-y-4">
-                    <div className="h-20 bg-gray-100 rounded-xl w-full"></div>
-                    <div className="h-20 bg-gray-100 rounded-xl w-full"></div>
+                    <div className="h-20 bg-surface-secondary rounded-xl w-full"></div>
+                    <div className="h-20 bg-surface-secondary rounded-xl w-full"></div>
                   </div>
                 </div>
               ) : projects.length === 0 ? (
                 <div className="flex-1 flex flex-col items-center justify-center text-center py-12">
-                  <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-3">
+                  <div className="w-12 h-12 bg-surface-secondary rounded-full flex items-center justify-center mb-3">
                     <FolderKanban className="w-6 h-6 text-gray-400" />
                   </div>
-                  <p className="text-sm font-medium text-gray-900">No tienes proyectos aún.</p>
-                  <p className="text-sm text-gray-500 mt-1 max-w-sm">Crea un proyecto para empezar a colaborar con otros estudiantes y profesores.</p>
+                  <p className="text-sm font-medium text-text-primary">No tienes proyectos aún.</p>
+                  <p className="text-sm text-text-muted mt-1 max-w-sm">Crea un proyecto para empezar a colaborar con otros estudiantes y profesores.</p>
                 </div>
               ) : (
                 <div className="grid sm:grid-cols-2 gap-4">
@@ -288,25 +288,25 @@ export default function ProfileDashboard() {
                     <Link
                       key={proj.id}
                       href={`/misc/proyectos/${proj.id}`}
-                      className="block group bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-lg transition-all duration-300 relative overflow-hidden"
+                      className="block group bg-surface-primary rounded-2xl border border-border-primary p-5 hover:shadow-lg transition-all duration-300 relative overflow-hidden"
                     >
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-2">
-                          <div 
+                          <div
                             className="w-3 h-3 rounded-full flex-shrink-0"
-                              style={{ backgroundColor: proj.color ?? 'var(--color-brand)' }}
+                            style={{ backgroundColor: proj.color ?? 'var(--color-brand)' }}
                           ></div>
-                          <h3 className="font-semibold text-gray-900 leading-tight group-hover:text-brand transition-colors line-clamp-1 text-sm">
+                          <h3 className="font-semibold text-text-primary leading-tight group-hover:text-brand transition-colors line-clamp-1 text-sm">
                             {proj.name}
                           </h3>
                         </div>
                       </div>
-                      <p className="text-xs text-gray-500 line-clamp-2 mt-auto flex-1 mb-4">
+                      <p className="text-xs text-text-muted line-clamp-2 mt-auto flex-1 mb-4">
                         {proj.description || 'Sin descripción...'}
                       </p>
-                      
-                      <div className="flex items-center justify-between pt-3 border-t border-gray-50 mt-auto">
-                        <span className="text-[10px] font-medium px-2 py-1 bg-gray-100 text-gray-600 rounded-full uppercase tracking-wider">
+
+                      <div className="flex items-center justify-between pt-3 border-t border-border-primary mt-auto">
+                        <span className="text-[10px] font-medium px-2 py-1 bg-surface-secondary text-text-secondary rounded-full uppercase tracking-wider">
                           {proj.status}
                         </span>
                         <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-brand transition-colors" />
@@ -319,37 +319,37 @@ export default function ProfileDashboard() {
           </div>
         </section>
 
-        <section className="col-span-1 border border-gray-100 rounded-xl shadow-sm bg-white h-full flex flex-col">
-          <div className="px-6 py-5 border-b border-gray-100">
-            <h2 className="text-base font-semibold text-gray-900">Feed de actividad reciente</h2>
+        <section className="col-span-1 border border-border-primary rounded-xl shadow-sm bg-surface-primary h-full flex flex-col">
+          <div className="px-6 py-5 border-b border-border-primary">
+            <h2 className="text-base font-semibold text-text-primary">Feed de actividad reciente</h2>
           </div>
           <div className="p-0 flex-1 flex flex-col overflow-hidden">
             {isLoading ? (
               <div className="p-6 space-y-4">
                 {[1, 2, 3].map(i => (
                   <div key={i} className="flex gap-3 animate-pulse">
-                    <div className="w-8 h-8 bg-gray-100 rounded-full shrink-0"></div>
+                    <div className="w-8 h-8 bg-surface-secondary rounded-full shrink-0"></div>
                     <div className="space-y-2 flex-1">
-                      <div className="h-3 bg-gray-100 rounded w-3/4"></div>
-                      <div className="h-2 bg-gray-100 rounded w-1/4"></div>
+                      <div className="h-3 bg-surface-secondary rounded w-3/4"></div>
+                      <div className="h-2 bg-surface-secondary rounded w-1/4"></div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : recentFeed.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center text-center py-12 px-6">
-                <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-3">
+                <div className="w-12 h-12 bg-surface-secondary rounded-full flex items-center justify-center mb-3">
                   <Activity className="w-6 h-6 text-gray-400" />
                 </div>
-                <p className="text-sm text-gray-500">Aún no hay actividad reciente en tus proyectos.</p>
+                <p className="text-sm text-text-muted">Aún no hay actividad reciente en tus proyectos.</p>
               </div>
             ) : (
               <div className="overflow-y-auto custom-scrollbar p-6 space-y-6 max-h-[500px]">
                 {recentFeed.map((log) => (
                   <div key={log.id} className="flex gap-3 relative group">
                     {/* Línea conectora (opcional para estilo timeline) */}
-                    <div className="absolute left-4 top-8 bottom-[-24px] w-px bg-gray-100 group-last:hidden"></div>
-                    
+                    <div className="absolute left-4 top-8 bottom-[-24px] w-px bg-surface-secondary group-last:hidden"></div>
+
                     <div className="w-8 h-8 rounded-full bg-brand/10 border border-brand/20 flex items-center justify-center shrink-0 z-10 overflow-hidden">
                       {log.user?.avatarUrl ? (
                         <img src={log.user.avatarUrl} alt="" className="w-full h-full object-cover" />
@@ -357,9 +357,9 @@ export default function ProfileDashboard() {
                         <span className="text-[10px] font-bold text-brand">{log.user?.name?.charAt(0) || 'U'}</span>
                       )}
                     </div>
-                    
+
                     <div className="flex-1 min-w-0 pt-1">
-                      <p className="text-sm text-gray-600 leading-snug">
+                      <p className="text-sm text-text-secondary leading-snug">
                         {getFeedMessage(log)}
                       </p>
                       <div className="flex items-center gap-2 mt-1">

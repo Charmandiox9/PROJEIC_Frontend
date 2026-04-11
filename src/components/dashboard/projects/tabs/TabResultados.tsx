@@ -52,20 +52,20 @@ export default function TabResultados({ project, isLeader }: TabResultadosProps)
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      
+
       {/* HEADER DE LA PESTAÑA */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
         <div>
-          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
             <Target className="w-5 h-5 text-brand" />
             Panel de Resultados Esperados
           </h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             Gestiona el progreso mediante hitos y carga de evidencias obligatorias.
           </p>
         </div>
         {isLeader && (
-          <button 
+          <button
             onClick={() => setIsCreateModalOpen(true)}
             className="flex items-center gap-2 bg-brand text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-brand-hover transition-colors shrink-0"
           >
@@ -78,10 +78,10 @@ export default function TabResultados({ project, isLeader }: TabResultadosProps)
       {isLoading ? (
         <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-brand animate-spin" /></div>
       ) : results.length === 0 ? (
-        <div className="text-center py-20 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+        <div className="text-center py-20 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-dashed border-gray-200 dark:border-gray-600">
           <Target className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500 font-medium">No hay resultados esperados definidos.</p>
-          <p className="text-sm text-gray-400 mt-1">Comienza creando el primer objetivo de valor.</p>
+          <p className="text-gray-500 dark:text-gray-400 font-medium">No hay resultados esperados definidos.</p>
+          <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Comienza creando el primer objetivo de valor.</p>
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
@@ -90,44 +90,44 @@ export default function TabResultados({ project, isLeader }: TabResultadosProps)
             const progressColor = result.progress === 100 ? 'bg-green-500' : 'bg-brand';
 
             return (
-              <div 
-                key={result.id} 
+              <div
+                key={result.id}
                 onClick={() => setSelectedResultDetails(result)} // 🔥 1. Abre el modal de detalles
-                className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md hover:border-brand/40 transition-all flex flex-col h-full cursor-pointer" // 🔥 2. Añadido cursor-pointer y un borde en hover
+                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:shadow-md hover:border-brand/40 transition-all flex flex-col h-full cursor-pointer"
               >
                 <div className="flex justify-between items-start gap-4 mb-3">
-                  <h3 className="font-bold text-gray-900 line-clamp-2 leading-tight">{result.title}</h3>
+                  <h3 className="font-bold text-gray-900 dark:text-gray-100 line-clamp-2 leading-tight">{result.title}</h3>
                   <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap shrink-0 ${STATUS_MAP[result.status]?.color || 'bg-gray-100'}`}>
                     {STATUS_MAP[result.status]?.label || result.status}
                   </span>
                 </div>
-                
-                <p className="text-sm text-gray-500 line-clamp-2 mb-6 flex-1">
+
+                <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-6 flex-1">
                   {result.description || 'Sin criterios de aceptación definidos.'}
                 </p>
 
                 {/* Motor de Progreso (Barra) */}
                 <div className="mb-5">
                   <div className="flex justify-between text-xs font-semibold mb-1.5">
-                    <span className="text-gray-600">Progreso Validado</span>
+                    <span className="text-gray-600 dark:text-gray-400">Progreso Validado</span>
                     <span className={result.progress === 100 ? 'text-green-600' : 'text-brand'}>{result.progress}%</span>
                   </div>
-                  <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="w-full h-2.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                     <div className={`h-full transition-all duration-500 rounded-full ${progressColor}`} style={{ width: `${result.progress}%` }}></div>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t border-gray-50 mt-auto">
+                <div className="flex items-center justify-between pt-4 border-t border-gray-50 dark:border-gray-700 mt-auto">
                   {/* Responsable */}
                   <div className="flex items-center gap-2">
-                    <img 
+                    <img
                       src={result.owner.avatarUrl || `${AVATAR_FALLBACK_URL}${result.owner.userId}`}
-                      alt={result.owner.name} 
+                      alt={result.owner.name}
                       className="w-8 h-8 rounded-full border border-gray-200"
                     />
                     <div>
-                      <p className="text-xs font-medium text-gray-900 leading-none">{result.owner.name}</p>
-                      <p className="text-[10px] text-gray-500 mt-0.5 uppercase tracking-wide">Responsable</p>
+                      <p className="text-xs font-medium text-gray-900 dark:text-gray-100 leading-none">{result.owner.name}</p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 uppercase tracking-wide">Responsable</p>
                     </div>
                   </div>
 
@@ -142,14 +142,14 @@ export default function TabResultados({ project, isLeader }: TabResultadosProps)
                         <AlertTriangle className="w-3.5 h-3.5" /> Sin Evidencia
                       </div>
                     )}
-                    
+
                     {/* Botón para abrir modal de avance */}
-                    <button 
+                    <button
                       onClick={(e) => {
                         e.stopPropagation();
                         setSelectedResultToUpdate(result);
                       }}
-                      className="p-1.5 bg-gray-50 hover:bg-gray-200 text-gray-600 rounded-md border border-gray-200 transition-colors" 
+                      className="p-1.5 bg-gray-50 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-md border border-gray-200 dark:border-gray-600 transition-colors"
                       title="Actualizar estado y subir evidencia"
                     >
                       <FileCheck className="w-4 h-4" />
@@ -162,8 +162,8 @@ export default function TabResultados({ project, isLeader }: TabResultadosProps)
         </div>
       )}
 
-      <CreateResultModal 
-        isOpen={isCreateModalOpen} 
+      <CreateResultModal
+        isOpen={isCreateModalOpen}
         projectId={project.id}
         members={project.members}
         onClose={() => setIsCreateModalOpen(false)}

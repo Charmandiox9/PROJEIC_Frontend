@@ -5,13 +5,13 @@ import { Home, ArrowLeft } from 'lucide-react';
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-6 text-center">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-surface-page px-6 text-center">
       <div className="space-y-6 max-w-lg">
         <h1 className="text-8xl font-extrabold text-brand-dark tracking-tight">404</h1>
-        <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+        <h2 className="text-2xl md:text-3xl font-bold text-text-primary">
           Página no encontrada
         </h2>
-        <p className="text-gray-600">
+        <p className="text-text-secondary">
           Lo sentimos, la página que buscas no existe o ha sido movida.
           Comprueba si hay algún error en la dirección ingresada.
         </p>

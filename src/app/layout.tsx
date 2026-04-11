@@ -18,7 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className="antialiased bg-white text-zinc-900 min-h-screen flex flex-col">
+      <body className="antialiased bg-surface-primary text-zinc-900 min-h-screen flex flex-col">
         <AuthProvider>
           <ClientLayout>
             {children}

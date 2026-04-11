@@ -92,30 +92,30 @@ export default function ProyectosPage() {
       (project.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
       (project.subject?.name.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
       (project.subject?.professors?.some(p => p.name.toLowerCase().includes(searchTerm.toLowerCase())) ?? false);
-      
+
     const matchesStatus = statusFilter === 'Todos' || project.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <section className="bg-white text-ui-dark py-12 px-6 border-b border-gray-100">
+    <div className="min-h-screen flex flex-col bg-surface-primary">
+      <section className="bg-surface-primary text-text-primary py-12 px-6 border-b border-border-primary">
         <div className="max-w-6xl mx-auto text-center">
           <h1 className="text-3xl md:text-4xl font-extrabold mb-3">Proyectos de la EIC</h1>
-            <p className="text-gray-500 font-medium">Iniciativas académicas abiertas a la comunidad universitaria.</p>
+          <p className="text-text-muted font-medium">Iniciativas académicas abiertas a la comunidad universitaria.</p>
         </div>
       </section>
 
-      <div className="bg-white border-b border-gray-200 px-6 py-4 sticky top-0 z-10">
+      <div className="bg-surface-primary border-b border-border-primary px-6 py-4 sticky top-0 z-10">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-4 justify-between items-center">
           <div className="relative w-full md:max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
             <input
               type="text"
               placeholder="Buscar proyectos, ramos o profesores..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-brand focus:border-brand outline-none transition-colors"
+              className="w-full pl-10 pr-4 py-2 border border-border-secondary rounded-lg text-sm text-text-primary focus:ring-2 focus:ring-brand focus:border-brand outline-none transition-colors bg-surface-primary placeholder:text-text-muted"
             />
           </div>
           <div className="flex gap-2 text-sm w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
@@ -123,11 +123,10 @@ export default function ProyectosPage() {
               <button
                 key={status}
                 onClick={() => setStatusFilter(status)}
-                className={`whitespace-nowrap px-4 py-2 rounded-full font-medium transition-colors ${
-                  statusFilter === status
-                    ? 'bg-brand-dark text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
+                className={`whitespace-nowrap px-4 py-2 rounded-full font-medium transition-colors ${statusFilter === status
+                  ? 'bg-brand-dark text-white'
+                  : 'bg-surface-secondary text-text-secondary hover:bg-surface-tertiary'
+                  }`}
               >
                 {status === 'Todos' ? 'Todos' : getStatusLabel(status)}
               </button>
@@ -142,12 +141,12 @@ export default function ProyectosPage() {
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-brand-dark"></div>
           </div>
         ) : error ? (
-          <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
-            <p className="text-gray-500">Ocurrió un error al cargar los proyectos. Inténtalo más tarde.</p>
+          <div className="text-center py-20 bg-surface-primary rounded-xl border border-border-primary">
+            <p className="text-text-muted">Ocurrió un error al cargar los proyectos. Inténtalo más tarde.</p>
           </div>
         ) : filteredProjects.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
-            <p className="text-gray-500">No hay proyectos públicos disponibles.</p>
+          <div className="text-center py-20 bg-surface-primary rounded-xl border border-border-primary">
+            <p className="text-text-muted">No hay proyectos públicos disponibles.</p>
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -158,35 +157,34 @@ export default function ProyectosPage() {
                 <button
                   onClick={() => setSelectedProjectId(project.id)}
                   key={project.id}
-                  className="flex flex-col text-left w-full min-h-[200px] bg-white border border-gray-200 rounded-xl p-6 hover:shadow-xl hover:border-brand/40 hover:-translate-y-1 transition-all duration-300 ring-offset-2 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent min-w-0 relative"
+                  className="flex flex-col text-left w-full min-h-[200px] bg-surface-primary border border-border-primary rounded-xl p-6 hover:shadow-xl hover:border-brand/40 hover:-translate-y-1 transition-all duration-300 ring-offset-2 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent min-w-0 relative"
                 >
                   <div className="flex justify-between items-start mb-4 gap-3 w-full">
-                    <h3 className="font-bold text-lg text-gray-900 line-clamp-2 decoration-brand group-hover:underline break-words w-full">
+                    <h3 className="font-bold text-lg text-text-primary line-clamp-2 decoration-brand group-hover:underline break-words w-full">
                       {project.name}
                     </h3>
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap shrink-0 ${
-                      project.status === 'ACTIVE' ? 'bg-green-100 text-green-700' :
-                      project.status === 'COMPLETED' ? 'bg-gray-100 text-gray-700' :
-                      'bg-brand-light text-brand'
-                    }`}>
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap shrink-0 ${project.status === 'ACTIVE' ? 'bg-green-100 text-green-700' :
+                      project.status === 'COMPLETED' ? 'bg-surface-secondary text-text-secondary' :
+                        'bg-brand-light text-brand'
+                      }`}>
                       {getStatusLabel(project.status)}
                     </span>
                   </div>
 
                   {project.isInstitutional && project.subject && (
-                    <div className="flex flex-col gap-1.5 mb-4 bg-gray-50/80 p-2.5 rounded-lg border border-gray-100 w-fit pr-4">
+                    <div className="flex flex-col gap-1.5 mb-4 bg-surface-secondary p-2.5 rounded-lg border border-border-secondary w-fit pr-4">
                       <div className="flex items-center gap-1.5">
                         <BookOpen className="w-3.5 h-3.5 text-brand shrink-0" />
                         <p className="text-xs font-semibold text-brand truncate">
-                          {project.subject.name} <span className="font-normal text-gray-400 ml-1">• {project.subject.period}</span>
+                          {project.subject.name} <span className="font-normal text-text-muted ml-1">• {project.subject.period}</span>
                         </p>
                       </div>
 
                       {project.subject.professors && project.subject.professors.length > 0 && (
                         <div className="flex items-start gap-1.5 pl-0.5">
-                          <GraduationCap className="w-3.5 h-3.5 text-gray-400 shrink-0 mt-0.5" />
-                          <p className="text-[11px] text-gray-600 line-clamp-1">
-                            <span className="font-medium text-gray-500 mr-1">Prof:</span>
+                          <GraduationCap className="w-3.5 h-3.5 text-text-muted shrink-0 mt-0.5" />
+                          <p className="text-[11px] text-text-secondary line-clamp-1">
+                            <span className="font-medium text-text-muted mr-1">Prof:</span>
                             {project.subject.professors.map(p => p.name).join(', ')}
                           </p>
                         </div>
@@ -194,7 +192,7 @@ export default function ProyectosPage() {
                     </div>
                   )}
 
-                  <p className="text-gray-600 text-sm mb-6 line-clamp-3">{project.description || 'Sin descripción detallada.'}</p>
+                  <p className="text-text-secondary text-sm mb-6 line-clamp-3">{project.description || 'Sin descripción detallada.'}</p>
 
                   <div className="flex items-center -space-x-2 relative z-0 mt-auto">
                     {activeMembers.slice(0, 4).map((member) => (
@@ -207,7 +205,7 @@ export default function ProyectosPage() {
                       />
                     ))}
                     {activeMembers.length > 4 && (
-                      <div className="w-8 h-8 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600 shrink-0 z-10">
+                      <div className="w-8 h-8 rounded-full border-2 border-white bg-surface-secondary flex items-center justify-center text-xs font-bold text-text-secondary shrink-0 z-10">
                         +{activeMembers.length - 4}
                       </div>
                     )}
@@ -219,7 +217,7 @@ export default function ProyectosPage() {
         )}
       </main>
 
-      <PublicProjectModal 
+      <PublicProjectModal
         isOpen={!!selectedProjectId}
         projectId={selectedProjectId}
         onClose={() => setSelectedProjectId(null)}
