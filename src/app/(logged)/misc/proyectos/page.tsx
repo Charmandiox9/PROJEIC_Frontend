@@ -56,11 +56,11 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  ACTIVE: 'bg-green-100 text-green-700',
-  STARTING: 'bg-blue-100 text-blue-700',
+  ACTIVE: 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300',
+  STARTING: 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300',
   COMPLETED: 'bg-surface-secondary text-text-secondary',
-  ON_HOLD: 'bg-yellow-100 text-yellow-700',
-  CANCELLED: 'bg-red-100 text-red-700',
+  ON_HOLD: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300',
+  CANCELLED: 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300',
 };
 
 const ROLE_LABELS: Record<string, string> = {
@@ -71,9 +71,9 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 const ROLE_COLORS: Record<string, string> = {
-  LEADER: 'bg-purple-100 text-purple-700',
-  STUDENT: 'bg-blue-100 text-blue-700',
-  SUPERVISOR: 'bg-orange-100 text-orange-700',
+  LEADER: 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300',
+  STUDENT: 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300',
+  SUPERVISOR: 'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300',
   EXTERNAL: 'bg-surface-secondary text-text-secondary',
 };
 
@@ -137,19 +137,19 @@ function ProjectCard({ project, currentUserId }: { project: Project; currentUser
   return (
     <Link
       href={`/misc/proyectos/${project.id}`}
-      className="group bg-surface-primary rounded-xl border border-border-primary overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col relative"
+      className="group w-[85vw] shrink-0 snap-center md:w-auto md:shrink md:snap-align-none bg-surface-primary rounded-xl border border-border-primary overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col relative"
     >
       <div className="h-1.5 w-full shrink-0" style={{ backgroundColor: project.color }} />
       <div className="p-5 flex flex-col flex-1">
         <div className="flex flex-col mb-4 gap-3 pr-2">
-          <div className="flex justify-between items-start gap-3 w-full">
+          <div className="flex flex-col sm:flex-row sm:justify-between items-start gap-3 w-full">
             <div className="flex flex-col gap-2 w-full">
               <h3 className="font-bold text-lg text-text-primary line-clamp-2 break-words leading-tight">
                 {project.name}
               </h3>
 
               {project.isInstitutional && project.subject && (
-                <div className="flex flex-col gap-1.5 mt-1 bg-surface-secondary p-2.5 rounded-lg border border-border-secondary w-fit pr-4">
+                <div className="flex flex-col gap-1.5 mt-1 bg-surface-secondary p-2.5 rounded-lg border border-border-secondary w-full min-w-0">
                   <div className="flex items-center gap-1.5">
                     <BookOpen className="w-3.5 h-3.5 text-brand shrink-0" />
                     <p className="text-xs font-semibold text-brand truncate">
@@ -170,7 +170,7 @@ function ProjectCard({ project, currentUserId }: { project: Project; currentUser
               )}
             </div>
 
-            <div className="flex flex-col items-end gap-2 shrink-0">
+            <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2 shrink-0 mt-1 sm:mt-0">
               <span className={`px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md whitespace-nowrap ${STATUS_COLORS[project.status] ?? 'bg-surface-secondary text-text-secondary'}`}>
                 {STATUS_LABELS[project.status] ?? project.status}
               </span>
@@ -416,7 +416,7 @@ export default function MisProyectosPage() {
           </p>
         </div>
       ) : (
-        <div className={`grid gap-4 ${viewMode === 'grid' ? 'sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
+        <div className={`flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 nice-scrollbar md:grid md:overflow-visible md:pb-0 ${viewMode === 'grid' ? 'md:grid-cols-2 lg:grid-cols-3' : 'md:grid-cols-1'}`}>
           {filteredProjects.map((project) => (
             <ProjectCard key={project.id} project={project} currentUserId={user?.userId} />
           ))}

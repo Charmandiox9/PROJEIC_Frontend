@@ -149,7 +149,7 @@ export default function ProyectosPage() {
             <p className="text-text-muted">No hay proyectos públicos disponibles.</p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 md:flex-none md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 md:overflow-visible nice-scrollbar">
             {filteredProjects.map((project) => {
               const activeMembers = project.members?.filter(m => m.status === 'ACTIVE') ?? [];
 
@@ -157,22 +157,22 @@ export default function ProyectosPage() {
                 <button
                   onClick={() => setSelectedProjectId(project.id)}
                   key={project.id}
-                  className="flex flex-col text-left w-full min-h-[200px] bg-surface-primary border border-border-primary rounded-xl p-6 hover:shadow-xl hover:border-brand/40 hover:-translate-y-1 transition-all duration-300 ring-offset-2 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent min-w-0 relative"
+                  className="flex flex-col text-left w-[85vw] shrink-0 snap-center md:w-auto md:shrink md:snap-align-none min-h-[200px] bg-surface-primary border border-border-primary rounded-xl p-6 hover:shadow-xl hover:border-brand/40 hover:-translate-y-1 transition-all duration-300 ring-offset-2 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent min-w-0 relative"
                 >
-                  <div className="flex justify-between items-start mb-4 gap-3 w-full">
+                  <div className="flex flex-col sm:flex-row sm:justify-between items-start mb-4 gap-3 w-full">
                     <h3 className="font-bold text-lg text-text-primary line-clamp-2 decoration-brand group-hover:underline break-words w-full">
                       {project.name}
                     </h3>
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap shrink-0 ${project.status === 'ACTIVE' ? 'bg-green-100 text-green-700' :
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap shrink-0 ${project.status === 'ACTIVE' ? 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300' :
                       project.status === 'COMPLETED' ? 'bg-surface-secondary text-text-secondary' :
-                        'bg-brand-light text-brand'
+                        'bg-brand-light text-brand dark:bg-brand/20 dark:text-brand-light'
                       }`}>
                       {getStatusLabel(project.status)}
                     </span>
                   </div>
 
                   {project.isInstitutional && project.subject && (
-                    <div className="flex flex-col gap-1.5 mb-4 bg-surface-secondary p-2.5 rounded-lg border border-border-secondary w-fit pr-4">
+                    <div className="flex flex-col gap-1.5 mb-4 bg-surface-secondary p-2.5 rounded-lg border border-border-secondary w-full min-w-0">
                       <div className="flex items-center gap-1.5">
                         <BookOpen className="w-3.5 h-3.5 text-brand shrink-0" />
                         <p className="text-xs font-semibold text-brand truncate">

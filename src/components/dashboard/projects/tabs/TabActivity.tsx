@@ -34,8 +34,8 @@ const getActionText = (action: string, entity: string, meta: any) => {
       TASK: `updated task ${entityName}`,
       PROJECT: `modified project_config`,
       MEMBER: `modified role for ${entityName}`,
-      EXPECTED_RESULT: meta?.addedEvidence 
-        ? `uploaded evidence to ${entityName}` 
+      EXPECTED_RESULT: meta?.addedEvidence
+        ? `uploaded evidence to ${entityName}`
         : `updated result ${entityName}`,
     },
     DELETED: {
@@ -63,7 +63,7 @@ const getActionText = (action: string, entity: string, meta: any) => {
 };
 
 const getTerminalPrefix = (action: string) => {
-  switch(action) {
+  switch (action) {
     case 'CREATED': return <span className="text-green-500">[+]</span>;
     case 'DELETED': return <span className="text-red-500">[-]</span>;
     case 'LEFT': return <span className="text-red-500">[{'<'}]</span>;
@@ -116,8 +116,8 @@ const renderActionDetails = (action: string, entity: string, meta: any) => {
                 <span className="text-text-secondary">↳</span> {fieldName}: <span className="line-through text-text-secondary">{formatValue(changeData.from)}</span> <span className="text-yellow-500">→</span> <span className="text-yellow-200">{formatValue(changeData.to)}</span>
               </div>
             );
-          } 
-          
+          }
+
           return (
             <div key={key} className="text-text-muted">
               <span className="text-text-secondary">↳</span> set {fieldName} = <span className="text-yellow-200">{formatValue(changeData)}</span>
@@ -172,41 +172,41 @@ export default function ActivityFeed({ project }: { project: Project }) {
   }
 
   return (
-    <div className="max-w-full mx-auto py-8 px-4 w-full">
+    <div className="max-w-full mx-auto py-4 sm:py-8 w-full min-w-0">
       {/* VENTANA DE TERMINAL */}
-<div className="bg-brand-dark rounded-lg border border-gray-800 shadow-2xl overflow-hidden font-mono text-sm">
+      <div className="bg-brand-dark rounded-lg border border-gray-800 shadow-2xl overflow-hidden font-mono text-sm w-full">
 
         {/* HEADER FALSO TIPO MACOS/LINUX */}
         <div className="bg-ui-dark-hover px-4 py-2 border-b border-gray-800 flex items-center gap-2 select-none">
           <div className="w-3 h-3 rounded-full bg-error"></div>
           <div className="w-3 h-3 rounded-full bg-warning"></div>
           <div className="w-3 h-3 rounded-full bg-success"></div>
-          <span className="ml-4 text-xs text-text-muted">root@projeic:~/project/{project.name.slice(0,8)}</span>
+          <span className="ml-4 text-xs text-text-muted">root@projeic:~/project/{project.name.slice(0, 8)}</span>
         </div>
 
         {/* CUERPO DEL LOG */}
-        <div className="p-4 sm:p-6 overflow-x-auto">
-          <ul className="flex flex-col gap-3 min-w-max">
+        <div className="p-3 sm:p-6 overflow-x-auto nice-scrollbar">
+          <ul className="flex flex-col gap-2 sm:gap-3 w-full">
             {logs.map((log) => {
               let parsedMeta = null;
-              try { if (log.meta) parsedMeta = JSON.parse(log.meta); } catch (e) {}
+              try { if (log.meta) parsedMeta = JSON.parse(log.meta); } catch (e) { }
 
               const prefix = getTerminalPrefix(log.action);
               const actionText = getActionText(log.action, log.entity, parsedMeta);
               const detailsNode = renderActionDetails(log.action, log.entity, parsedMeta);
-              
+
               const timestamp = format(new Date(log.createdAt), 'yyyy-MM-dd HH:mm:ss');
-              
               const username = log.user.name.split(' ')[0].toLowerCase();
 
               return (
                 <li key={log.id} className="group hover:bg-surface-primary/[0.02] p-1 -mx-1 rounded transition-colors">
-                  <div className="flex items-start gap-4">
-                    <span className="text-text-secondary shrink-0 select-none">[{timestamp}]</span>
+                  {/* Mobile: stack timestamp above action. Desktop: inline */}
+                  <div className="flex flex-col sm:flex-row sm:items-start gap-0.5 sm:gap-4">
+                    <span className="text-[10px] sm:text-xs text-text-muted sm:text-text-secondary shrink-0 select-none tabular-nums">[{timestamp}]</span>
                     <div className="flex flex-col">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                         <span className="select-none">{prefix}</span>
-                        <span className="text-text-secondary">
+                        <span className="text-text-secondary text-xs sm:text-sm">
                           <span className="text-blue-400 font-bold">{username}</span>{' '}
                           {actionText}
                         </span>
@@ -217,13 +217,13 @@ export default function ActivityFeed({ project }: { project: Project }) {
                 </li>
               );
             })}
-            
+
             {/* Línea final interactiva falsa */}
-            <li className="mt-4 flex gap-4 text-text-muted">
-              <span className="shrink-0 select-none">[{format(new Date(), 'yyyy-MM-dd HH:mm:ss')}]</span>
+            <li className="mt-3 sm:mt-4 flex flex-col sm:flex-row sm:gap-4 text-text-muted gap-0.5">
+              <span className="shrink-0 select-none text-[10px] sm:text-xs tabular-nums">[{format(new Date(), 'yyyy-MM-dd HH:mm:ss')}]</span>
               <div className="flex gap-2 items-center">
-                <span className="text-green-500 font-bold">root@projeic:~$</span>
-                <span className="w-2 h-4 bg-gray-400 animate-pulse"></span>
+                <span className="text-green-500 font-bold text-xs sm:text-sm">root@projeic:~$</span>
+                <span className="w-2 h-3 sm:h-4 bg-gray-400 animate-pulse"></span>
               </div>
             </li>
           </ul>

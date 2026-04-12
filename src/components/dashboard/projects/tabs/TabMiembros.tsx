@@ -4,6 +4,7 @@ import { ROLE_OPTIONS, UCN_DOMAINS } from '@/constants/project-constants';
 import { Trash2, Loader2, User, UserPlus, AlertCircle, Check } from 'lucide-react';
 import Select from '@/components/ui/Select';
 import MemberAvatar from '../../project-detail/MemberAvatar';
+import RoleBadge from '../../project-detail/RoleBadge';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { ADD_PROJECT_MEMBER } from '@/graphql/misc/operations';
 
@@ -18,6 +19,14 @@ interface TabMiembrosProps {
 function isValidUcnEmail(email: string): boolean {
   return UCN_DOMAINS.some((d) => email.toLowerCase().endsWith(d));
 }
+
+const ROLE_BADGE: Record<string, string> = {
+  LEADER: 'text-purple-700 bg-purple-100 border border-purple-300 dark:text-purple-300 dark:bg-purple-900/40 dark:border-purple-700',
+  STUDENT: 'text-blue-700   bg-blue-100   border border-blue-300   dark:text-blue-300   dark:bg-blue-900/40   dark:border-blue-700',
+  SUPERVISOR: 'text-orange-700 bg-orange-100 border border-orange-300 dark:text-orange-300 dark:bg-orange-900/40 dark:border-orange-700',
+  EXTERNAL: 'text-gray-600   bg-gray-100   border border-gray-300   dark:text-gray-400   dark:bg-gray-700/40   dark:border-gray-600',
+};
+const roleClass = (role: string) => ROLE_BADGE[role] ?? ROLE_BADGE.EXTERNAL;
 
 export default function TabMiembros({
   project,
@@ -112,20 +121,32 @@ export default function TabMiembros({
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <Select
-                    value={m.role}
-                    onChange={(e) => onUpdateRole(m.id, e.target.value)}
-                    disabled={!isLeader}
-                    className="text-[11px] font-bold text-brand bg-brand/5 border-brand/20 w-auto"
-                  >
-                    {ROLE_OPTIONS.map((r) => (
-                      <option key={r.value} value={r.value}>{r.label}</option>
-                    ))}
-                  </Select>
+                  {isLeader ? (
+                    <label className="relative cursor-pointer" title="Cambiar rol">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md whitespace-nowrap ${roleClass(m.role)}`}>
+                        {ROLE_OPTIONS.find(r => r.value === m.role)?.label ?? m.role}
+                      </span>
+                      <select
+                        value={m.role}
+                        onChange={(e) => onUpdateRole(m.id, e.target.value)}
+                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                      >
+                        {ROLE_OPTIONS.map((r) => (
+                          <option key={r.value} value={r.value} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+                            {r.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  ) : (
+                    <span className={`inline-flex items-center px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md whitespace-nowrap ${roleClass(m.role)}`}>
+                      {ROLE_OPTIONS.find(r => r.value === m.role)?.label ?? m.role}
+                    </span>
+                  )}
                   {isLeader && (
                     <button
                       onClick={() => onRemoveMember(m.id)}
-                      className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                      className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-md transition-colors"
                       title="Expulsar"
                     >
                       <Trash2 className="w-3.5 h-3.5" />

@@ -15,15 +15,15 @@ export default function HeroSection() {
   }, []);
 
   return (
-    <section className="bg-white dark:bg-brand-dark text-ui-dark dark:text-gray-100 border-b border-gray-100 dark:border-gray-700 min-h-[calc(100vh-64px)] flex flex-col justify-center py-10">
-      <div className="max-w-4xl mx-auto text-center px-6">
+    <section className="bg-surface-primary py-12 md:py-24 flex flex-col justify-center">
+      <div className="max-w-4xl mx-auto text-center px-4 sm:px-6">
         <div className="inline-block px-4 py-1 mb-4 text-xs font-semibold tracking-wider text-ui-dark dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-full border border-gray-200 dark:border-gray-600">
           Plataforma de proyectos para la EIC
         </div>
-        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 leading-tight">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-4 leading-tight text-text-primary">
           Gestión de proyectos académicos, en un solo lugar
         </h1>
-        <p className="text-base md:text-lg text-gray-500 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
+        <p className="text-sm sm:text-base md:text-lg text-text-muted mb-8 max-w-2xl mx-auto">
           PROJEIC centraliza el seguimiento, la trazabilidad y la visibilidad de los proyectos de la Escuela de Ingeniería Coquimbo.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -42,7 +42,7 @@ export default function HeroSection() {
           </Link>
         </div>
       </div>
-      <div className="mt-auto px-6">
+      <div className="mt-12 md:mt-16 px-4 sm:px-6">
         <StatsSection />
       </div>
     </section>

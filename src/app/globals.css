@@ -159,6 +159,91 @@ body {
   color: var(--color-gray-100);
 }
 
+/* ── Scrollbar suave reutilizable ── */
+.nice-scrollbar::-webkit-scrollbar {
+  height: 4px;
+  width: 4px;
+}
+
+.nice-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.nice-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-border-secondary);
+  border-radius: 9999px;
+}
+
+.nice-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* ── Kanban board scrollbar ── */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-border-secondary);
+  border-radius: 9999px;
+}
+
+/* ── Role badge colors (light + dark) ── */
+/* Light mode */
+.role-leader {
+  color: #7e22ce;
+  background: #f3e8ff;
+  border: 1px solid #e9d5ff;
+}
+
+.role-student {
+  color: #1d4ed8;
+  background: #dbeafe;
+  border: 1px solid #bfdbfe;
+}
+
+.role-supervisor {
+  color: #c2410c;
+  background: #ffedd5;
+  border: 1px solid #fed7aa;
+}
+
+.role-external {
+  color: #374151;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+}
+
+/* Dark mode — using same selector pattern as @custom-variant dark (&:where(.dark, .dark *)) */
+:where(.dark, .dark *) .role-leader {
+  color: #d8b4fe;
+  background: rgba(126, 34, 206, 0.18);
+  border-color: rgba(167, 85, 247, 0.4);
+}
+
+:where(.dark, .dark *) .role-student {
+  color: #93c5fd;
+  background: rgba(29, 78, 216, 0.18);
+  border-color: rgba(96, 165, 250, 0.4);
+}
+
+:where(.dark, .dark *) .role-supervisor {
+  color: #fdba74;
+  background: rgba(194, 65, 12, 0.18);
+  border-color: rgba(251, 146, 60, 0.4);
+}
+
+:where(.dark, .dark *) .role-external {
+  color: #9ca3af;
+  background: rgba(75, 85, 99, 0.25);
+  border-color: rgba(107, 114, 128, 0.4);
+}
+
 /* Tokens semánticos para variables de modo oscuro */
 
 :root {

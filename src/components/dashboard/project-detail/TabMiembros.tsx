@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { User, Loader2, Trash2, Check, UserPlus, AlertCircle } from 'lucide-react';
 import { ProjectMember, ROLE_OPTIONS, UCN_DOMAINS, isValidUcnEmail } from './types';
 import MemberAvatar from './MemberAvatar';
+import RoleBadge from './RoleBadge';
 import Select from '@/components/ui/Select';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { ADD_PROJECT_MEMBER } from '@/graphql/misc/operations';
@@ -111,20 +112,28 @@ export default function TabMiembros({
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <Select
-                    value={m.role}
-                    onChange={(e) => onUpdateRole(m.id, e.target.value)}
-                    disabled={!isLeader}
-                    className="text-[11px] font-bold text-brand bg-brand/5 border-brand/20 w-auto"
-                  >
-                    {ROLE_OPTIONS.map((r) => (
-                      <option key={r.value} value={r.value}>{r.label}</option>
-                    ))}
-                  </Select>
+                  {isLeader ? (
+                    <label className="relative cursor-pointer" title="Cambiar rol">
+                      <RoleBadge role={m.role} label={ROLE_OPTIONS.find(r => r.value === m.role)?.label ?? m.role} />
+                      <select
+                        value={m.role}
+                        onChange={(e) => onUpdateRole(m.id, e.target.value)}
+                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                      >
+                        {ROLE_OPTIONS.map((r) => (
+                          <option key={r.value} value={r.value} className="bg-surface-primary text-text-primary">
+                            {r.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  ) : (
+                    <RoleBadge role={m.role} label={ROLE_OPTIONS.find(r => r.value === m.role)?.label ?? m.role} />
+                  )}
                   {isLeader && (
                     <button
                       onClick={() => onRemoveMember(m.id)}
-                      className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                      className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-md transition-colors"
                       title="Expulsar"
                     >
                       <Trash2 className="w-3.5 h-3.5" />

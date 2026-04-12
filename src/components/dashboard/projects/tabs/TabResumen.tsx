@@ -2,7 +2,7 @@ import { Project } from '@/types/project';
 import { STATUS_LABELS, STATUS_COLORS, ROLE_OPTIONS } from '@/constants/project-constants';
 import { Edit3, Trash2, Loader2, Calendar, Layout, Globe, Lock, BookOpen, User, UserPlus } from 'lucide-react';
 import MemberAvatar from '../../project-detail/MemberAvatar';
-import Select from '@/components/ui/Select';
+import RoleBadge from '../../project-detail/RoleBadge';
 
 interface TabResumenProps {
   project: Project;
@@ -158,27 +158,37 @@ export default function TabResumen({
                           <Loader2 className="w-3 h-3 animate-spin" /> Pendiente
                         </span>
                       )}
-                      <Select
-                        value={member.role}
-                        onChange={(e) => onUpdateRole(member.id, e.target.value)}
-                        disabled={!isLeader}
-                        className="mt-0.5 text-[11px] font-bold text-brand bg-brand/5 border-brand/20 w-auto"
-                      >
-                        {ROLE_OPTIONS.map((r) => (
-                          <option key={r.value} value={r.value}>{r.label}</option>
-                        ))}
-                      </Select>
                     </div>
                   </div>
-                  {isLeader && (
-                    <button
-                      onClick={() => onRemoveMember(member.id)}
-                      className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors shrink-0"
-                      title="Eliminar"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  )}
+                  <div className="flex items-center gap-2 shrink-0">
+                    {isLeader ? (
+                      <label className="relative cursor-pointer" title="Cambiar rol">
+                        <RoleBadge role={member.role} label={ROLE_OPTIONS.find(r => r.value === member.role)?.label ?? member.role} />
+                        <select
+                          value={member.role}
+                          onChange={(e) => onUpdateRole(member.id, e.target.value)}
+                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                        >
+                          {ROLE_OPTIONS.map((r) => (
+                            <option key={r.value} value={r.value} className="bg-surface-primary text-text-primary">
+                              {r.label}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    ) : (
+                      <RoleBadge role={member.role} label={ROLE_OPTIONS.find(r => r.value === member.role)?.label ?? member.role} />
+                    )}
+                    {isLeader && (
+                      <button
+                        onClick={() => onRemoveMember(member.id)}
+                        className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors shrink-0"
+                        title="Eliminar"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>

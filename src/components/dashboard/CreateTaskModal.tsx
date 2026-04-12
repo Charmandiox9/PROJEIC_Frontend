@@ -101,7 +101,12 @@ export default function CreateTaskModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     const selectedBoard = boards.find(b => b.id === formData.boardId);
-    const calculatedStatus = selectedBoard ? getStatusFromBoardName(selectedBoard.name) : 'TODO';
+    let calculatedStatus = selectedBoard ? getStatusFromBoardName(selectedBoard.name) : 'TODO';
+
+    if (formData.boardId && formData.boardId.startsWith('fake-')) {
+      const statusMap: any = { 'fake-backlog': 'BACKLOG', 'fake-todo': 'TODO', 'fake-inprogress': 'IN_PROGRESS', 'fake-done': 'DONE' };
+      calculatedStatus = statusMap[formData.boardId] || calculatedStatus;
+    }
 
     e.preventDefault();
     setIsSubmitting(true);
@@ -119,7 +124,7 @@ export default function CreateTaskModal({
           id: taskToEdit.id,
           title: formData.title,
           description: formData.description || undefined,
-          boardId: formData.boardId || undefined,
+          boardId: (formData.boardId && formData.boardId.startsWith('fake-')) ? null : (formData.boardId || undefined),
           status: calculatedStatus,
           assigneeId: formData.assigneeId || undefined,
           priority: formData.priority,
@@ -132,12 +137,16 @@ export default function CreateTaskModal({
           projectId: projectId,
           creatorId: user?.userId || 'unknown',
           description: formData.description || undefined,
-          boardId: formData.boardId || undefined,
+          boardId: (formData.boardId && formData.boardId.startsWith('fake-')) ? undefined : (formData.boardId || undefined),
           assigneeId: formData.assigneeId || undefined,
           priority: formData.priority,
           dueDate: finalDueDate,
         };
-        await fetchGraphQL({ query: CREATE_TASK, variables: { input } });
+        const createdResponse = await fetchGraphQL({ query: CREATE_TASK, variables: { input } });
+
+        if (calculatedStatus && calculatedStatus !== 'BACKLOG' && createdResponse?.createTask?.id) {
+          await fetchGraphQL({ query: UPDATE_TASK, variables: { input: { id: createdResponse.createTask.id, status: calculatedStatus } } });
+        }
       }
       onClose();
     } catch (err: any) {
@@ -165,8 +174,6 @@ export default function CreateTaskModal({
       tags: prev.tags?.filter(t => t !== tagToRemove)
     }));
   };
-
-
 
   const isEditing = !!taskToEdit;
 
@@ -205,7 +212,7 @@ export default function CreateTaskModal({
                 <option key={m.id} value={m.user.id}>{m.user.name}</option>
               ))}
             </Select>
-            <Input id="task-due-date" label="Fecha" name="dueDate" type="date" value={formData.dueDate} onChange={handleChange} />
+            <Input id="task-due-date" label="Fecha de Término" name="dueDate" type="date" value={formData.dueDate} onChange={handleChange} title="Agrega una fecha límite o de término" />
           </div>
 
           <div className="space-y-2">

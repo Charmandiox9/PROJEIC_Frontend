@@ -62,36 +62,36 @@ export default function ScrumBoard({ projectId, members, userRole }: any) {
     <div className="space-y-6">
 
       {/* SUB-MENÚ ESTILO JIRA */}
-      <div className="flex items-center gap-1 bg-gray-50/50 dark:bg-gray-800/50 p-1 rounded-xl border border-gray-100 dark:border-gray-700 w-fit">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-1 bg-gray-50/50 dark:bg-gray-800/50 p-1 rounded-xl border border-gray-100 dark:border-gray-700 w-full sm:w-fit">
         <button
           onClick={() => setCurrentView('board')}
-          className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ${currentView === 'board'
-              ? 'bg-white dark:bg-gray-700 text-brand shadow-sm border border-gray-200/50 dark:border-gray-600'
-              : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+          className={`flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ${currentView === 'board'
+            ? 'bg-white dark:bg-gray-700 text-brand shadow-sm border border-gray-200/50 dark:border-gray-600'
+            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
             }`}
         >
-          <Layout className="w-4 h-4" />
-          {activeSprint ? 'Sprint Activo' : 'Planificación (Backlog)'}
+          <Layout className="w-4 h-4 shrink-0" />
+          <span className="truncate">{activeSprint ? 'Sprint Activo' : 'Planificación'}</span>
         </button>
         <button
           onClick={() => setCurrentView('timeline')}
-          className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ${currentView === 'timeline'
-              ? 'bg-white dark:bg-gray-700 text-brand shadow-sm border border-gray-200/50 dark:border-gray-600'
-              : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+          className={`flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ${currentView === 'timeline'
+            ? 'bg-white dark:bg-gray-700 text-brand shadow-sm border border-gray-200/50 dark:border-gray-600'
+            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
             }`}
         >
-          <History className="w-4 h-4" />
-          Cronograma / Historial
+          <History className="w-4 h-4 shrink-0" />
+          <span className="truncate">Cronograma / Historial</span>
         </button>
         <button
           onClick={() => setCurrentView('burndown')}
-          className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ${currentView === 'burndown'
-              ? 'bg-white dark:bg-gray-700 text-brand shadow-sm border border-gray-200/50 dark:border-gray-600'
-              : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+          className={`flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ${currentView === 'burndown'
+            ? 'bg-white dark:bg-gray-700 text-brand shadow-sm border border-gray-200/50 dark:border-gray-600'
+            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
             }`}
         >
-          <LineChart className="w-4 h-4" />
-          Burndown
+          <LineChart className="w-4 h-4 shrink-0" />
+          <span className="truncate">Burndown</span>
         </button>
       </div>
 
@@ -114,8 +114,8 @@ export default function ScrumBoard({ projectId, members, userRole }: any) {
         )
       ) : activeSprint ? (
         <div className="space-y-4 animate-in fade-in">
-          <div className="bg-brand/5 border border-brand/20 p-4 rounded-xl flex justify-between items-center shadow-sm">
-            <div>
+          <div className="bg-brand/5 border border-brand/20 p-4 rounded-xl flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-sm w-full relative">
+            <div className="flex-1 min-w-0 pr-4">
               <h2 className="font-bold text-brand flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                 {activeSprint.name}
@@ -124,7 +124,7 @@ export default function ScrumBoard({ projectId, members, userRole }: any) {
             </div>
             <button
               onClick={handleCompleteSprint}
-              className="text-xs font-bold text-red-600 bg-white dark:bg-gray-800 border border-red-200 dark:border-red-700 px-4 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950 hover:border-red-300 transition-all shadow-sm"
+              className="text-xs font-bold text-red-600 bg-white dark:bg-gray-800 border border-red-200 dark:border-red-700 px-4 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950 hover:border-red-300 transition-all shadow-sm shrink-0 sm:w-auto w-full"
             >
               Finalizar Sprint
             </button>

@@ -14,15 +14,15 @@ export default function CtaSection() {
   }, []);
 
   return (
-    <section className="bg-brand-dark py-16 px-6">
-      <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+    <section className="bg-surface-nav py-12 sm:py-16 px-4 sm:px-6">
+      <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8 text-center md:text-left">
         <div className="text-white">
-          <h2 className="text-2xl md:text-3xl font-bold mb-2">¿Tienes un proyecto en la EIC?</h2>
-          <p className="text-blue-200">Crea tu espacio en menos de 2 minutos, sin instalaciones.</p>
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2">¿Tienes un proyecto en la EIC?</h2>
+          <p className="text-blue-200 text-sm sm:text-base">Crea tu espacio en menos de 2 minutos, sin instalaciones.</p>
         </div>
         <Link
           href={!mounted ? "/auth/login?tab=register" : (user ? "/misc/proyectos" : "/auth/login?tab=register")}
-          className="flex items-center px-6 py-3 text-sm font-semibold text-brand-dark bg-surface-primary rounded-lg hover:bg-surface-secondary transition-colors whitespace-nowrap"
+          className="w-full sm:w-auto flex justify-center items-center px-6 py-3 text-sm font-semibold text-text-btn bg-surface-btn rounded-lg hover:bg-surface-btn-hover transition-colors whitespace-nowrap"
         >
           {!mounted ? "Crear proyecto" : (user ? "Ir a mis proyectos" : "Crear proyecto")}
           <ArrowRight className="w-4 h-4 ml-2" />

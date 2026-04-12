@@ -150,7 +150,7 @@ export default function ProyectosPublicosLogeadoPage() {
             <p className="text-gray-500">No se encontraron proyectos públicos.</p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 md:flex-none md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 md:overflow-visible nice-scrollbar">
             {filteredProjects.map((project) => {
               const activeMembers = project.members?.filter(m => m.status === 'ACTIVE') ?? [];
               const isMember = project.members?.some((m) => m.user.userId === user?.userId && m.status === 'ACTIVE') ?? false;
@@ -158,7 +158,7 @@ export default function ProyectosPublicosLogeadoPage() {
               return (
                 <div
                   key={project.id}
-                  className="bg-surface-primary border border-border-primary rounded-xl p-6 hover:shadow-xl hover:border-brand/40 transition-all duration-300 flex flex-col min-h-0 relative"
+                  className="bg-surface-primary border border-border-primary rounded-xl p-6 hover:shadow-xl hover:border-brand/40 transition-all duration-300 flex flex-col min-h-0 relative w-[85vw] shrink-0 snap-center md:w-auto md:shrink md:snap-align-none"
                 >
                   {/* Etiqueta de Miembro en esquina superior derecha */}
                   {isMember && (
@@ -170,12 +170,12 @@ export default function ProyectosPublicosLogeadoPage() {
                   )}
 
                   <div className="flex flex-col mb-4 gap-3 pr-2">
-                    <div className="flex justify-between items-start gap-3 w-full">
+                    <div className="flex flex-col sm:flex-row sm:justify-between items-start gap-3 w-full">
                       <div className="flex flex-col gap-2 w-full">
                         <h3 className="font-bold text-lg text-text-primary line-clamp-2 break-words leading-tight">{project.name}</h3>
 
                         {project.isInstitutional && project.subject && (
-                          <div className="flex flex-col gap-1.5 mt-1 bg-surface-secondary p-2.5 rounded-lg border border-border-secondary">
+                          <div className="flex flex-col gap-1.5 mt-1 bg-surface-secondary p-2.5 rounded-lg border border-border-secondary w-full min-w-0">
                             <div className="flex items-center gap-1.5">
                               <BookOpen className="w-3.5 h-3.5 text-brand shrink-0" />
                               <p className="text-xs font-semibold text-brand truncate">
@@ -196,9 +196,9 @@ export default function ProyectosPublicosLogeadoPage() {
                         )}
                       </div>
 
-                      <span className={`px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md whitespace-nowrap shrink-0 ${project.status === 'ACTIVE' ? 'bg-green-50 text-green-700' :
-                        project.status === 'COMPLETED' ? 'bg-gray-100 text-gray-700' :
-                          'bg-brand/10 text-brand'
+                      <span className={`px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md whitespace-nowrap shrink-0 ${project.status === 'ACTIVE' ? 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300' :
+                        project.status === 'COMPLETED' ? 'bg-surface-secondary text-text-secondary' :
+                          'bg-brand/10 text-brand dark:bg-brand/20 dark:text-brand-light'
                         }`}>
                         {getStatusLabel(project.status)}
                       </span>
