@@ -14,7 +14,7 @@ export default function AuthPage() {
     if (!baseUrl) {
       const isProduction = window.location.hostname.includes('railway.app');
       baseUrl = isProduction 
-        ? 'https://projeicbackend-production.up.railway.app' 
+        ? 'https://projeicbackend-development.up.railway.app' 
         : 'http://localhost:4000'; // Ajusta a tu puerto local si es otro
     }
 
