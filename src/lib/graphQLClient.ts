@@ -28,11 +28,15 @@ export async function fetchGraphQL({
     const getBackendUrl = () => {
       if (typeof window === "undefined") return "";
 
-      if (
-        window.location.hostname.includes(
-          "projeicfrontend-production.up.railway.app",
-        )
-      ) {
+      if (process.env.NEXT_PUBLIC_BACKEND_URL) {
+        return process.env.NEXT_PUBLIC_BACKEND_URL;
+      }
+
+      if (window.location.hostname.includes("development.up.railway.app")) {
+        return "https://projeicbackend-development.up.railway.app";
+      }
+
+      if (window.location.hostname.includes("production.up.railway.app")) {
         return "https://projeicbackend-production.up.railway.app";
       }
 
