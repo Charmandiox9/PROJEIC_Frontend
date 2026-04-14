@@ -14,7 +14,7 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="w-64 bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 hidden md:flex flex-col h-[calc(100vh-73px)] sticky top-[73px]">
+    <aside className="w-64 bg-surface-primary dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 hidden md:flex flex-col h-[calc(100vh-73px)] sticky top-[73px]">
       <div className="flex-1 py-6 px-4 space-y-2 overflow-y-auto">
         <p className="px-4 text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-4">
           Menú Principal

@@ -23,7 +23,9 @@ interface ProjectFormData {
   methodology: string;
   isPublic: boolean;
   subjectId: string;
-  mode: string; // 🔥 Nuevo campo
+  mode: string;
+  isInstitutional: boolean;
+  professorId: string;
 }
 
 interface PendingMember {
@@ -54,7 +56,9 @@ const INITIAL_FORM: ProjectFormData = {
   methodology: 'KANBAN',
   isPublic: false,
   subjectId: '',
-  mode: 'CLASSIC', // 🔥 Por defecto clásico
+  mode: 'CLASSIC',
+  isInstitutional: false,
+  professorId: '',
 };
 
 export default function CreateProjectModal({ isOpen, onClose, onSuccess }: CreateProjectModalProps) {
@@ -155,8 +159,10 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
             status: formData.status,
             methodology: formData.methodology,
             isPublic: formData.isPublic,
+            mode: formData.mode,
+            isInstitutional: formData.isInstitutional,
             subjectId: formData.subjectId || undefined,
-            mode: formData.mode, // 🔥 Enviamos el modo al backend
+            professorId: formData.isInstitutional ? formData.professorId : undefined,
           },
         },
       });
@@ -202,13 +208,13 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
-        
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white shrink-0">
-          <h2 className="text-xl font-bold text-gray-900">Crear nuevo proyecto</h2>
+      <div className="bg-surface-primary rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
+
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-primary bg-surface-primary shrink-0">
+          <h2 className="text-xl font-bold text-text-primary">Crear nuevo proyecto</h2>
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-2 text-gray-400 hover:text-text-primary hover:bg-surface-tertiary rounded-full transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -225,24 +231,23 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
 
             {/* 🔥 NUEVO: Selector de Modalidad */}
             <div className="space-y-3">
-              <label className="text-sm font-semibold text-gray-900 block">
+              <label className="text-sm font-semibold text-text-primary block">
                 Modalidad de Gestión <span className="text-brand">*</span>
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button
                   type="button"
                   onClick={() => handleModeChange('CLASSIC')}
-                  className={`relative p-4 rounded-xl text-left border-2 transition-all duration-200 flex flex-col gap-1 ${
-                    formData.mode === 'CLASSIC' 
-                      ? 'border-brand bg-brand/5 shadow-sm' 
-                      : 'border-gray-100 hover:border-gray-200 bg-white'
-                  }`}
+                  className={`relative p-4 rounded-xl text-left border-2 transition-all duration-200 flex flex-col gap-1 ${formData.mode === 'CLASSIC'
+                    ? 'border-brand bg-brand/5 shadow-sm'
+                    : 'border-border-primary hover:border-border-secondary bg-surface-primary'
+                    }`}
                 >
                   <div className="flex justify-between items-center w-full">
-                    <span className={`font-bold text-sm ${formData.mode === 'CLASSIC' ? 'text-brand' : 'text-gray-700'}`}>Modo Clásico</span>
+                    <span className={`font-bold text-sm ${formData.mode === 'CLASSIC' ? 'text-brand' : 'text-text-secondary'}`}>Modo Clasico</span>
                     {formData.mode === 'CLASSIC' && <CheckCircle2 className="w-4 h-4 text-brand" />}
                   </div>
-                  <span className="text-xs text-gray-500 leading-relaxed">
+                  <span className="text-xs text-text-muted leading-relaxed">
                     Basado en progreso de Tareas y metodologías ágiles (Scrum, Kanban).
                   </span>
                 </button>
@@ -250,24 +255,23 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
                 <button
                   type="button"
                   onClick={() => handleModeChange('HYBRID')}
-                  className={`relative p-4 rounded-xl text-left border-2 transition-all duration-200 flex flex-col gap-1 ${
-                    formData.mode === 'HYBRID' 
-                      ? 'border-brand bg-brand/5 shadow-sm' 
-                      : 'border-gray-100 hover:border-gray-200 bg-white'
-                  }`}
+                  className={`relative p-4 rounded-xl text-left border-2 transition-all duration-200 flex flex-col gap-1 ${formData.mode === 'HYBRID'
+                    ? 'border-brand bg-brand/5 shadow-sm'
+                    : 'border-border-primary hover:border-border-secondary bg-surface-primary'
+                    }`}
                 >
                   <div className="flex justify-between items-center w-full">
-                    <span className={`font-bold text-sm ${formData.mode === 'HYBRID' ? 'text-brand' : 'text-gray-700'}`}>Projeic Native (EIC)</span>
+                    <span className={`font-bold text-sm ${formData.mode === 'HYBRID' ? 'text-brand' : 'text-text-secondary'}`}>Projeic Native (EIC)</span>
                     {formData.mode === 'HYBRID' && <CheckCircle2 className="w-4 h-4 text-brand" />}
                   </div>
-                  <span className="text-xs text-gray-500 leading-relaxed">
+                  <span className="text-xs text-text-muted leading-relaxed">
                     Orientado a Resultados Esperados y validación por carga de Evidencias.
                   </span>
                 </button>
               </div>
             </div>
 
-            <div className="h-px w-full bg-gray-100"></div>
+            <div className="h-px w-full bg-border-primary"></div>
 
             <Input
               id="name"
@@ -293,21 +297,67 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
               placeholder="Un breve resumen de la meta del proyecto..."
             />
 
-            <Select
-              id="subjectId"
-              label="Asignatura (Opcional)"
-              name="subjectId"
-              value={formData.subjectId}
-              onChange={handleChange}
-              disabled={isLoadingSubjects}
-            >
-              <option value="">Sin asignatura</option>
-              {subjects.map((subject) => (
-                <option key={subject.id} value={subject.id}>
-                  {subject.name} {subject.code ? `(${subject.code})` : ''}
-                </option>
-              ))}
-            </Select>
+            <label className="flex items-center gap-2 cursor-pointer mt-4">
+              <input
+                type="checkbox"
+                name="isInstitutional"
+                checked={formData.isInstitutional}
+                onChange={(e) => {
+                  handleChange(e);
+                  // Si desmarcan, limpiamos los campos
+                  if (!e.target.checked) {
+                    setFormData(prev => ({ ...prev, subjectId: '', professorId: '' }));
+                  }
+                }}
+                className="w-4 h-4 text-brand border-gray-300 rounded focus:ring-brand"
+              />
+              <span className="text-sm font-semibold text-text-primary">Este es un proyecto de Asignatura (Institucional)</span>
+            </label>
+
+            {formData.isInstitutional && (
+              <div className="grid md:grid-cols-2 gap-4 p-4 bg-brand/5 border border-brand/10 rounded-xl animate-in fade-in slide-in-from-top-2">
+                <Select
+                  id="subjectId"
+                  label="Asignatura *"
+                  name="subjectId"
+                  value={formData.subjectId}
+                  onChange={(e) => {
+                    handleChange(e);
+                    // Reseteamos el profesor si cambian de ramo
+                    setFormData(prev => ({ ...prev, professorId: '' }));
+                  }}
+                  disabled={isLoadingSubjects}
+                  required={formData.isInstitutional}
+                >
+                  <option value="">Selecciona un ramo</option>
+                  {subjects.map((subject) => (
+                    <option key={subject.id} value={subject.id}>
+                      {subject.name} {subject.code ? `(${subject.code})` : ''}
+                    </option>
+                  ))}
+                </Select>
+
+                <Select
+                  id="professorId"
+                  label="Profesor a cargo *"
+                  name="professorId"
+                  value={formData.professorId}
+                  onChange={handleChange}
+                  disabled={!formData.subjectId}
+                  required={formData.isInstitutional}
+                >
+                  <option value="">Selecciona un profesor</option>
+                  {/* Buscamos el ramo seleccionado y mapeamos sus profesores */}
+                  {subjects
+                    .find(s => s.id === formData.subjectId)
+                    ?.professors?.map((prof: any) => (
+                      <option key={prof.id} value={prof.id}>
+                        {prof.name}
+                      </option>
+                    ))}
+                </Select>
+              </div>
+            )}
 
             <div className="grid md:grid-cols-2 gap-4">
               <Select
@@ -320,7 +370,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
                 <option value="ACTIVE">Activo</option>
                 <option value="ON_HOLD">En pausa</option>
               </Select>
-              
+
               {/* Ocultamos la metodología si estamos en Modo Híbrido */}
               {formData.mode === 'CLASSIC' && (
                 <Select
@@ -331,15 +381,15 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
                   onChange={handleChange}
                 >
                   <option value="KANBAN">Kanban</option>
-                  <option value="SCRUM" disabled>Scrum (Próximamente)</option>
+                  <option value="SCRUM">Scrum (Próximamente)</option>
                   <option value="SCRUMBAN" disabled>Scrumban (Próximamente)</option>
                 </Select>
               )}
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-surface-secondary rounded-xl border border-border-secondary">
               <div className="flex items-center gap-3">
-                <label htmlFor="color" className="text-sm font-medium text-gray-700">
+                <label htmlFor="color" className="text-sm font-medium text-text-secondary">
                   Color de etiqueta:
                 </label>
                 <input
@@ -359,18 +409,18 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
                   onChange={handleChange}
                   className="w-4 h-4 text-brand border-gray-300 rounded focus:ring-brand"
                 />
-                <span className="text-sm font-medium text-gray-700">Hacer proyecto público</span>
+                <span className="text-sm font-medium text-text-secondary">Hacer proyecto publico</span>
               </label>
             </div>
 
-            <div className="pt-2 border-t border-gray-100 space-y-3">
+            <div className="pt-2 border-t border-border-primary space-y-3">
               <div className="flex items-center gap-2">
                 <UserPlus className="w-4 h-4 text-gray-500" />
-                <h3 className="text-sm font-semibold text-gray-800">Miembros del equipo</h3>
+                <h3 className="text-sm font-semibold text-text-primary">Miembros del equipo</h3>
                 <span className="text-xs text-gray-400 font-normal">(opcional)</span>
               </div>
 
-              <label className="flex items-center gap-1.5 text-xs text-gray-600 cursor-pointer select-none w-fit">
+              <label className="flex items-center gap-1.5 text-xs text-text-secondary cursor-pointer select-none w-fit">
                 <input
                   type="checkbox"
                   checked={isExternal}
@@ -426,10 +476,10 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
                   {pendingMembers.map((m) => (
                     <li
                       key={m.email}
-                      className="flex items-center justify-between px-3 py-2 bg-white rounded-lg border border-gray-200 text-sm shadow-sm"
+                      className="flex items-center justify-between px-3 py-2 bg-surface-primary rounded-lg border border-border-secondary text-sm shadow-sm"
                     >
                       <div className="flex items-center gap-2 min-w-0">
-                        <span className="truncate text-gray-800 font-medium">{m.email}</span>
+                        <span className="truncate text-text-primary font-medium">{m.email}</span>
                         <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md uppercase shrink-0 ${m.isExternal ? 'bg-gray-200 text-gray-600' : 'bg-brand/10 text-brand'}`}>
                           {roleLabel(m)}
                         </span>
@@ -450,12 +500,12 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
         </div>
 
         {/* Action Footer */}
-        <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 shrink-0">
+        <div className="p-4 border-t border-border-primary bg-surface-secondary flex justify-end gap-3 shrink-0">
           <button
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+            className="px-4 py-2 text-sm font-medium text-text-primary bg-surface-primary border border-border-secondary rounded-lg hover:bg-surface-tertiary transition-colors disabled:opacity-50"
           >
             Cancelar
           </button>

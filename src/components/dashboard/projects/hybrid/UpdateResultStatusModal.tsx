@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { X, Loader2, AlertCircle, UploadCloud, Link as LinkIcon, FileCheck } from 'lucide-react';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { UPDATE_RESULT_STATUS } from '@/graphql/hybrid/operations';
+import { GET_UPLOAD_PRESIGNED_URL } from '@/graphql/hybrid/operations';
 import Select from '@/components/ui/Select';
 import Input from '@/components/ui/Input';
 
@@ -35,7 +36,7 @@ const STATUS_WEIGHT: Record<string, number> = {
 export default function UpdateResultStatusModal({ isOpen, result, onClose, onSuccess }: UpdateResultStatusModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [status, setStatus] = useState(result?.status || 'NOT_STARTED');
   const [reason, setReason] = useState('');
   const [evidenceType, setEvidenceType] = useState<'NONE' | 'URL' | 'FILE'>('NONE');
@@ -57,11 +58,40 @@ export default function UpdateResultStatusModal({ isOpen, result, onClose, onSuc
 
   const currentWeight = STATUS_WEIGHT[result.status];
   const selectedWeight = STATUS_WEIGHT[status];
-  
+
   const isAdvancing = selectedWeight > currentWeight;
   const isRegressing = selectedWeight < currentWeight;
-  
+
   const isEvidenceRequired = isAdvancing && REQUIRES_EVIDENCE.includes(status);
+
+  const uploadFileToS3 = async (file: File): Promise<string> => {
+    const presignRes = await fetchGraphQL({
+      query: GET_UPLOAD_PRESIGNED_URL,
+      variables: { fileName: file.name, contentType: file.type }
+    });
+
+    if (presignRes.errors || !presignRes.getUploadPresignedUrl) {
+      console.error(presignRes.errors);
+      throw new Error("Error al obtener credenciales de subida del servidor.");
+    }
+
+    const { uploadUrl, fileKey } = presignRes.getUploadPresignedUrl;
+
+    const uploadRes = await fetch(uploadUrl, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': file.type,
+      },
+      body: file,
+    });
+
+    if (!uploadRes.ok) {
+      throw new Error('Error al enviar el archivo a la nube (R2/MinIO).');
+    }
+
+    // PASO 3: Retornar la llave para guardarla en la BD de PROJEIC
+    return fileKey;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,18 +126,7 @@ export default function UpdateResultStatusModal({ isOpen, result, onClose, onSuc
       let uploadedFileKey = null;
 
       if (evidenceType === 'FILE' && evidenceFile) {
-        const formData = new FormData();
-        formData.append('file', evidenceFile);
-
-        const uploadRes = await fetch(`/projeic/api/uploads/evidence`, {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!uploadRes.ok) throw new Error('Error al subir el archivo al servidor');
-        
-        const uploadData = await uploadRes.json();
-        uploadedFileKey = uploadData.fileKey;
+        uploadedFileKey = await uploadFileToS3(evidenceFile);
       }
 
       const response = await fetchGraphQL({
@@ -137,21 +156,21 @@ export default function UpdateResultStatusModal({ isOpen, result, onClose, onSuc
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
+      <div className="bg-surface-primary dark:bg-surface-primary rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-primary dark:border-border-primary shrink-0">
           <div className="flex items-center gap-2">
             <FileCheck className="w-5 h-5 text-brand" />
-            <h2 className="text-xl font-bold text-gray-900">Actualizar Progreso</h2>
+            <h2 className="text-xl font-bold text-text-primary dark:text-text-primary">Actualizar Progreso</h2>
           </div>
-          <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
+          <button onClick={onClose} className="p-2 text-text-muted hover:text-text-secondary dark:hover:text-gray-200 hover:bg-surface-secondary dark:hover:bg-surface-secondary rounded-full transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-5 overflow-y-auto custom-scrollbar">
-          <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-            <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Resultado Seleccionado</p>
-            <p className="font-medium text-gray-900 line-clamp-2">{result.title}</p>
+          <div className="bg-surface-secondary dark:bg-surface-secondary p-3 rounded-lg border border-border-primary dark:border-border-secondary">
+            <p className="text-xs text-text-muted dark:text-text-muted uppercase font-bold tracking-wider mb-1">Resultado Seleccionado</p>
+            <p className="font-medium text-text-primary dark:text-text-primary line-clamp-2">{result.title}</p>
           </div>
 
           {error && (
@@ -162,11 +181,11 @@ export default function UpdateResultStatusModal({ isOpen, result, onClose, onSuc
           )}
 
           <div>
-            <Select 
-              id="status" 
-              label="Nuevo Estado" 
-              name="status" 
-              value={status} 
+            <Select
+              id="status"
+              label="Nuevo Estado"
+              name="status"
+              value={status}
               onChange={(e) => {
                 setStatus(e.target.value);
                 setError(null);
@@ -191,28 +210,28 @@ export default function UpdateResultStatusModal({ isOpen, result, onClose, onSuc
                 placeholder="Ej: El profesor solicitó correcciones en la arquitectura o los tests fallaron..."
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                className="w-full p-3 text-sm border border-orange-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-shadow bg-white resize-none"
+                className="w-full p-3 text-sm border border-orange-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-shadow bg-surface-primary resize-none"
                 rows={3}
               />
             </div>
           )}
 
           {/* ZONA DE EVIDENCIA SIEMPRE VISIBLE */}
-          <div className={`p-4 rounded-xl space-y-4 transition-colors ${isEvidenceRequired ? 'border-2 border-brand/40 bg-brand/5' : 'border border-gray-200 bg-gray-50'}`}>
+          <div className={`p-4 rounded-xl space-y-4 transition-colors ${isEvidenceRequired ? 'border-2 border-brand/40 bg-brand/5' : 'border border-border-primary dark:border-border-secondary bg-surface-secondary dark:bg-surface-secondary'}`}>
             <div className="flex items-start gap-2">
               {isEvidenceRequired ? (
                 <>
                   <AlertCircle className="w-4 h-4 text-brand mt-0.5 shrink-0" />
                   <p className="text-sm text-brand-dark font-medium leading-snug">
-                    <strong className="uppercase text-[10px] tracking-wider bg-brand text-white px-1.5 py-0.5 rounded mr-1">Obligatorio</strong><br/>
+                    <strong className="uppercase text-[10px] tracking-wider bg-brand text-white px-1.5 py-0.5 rounded mr-1">Obligatorio</strong><br />
                     Este avance es un hito clave. Debes respaldarlo adjuntando una evidencia.
                   </p>
                 </>
               ) : (
                 <>
-                  <UploadCloud className="w-4 h-4 text-gray-500 mt-0.5 shrink-0" />
-                  <p className="text-sm text-gray-600 font-medium leading-snug">
-                    <strong className="uppercase text-[10px] tracking-wider bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded mr-1">Opcional</strong><br/>
+                  <UploadCloud className="w-4 h-4 text-text-muted mt-0.5 shrink-0" />
+                  <p className="text-sm text-text-secondary dark:text-text-secondary font-medium leading-snug">
+                    <strong className="uppercase text-[10px] tracking-wider bg-gray-200 text-text-secondary px-1.5 py-0.5 rounded mr-1">Opcional</strong><br />
                     ¿Quieres adjuntar algún respaldo a tu estado actual?
                   </p>
                 </>
@@ -226,7 +245,7 @@ export default function UpdateResultStatusModal({ isOpen, result, onClose, onSuc
                   setEvidenceType('NONE');
                   setError(null);
                 }}
-                className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-colors ${evidenceType === 'NONE' ? 'border-brand bg-white text-brand' : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'}`}
+                className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-colors ${evidenceType === 'NONE' ? 'border-brand bg-surface-primary dark:bg-surface-primary text-brand' : 'border-border-primary dark:border-border-secondary bg-surface-primary dark:bg-surface-secondary text-text-muted dark:text-text-muted hover:border-border-secondary'}`}
               >
                 <X className="w-5 h-5 mb-1" />
                 <span className="text-xs font-bold">Ninguna</span>
@@ -237,7 +256,7 @@ export default function UpdateResultStatusModal({ isOpen, result, onClose, onSuc
                   setEvidenceType('URL');
                   setError(null);
                 }}
-                className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-colors ${evidenceType === 'URL' ? 'border-brand bg-white text-brand' : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'}`}
+                className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-colors ${evidenceType === 'URL' ? 'border-brand bg-surface-primary dark:bg-surface-primary text-brand' : 'border-border-primary dark:border-border-secondary bg-surface-primary dark:bg-surface-secondary text-text-muted dark:text-text-muted hover:border-border-secondary'}`}
               >
                 <LinkIcon className="w-5 h-5 mb-1" />
                 <span className="text-xs font-bold">Link (URL)</span>
@@ -248,7 +267,7 @@ export default function UpdateResultStatusModal({ isOpen, result, onClose, onSuc
                   setEvidenceType('FILE');
                   setError(null);
                 }}
-                className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-colors ${evidenceType === 'FILE' ? 'border-brand bg-white text-brand' : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'}`}
+                className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-colors ${evidenceType === 'FILE' ? 'border-brand bg-surface-primary dark:bg-surface-primary text-brand' : 'border-border-primary dark:border-border-secondary bg-surface-primary dark:bg-surface-secondary text-text-muted dark:text-text-muted hover:border-border-secondary'}`}
               >
                 <UploadCloud className="w-5 h-5 mb-1" />
                 <span className="text-xs font-bold">Archivo</span>
@@ -275,7 +294,7 @@ export default function UpdateResultStatusModal({ isOpen, result, onClose, onSuc
                   type="file"
                   id="evidenceFile"
                   onChange={(e) => setEvidenceFile(e.target.files?.[0] || null)}
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brand/10 file:text-brand hover:file:bg-brand/20 cursor-pointer border border-gray-300 rounded-lg p-2 bg-white transition-colors"
+                  className="block w-full text-sm text-text-muted dark:text-text-muted file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brand/10 file:text-brand hover:file:bg-brand/20 cursor-pointer border border-border-secondary dark:border-border-secondary rounded-lg p-2 bg-surface-primary dark:bg-surface-secondary transition-colors"
                   required
                 />
                 {evidenceFile && <p className="text-xs text-green-600 mt-2 font-medium">✓ Archivo listo: {evidenceFile.name}</p>}
@@ -283,13 +302,13 @@ export default function UpdateResultStatusModal({ isOpen, result, onClose, onSuc
             )}
           </div>
 
-          <div className="pt-4 border-t border-gray-100 flex justify-end gap-3 shrink-0">
-            <button type="button" onClick={onClose} disabled={isSubmitting} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+          <div className="pt-4 border-t border-border-primary dark:border-border-primary flex justify-end gap-3 shrink-0">
+            <button type="button" onClick={onClose} disabled={isSubmitting} className="px-4 py-2 text-sm font-medium text-text-secondary dark:text-text-secondary bg-surface-primary dark:bg-surface-secondary border border-border-secondary dark:border-border-secondary rounded-lg hover:bg-surface-secondary dark:hover:bg-gray-600 transition-colors">
               Cancelar
             </button>
-            <button 
-              type="submit" 
-              disabled={isSubmitting || (isEvidenceRequired && evidenceType === 'NONE') || (isRegressing && !reason.trim())} 
+            <button
+              type="submit"
+              disabled={isSubmitting || (isEvidenceRequired && evidenceType === 'NONE') || (isRegressing && !reason.trim())}
               className="px-6 py-2 text-sm font-medium text-white bg-brand rounded-lg hover:bg-brand-hover flex items-center gap-2 transition-colors disabled:opacity-50"
             >
               {isSubmitting ? (

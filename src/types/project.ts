@@ -35,4 +35,5 @@ export interface Project {
   members: ProjectMember[];
   myRole?: string;
   mode?: string;
+  professor?: { id: string; name: string }[];
 }

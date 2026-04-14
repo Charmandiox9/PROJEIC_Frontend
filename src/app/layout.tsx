@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthProvider";
 import ClientLayout from "@/components/ClientLayout";
+import { Toaster } from 'sonner';
 
 export const metadata: Metadata = {
   title: "Projeic App",
@@ -18,12 +19,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className="antialiased bg-white text-zinc-900 min-h-screen flex flex-col">
+      <body className="antialiased bg-surface-primary text-zinc-900 min-h-screen flex flex-col">
         <AuthProvider>
           <ClientLayout>
             {children}
           </ClientLayout>
         </AuthProvider>
+        <Toaster richColors position="top-right" />
       </body>
     </html>
   );

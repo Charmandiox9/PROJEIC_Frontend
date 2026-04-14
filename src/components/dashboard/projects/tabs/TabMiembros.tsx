@@ -4,6 +4,7 @@ import { ROLE_OPTIONS, UCN_DOMAINS } from '@/constants/project-constants';
 import { Trash2, Loader2, User, UserPlus, AlertCircle, Check } from 'lucide-react';
 import Select from '@/components/ui/Select';
 import MemberAvatar from '../../project-detail/MemberAvatar';
+import RoleBadge from '../../project-detail/RoleBadge';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { ADD_PROJECT_MEMBER } from '@/graphql/misc/operations';
 
@@ -18,6 +19,14 @@ interface TabMiembrosProps {
 function isValidUcnEmail(email: string): boolean {
   return UCN_DOMAINS.some((d) => email.toLowerCase().endsWith(d));
 }
+
+const ROLE_BADGE: Record<string, string> = {
+  LEADER: 'text-purple-700 bg-purple-100 border border-purple-300 dark:text-purple-300 dark:bg-purple-900/40 dark:border-purple-700',
+  STUDENT: 'text-blue-700   bg-blue-100   border border-blue-300   dark:text-blue-300   dark:bg-blue-900/40   dark:border-blue-700',
+  SUPERVISOR: 'text-orange-700 bg-orange-100 border border-orange-300 dark:text-orange-300 dark:bg-orange-900/40 dark:border-orange-700',
+  EXTERNAL: 'text-gray-600   bg-gray-100   border border-gray-300   dark:text-gray-400   dark:bg-gray-700/40   dark:border-gray-600',
+};
+const roleClass = (role: string) => ROLE_BADGE[role] ?? ROLE_BADGE.EXTERNAL;
 
 export default function TabMiembros({
   project,
@@ -87,7 +96,7 @@ export default function TabMiembros({
 
   return (
     <div className={`grid grid-cols-1 ${isLeader ? 'lg:grid-cols-3' : ''} gap-6`}>
-      <div className={`${isLeader ? 'md:col-span-2' : ''} bg-white rounded-xl border border-gray-100 p-6 space-y-4`}>
+      <div className={`${isLeader ? 'md:col-span-2' : ''} bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6 space-y-4`}>
         <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Integrantes ({activeMembers.length})</h3>
         {activeMembers.length === 0 ? (
           <div className="text-center py-12">
@@ -97,11 +106,11 @@ export default function TabMiembros({
         ) : (
           <ul className="space-y-3">
             {activeMembers.map((m) => (
-              <li key={m.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
+              <li key={m.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-100 dark:border-gray-600">
                 <div className="flex items-center gap-3 min-w-0">
                   <MemberAvatar member={m} />
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 truncate max-w-[200px]">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[200px]">
                       {m.user.name}
                     </p>
                     {m.status === 'PENDING' && (
@@ -112,20 +121,32 @@ export default function TabMiembros({
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <Select
-                    value={m.role}
-                    onChange={(e) => onUpdateRole(m.id, e.target.value)}
-                    disabled={!isLeader}
-                    className="text-[11px] font-bold text-brand bg-brand/5 border-brand/20 w-auto"
-                  >
-                    {ROLE_OPTIONS.map((r) => (
-                      <option key={r.value} value={r.value}>{r.label}</option>
-                    ))}
-                  </Select>
+                  {isLeader ? (
+                    <label className="relative cursor-pointer" title="Cambiar rol">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md whitespace-nowrap ${roleClass(m.role)}`}>
+                        {ROLE_OPTIONS.find(r => r.value === m.role)?.label ?? m.role}
+                      </span>
+                      <select
+                        value={m.role}
+                        onChange={(e) => onUpdateRole(m.id, e.target.value)}
+                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                      >
+                        {ROLE_OPTIONS.map((r) => (
+                          <option key={r.value} value={r.value} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+                            {r.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  ) : (
+                    <span className={`inline-flex items-center px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md whitespace-nowrap ${roleClass(m.role)}`}>
+                      {ROLE_OPTIONS.find(r => r.value === m.role)?.label ?? m.role}
+                    </span>
+                  )}
                   {isLeader && (
                     <button
                       onClick={() => onRemoveMember(m.id)}
-                      className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                      className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-md transition-colors"
                       title="Expulsar"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -141,13 +162,13 @@ export default function TabMiembros({
       {isLeader && (
         <div className="space-y-4 min-w-0 overflow-hidden">
           {success ? (
-            <div className="bg-white rounded-xl border border-green-200 p-8 text-center space-y-4 shadow-sm animate-in fade-in duration-300">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-green-200 dark:border-green-700 p-8 text-center space-y-4 shadow-sm animate-in fade-in duration-300">
               <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto">
                 <Check className="w-8 h-8" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900">¡Invitación enviada!</h3>
-                <p className="text-sm text-gray-500 mt-1">El usuario ha sido invitado exitosamente.</p>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">¡Invitación enviada!</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">El usuario ha sido invitado exitosamente.</p>
               </div>
               <button
                 onClick={handleInviteAnother}
@@ -157,10 +178,10 @@ export default function TabMiembros({
               </button>
             </div>
           ) : (
-            <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-4">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6 space-y-4">
               <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Agregar miembro</h3>
 
-              <label className="flex items-center gap-1.5 text-xs text-gray-600 cursor-pointer select-none">
+              <label className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400 cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={isExternal}
@@ -176,7 +197,7 @@ export default function TabMiembros({
                 onChange={(e) => setEmail(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleInvite()}
                 placeholder={isExternal ? 'correo@externo.com' : 'correo@alumnos.ucn.cl'}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none"
+                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none bg-white dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500"
               />
 
               {!isExternal && (
@@ -207,11 +228,11 @@ export default function TabMiembros({
             </div>
           )}
 
-          <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-3 overflow-y-auto max-h-64">
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6 space-y-3 overflow-y-auto max-h-64">
             <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Roles disponibles</h3>
             {ROLE_DESCRIPTIONS.map((r) => (
               <div key={r.role}>
-                <p className="text-xs font-bold text-gray-700">{r.role}</p>
+                <p className="text-xs font-bold text-gray-700 dark:text-gray-300">{r.role}</p>
                 <p className="text-xs text-gray-400 leading-relaxed">{r.desc}</p>
               </div>
             ))}

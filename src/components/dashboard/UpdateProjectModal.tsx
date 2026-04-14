@@ -16,7 +16,7 @@ interface UpdateProjectModalProps {
 export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess }: UpdateProjectModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [subjects, setSubjects] = useState<any[]>([]);
   const [isLoadingSubjects, setIsLoadingSubjects] = useState(false);
 
@@ -131,12 +131,12 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
-          <h2 className="text-xl font-bold text-gray-900">Editar proyecto</h2>
-          <button 
+      <div className="bg-surface-primary rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-primary shrink-0">
+          <h2 className="text-xl font-bold text-text-primary">Editar proyecto</h2>
+          <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-2 text-gray-400 hover:text-text-primary hover:bg-surface-tertiary rounded-full transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -151,24 +151,23 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
 
           {/* SELECTOR DE MODALIDAD */}
           <div className="space-y-3">
-            <label className="text-sm font-semibold text-gray-900 block">
+            <label className="text-sm font-semibold text-text-primary block">
               Modalidad de Gestión <span className="text-brand">*</span>
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => handleModeChange('CLASSIC')}
-                className={`relative p-4 rounded-xl text-left border-2 transition-all duration-200 flex flex-col gap-1 ${
-                  formData.mode === 'CLASSIC' 
-                    ? 'border-brand bg-brand/5 shadow-sm' 
-                    : 'border-gray-100 hover:border-gray-200 bg-white'
-                }`}
+                className={`relative p-4 rounded-xl text-left border-2 transition-all duration-200 flex flex-col gap-1 ${formData.mode === 'CLASSIC'
+                  ? 'border-brand bg-brand/5 shadow-sm'
+                  : 'border-border-primary hover:border-border-secondary bg-surface-primary'
+                  }`}
               >
                 <div className="flex justify-between items-center w-full">
-                  <span className={`font-bold text-sm ${formData.mode === 'CLASSIC' ? 'text-brand' : 'text-gray-700'}`}>Modo Clásico</span>
+                  <span className={`font-bold text-sm ${formData.mode === 'CLASSIC' ? 'text-brand' : 'text-text-secondary'}`}>Modo Clásico</span>
                   {formData.mode === 'CLASSIC' && <CheckCircle2 className="w-4 h-4 text-brand" />}
                 </div>
-                <span className="text-xs text-gray-500 leading-relaxed">
+                <span className="text-xs text-text-muted leading-relaxed">
                   Basado en progreso de Tareas y metodologías ágiles (Scrum, Kanban).
                 </span>
               </button>
@@ -176,27 +175,26 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
               <button
                 type="button"
                 onClick={() => handleModeChange('HYBRID')}
-                className={`relative p-4 rounded-xl text-left border-2 transition-all duration-200 flex flex-col gap-1 ${
-                  formData.mode === 'HYBRID' 
-                    ? 'border-brand bg-brand/5 shadow-sm' 
-                    : 'border-gray-100 hover:border-gray-200 bg-white'
-                }`}
+                className={`relative p-4 rounded-xl text-left border-2 transition-all duration-200 flex flex-col gap-1 ${formData.mode === 'HYBRID'
+                  ? 'border-brand bg-brand/5 shadow-sm'
+                  : 'border-border-primary hover:border-border-secondary bg-surface-primary'
+                  }`}
               >
                 <div className="flex justify-between items-center w-full">
-                  <span className={`font-bold text-sm ${formData.mode === 'HYBRID' ? 'text-brand' : 'text-gray-700'}`}>Modo Híbrido (EIC)</span>
+                  <span className={`font-bold text-sm ${formData.mode === 'HYBRID' ? 'text-brand' : 'text-text-secondary'}`}>Modo Híbrido (EIC)</span>
                   {formData.mode === 'HYBRID' && <CheckCircle2 className="w-4 h-4 text-brand" />}
                 </div>
-                <span className="text-xs text-gray-500 leading-relaxed">
+                <span className="text-xs text-text-muted leading-relaxed">
                   Orientado a Resultados Esperados y validación por carga de Evidencias.
                 </span>
               </button>
             </div>
           </div>
 
-          <div className="h-px w-full bg-gray-100"></div>
+          <div className="h-px w-full bg-border-primary"></div>
 
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="name" className="block text-sm font-medium text-text-secondary mb-1">
               Nombre del proyecto <span className="text-red-500">*</span>
             </label>
             <input
@@ -208,12 +206,12 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
               maxLength={100}
               value={formData.name}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none transition-shadow"
+              className="w-full px-4 py-2 border border-border-secondary rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none transition-shadow bg-surface-primary text-text-primary"
             />
           </div>
 
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="description" className="block text-sm font-medium text-text-secondary mb-1">
               Descripción
             </label>
             <textarea
@@ -223,13 +221,13 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
               maxLength={500}
               value={formData.description}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none transition-shadow resize-none"
+              className="w-full px-4 py-2 border border-border-secondary rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none transition-shadow resize-none bg-surface-primary text-text-primary"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="status" className="block text-sm font-medium text-text-secondary mb-1">
                 Estado
               </label>
               <select
@@ -237,7 +235,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
                 name="status"
                 value={formData.status}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none bg-white"
+                className="w-full px-4 py-2 border border-border-secondary rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none bg-surface-primary text-text-primary"
               >
                 <option value="STARTING">Iniciando</option>
                 <option value="ACTIVE">Activo</option>
@@ -250,7 +248,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
             {/* Ocultamos la metodología si el modo es HÍBRIDO */}
             {formData.mode === 'CLASSIC' && (
               <div>
-                <label htmlFor="methodology" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="methodology" className="block text-sm font-medium text-text-secondary mb-1">
                   Metodología
                 </label>
                 <select
@@ -258,7 +256,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
                   name="methodology"
                   value={formData.methodology}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none bg-white"
+                  className="w-full px-4 py-2 border border-border-secondary rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none bg-surface-primary text-text-primary"
                 >
                   <option value="KANBAN">Kanban</option>
                   <option value="SCRUM" disabled>Scrum (Próximamente)</option>
@@ -269,7 +267,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
           </div>
 
           {/* SECCIÓN INSTITUCIONAL */}
-          <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl space-y-4">
+          <div className="p-4 bg-surface-secondary border border-border-secondary rounded-xl space-y-4">
             <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
@@ -279,17 +277,17 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
                 className="w-4 h-4 text-brand border-gray-300 rounded focus:ring-brand"
               />
               <div className="flex flex-col">
-                <span className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
+                <span className="text-sm font-bold text-text-primary flex items-center gap-1.5">
                   <BookOpen className="w-4 h-4 text-brand" /> Proyecto Institucional (EIC)
                 </span>
-                <span className="text-xs text-gray-500">Vincular este proyecto a un ramo de la escuela.</span>
+                <span className="text-xs text-text-muted">Vincular este proyecto a un ramo de la escuela.</span>
               </div>
             </label>
 
             {/* Selector de Ramo */}
             {formData.isInstitutional && (
               <div className="pt-2 animate-in fade-in slide-in-from-top-2">
-                <label htmlFor="subjectId" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="subjectId" className="block text-sm font-medium text-text-secondary mb-1">
                   Selecciona el Ramo <span className="text-red-500">*</span>
                 </label>
                 <select
@@ -298,7 +296,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
                   value={formData.subjectId}
                   onChange={handleChange}
                   disabled={isLoadingSubjects}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none bg-white disabled:opacity-50"
+                  className="w-full px-4 py-2 border border-border-secondary rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none bg-surface-primary text-text-primary disabled:opacity-50"
                 >
                   <option value="">-- Seleccionar Ramo --</option>
                   {subjects.map((subject) => (
@@ -312,9 +310,9 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
             )}
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-surface-secondary rounded-xl border border-border-secondary">
             <div className="flex items-center gap-3">
-              <label htmlFor="color" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="color" className="block text-sm font-medium text-text-secondary">
                 Color de etiqueta:
               </label>
               <div className="relative">
@@ -337,17 +335,17 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
                 onChange={handleChange}
                 className="w-4 h-4 text-brand border-gray-300 rounded focus:ring-brand"
               />
-              <span className="text-sm font-medium text-gray-700">Proyecto público</span>
+              <span className="text-sm font-medium text-text-secondary">Proyecto publico</span>
             </label>
           </div>
         </form>
 
-        <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 shrink-0">
+        <div className="p-4 border-t border-border-primary bg-surface-secondary flex justify-end gap-3 shrink-0">
           <button
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+            className="px-4 py-2 text-sm font-medium text-text-primary bg-surface-primary border border-border-secondary rounded-lg hover:bg-surface-tertiary transition-colors disabled:opacity-50"
           >
             Cancelar
           </button>

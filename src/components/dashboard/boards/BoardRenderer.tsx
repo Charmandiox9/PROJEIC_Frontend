@@ -1,10 +1,11 @@
-import KanbanBoard from './KanbanBoard';
-import ScrumBoard from './ScrumBoard';
-import ScrumbanBoard from './ScrumbanBoard';
+import KanbanBoard from './kanban/KanbanBoard';
+import ScrumBoard from './scrum/ScrumBoard';
+import ScrumbanBoard from './scrumban/ScrumbanBoard';
 
 interface ProjectMember {
   id: string;
   role: string;
+  status: string;
   user: {
     id: string;
     name: string;
@@ -24,7 +25,7 @@ export default function BoardRenderer({ methodology, projectId, members, userRol
     return <KanbanBoard projectId={projectId} members={members} userRole={userRole} />;
   }
   if (methodology === 'SCRUM') {
-    return <ScrumBoard />;
+    return <ScrumBoard projectId={projectId} members={members} userRole={userRole} />;
   }
   if (methodology === 'SCRUMBAN') {
     return <ScrumbanBoard />;

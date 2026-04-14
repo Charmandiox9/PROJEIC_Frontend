@@ -4,7 +4,7 @@ const PAGE_TEXTS = {
   heroTitle: 'Acerca de PROJEIC',
   heroSubtitle: 'Transparencia y trazabilidad para los proyectos académicos.',
   aboutTitle: '¿Qué es PROJEIC?',
-  aboutDescription: 'PROJEIC es una plataforma de gestión de proyectos académicos desarrollada para la Escuela de Ingeniería Coquimbo de la Universidad Católica del Norte. Su objetivo principal es centralizar el seguimiento, proporcionar visibilidad pública y asegurar la trazabilidad completa del ciclo de vida de los proyectos estudiantiles, conectando a estudiantes, docentes supervisores y la comunidad universitaria en un solo entorno colaborativo.',   
+  aboutDescription: 'PROJEIC es una plataforma de gestión de proyectos académicos desarrollada para la Escuela de Ingeniería Coquimbo de la Universidad Católica del Norte. Su objetivo principal es centralizar el seguimiento, proporcionar visibilidad pública y asegurar la trazabilidad completa del ciclo de vida de los proyectos estudiantiles, conectando a estudiantes, docentes supervisores y la comunidad universitaria en un solo entorno colaborativo.',
   proposalTitle: 'Nuestra propuesta',
   technologyTitle: 'Tecnología',
   developersTitle: 'Desarrolladores'
@@ -64,36 +64,36 @@ const DEVELOPERS = [
 
 export default function AcercaPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-<section className="bg-white bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-light/30 via-transparent to-transparent text-ui-dark py-16 px-6 border-b border-gray-100">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-3xl md:text-5xl font-bold mb-4">{PAGE_TEXTS.heroTitle}</h1>
-            <p className="text-gray-500 text-lg md:text-xl font-medium">{PAGE_TEXTS.heroSubtitle}</p>
+    <div className="min-h-screen flex flex-col bg-surface-primary dark:bg-brand-dark">
+      <section className="bg-surface-primary dark:bg-brand-dark bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-light/30 via-transparent to-transparent text-ui-dark dark:text-text-primary py-16 px-6 border-b border-border-primary dark:border-border-primary">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-3xl md:text-5xl font-bold mb-4">{PAGE_TEXTS.heroTitle}</h1>
+          <p className="text-text-muted dark:text-text-muted text-lg md:text-xl font-medium">{PAGE_TEXTS.heroSubtitle}</p>
         </div>
       </section>
 
       <main className="flex-grow max-w-5xl mx-auto w-full px-6 py-16 space-y-20">
         <section className="text-center max-w-3xl mx-auto">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">{PAGE_TEXTS.aboutTitle}</h2>
-          <p className="text-gray-600 leading-relaxed text-lg">
+          <h2 className="text-2xl font-bold text-text-primary dark:text-text-primary mb-6">{PAGE_TEXTS.aboutTitle}</h2>
+          <p className="text-text-secondary dark:text-text-muted leading-relaxed text-lg">
             {PAGE_TEXTS.aboutDescription}
           </p>
         </section>
 
         <section>
           <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold text-gray-900">{PAGE_TEXTS.proposalTitle}</h2>
+            <h2 className="text-2xl font-bold text-text-primary dark:text-text-primary">{PAGE_TEXTS.proposalTitle}</h2>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {PROPOSALS.map((item) => {
               const Icon = item.icon;
               return (
-                <div key={item.id} className="bg-gray-50 border border-gray-100 p-8 rounded-2xl text-center hover:bg-white hover:border-brand hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
-                  <div className="w-14 h-14 bg-brand-light text-brand rounded-full flex items-center justify-center mx-auto mb-6">
+                <div key={item.id} className="bg-surface-secondary dark:bg-surface-primary border border-border-primary dark:border-border-primary p-8 rounded-2xl text-center hover:bg-surface-primary dark:hover:bg-surface-secondary hover:border-brand hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
+                  <div className="w-14 h-14 bg-brand-light dark:bg-brand/20 text-brand dark:text-brand-light rounded-full flex items-center justify-center mx-auto mb-6">
                     <Icon className="w-6 h-6" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">{item.title}</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">
+                  <h3 className="text-xl font-bold text-text-primary dark:text-text-primary mb-3">{item.title}</h3>
+                  <p className="text-text-secondary dark:text-text-muted text-sm leading-relaxed">
                     {item.description}
                   </p>
                 </div>
@@ -102,43 +102,43 @@ export default function AcercaPage() {
           </div>
         </section>
 
-        <section className="border-t border-gray-100 pt-20">
+        <section className="border-t border-border-primary dark:border-border-primary pt-20">
           <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold text-gray-900">{PAGE_TEXTS.technologyTitle}</h2>
+            <h2 className="text-2xl font-bold text-text-primary dark:text-text-primary">{PAGE_TEXTS.technologyTitle}</h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             {TECHNOLOGIES.map((tech) => (
-              <a 
-                key={tech.id} 
+              <a
+                key={tech.id}
                 href={tech.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="border border-gray-200 p-5 rounded-xl flex flex-col items-center justify-center text-center bg-white hover:border-brand hover:shadow-lg hover:-translate-y-1 transition-all duration-200 group"
+                className="border border-border-primary dark:border-border-primary p-5 rounded-xl flex flex-col items-center justify-center text-center bg-surface-primary dark:bg-surface-primary hover:border-brand hover:shadow-lg hover:-translate-y-1 transition-all duration-200 group"
               >
-                <img src={tech.iconUrl} alt={`Logo de ${tech.name}`} className="w-10 h-10 mb-4 group-hover:scale-110 transition-transform duration-300" />
-                <span className="font-bold text-gray-900 text-sm mb-1 group-hover:text-brand transition-colors">{tech.name}</span>
-                <span className="text-xs text-gray-500">{tech.role}</span>
+                <img src={tech.iconUrl} alt={`Logo de ${tech.name}`} className={`w-10 h-10 mb-4 group-hover:scale-110 transition-transform duration-300 ${tech.name === 'Next.js' ? 'dark:invert' : ''}`} />
+                <span className="font-bold text-text-primary dark:text-text-primary text-sm mb-1 group-hover:text-brand transition-colors">{tech.name}</span>
+                <span className="text-xs text-text-muted dark:text-text-muted">{tech.role}</span>
               </a>
             ))}
           </div>
         </section>
 
-        <section className="border-t border-gray-100 pt-20">
+        <section className="border-t border-border-primary dark:border-border-primary pt-20">
           <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold text-gray-900">{PAGE_TEXTS.developersTitle}</h2>
+            <h2 className="text-2xl font-bold text-text-primary dark:text-text-primary">{PAGE_TEXTS.developersTitle}</h2>
           </div>
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {DEVELOPERS.map((dev) => {
               const githubUsername = dev.github.split('/').pop();
               const avatarUrl = `https://github.com/${githubUsername}.png`;
-              
+
               return (
-                <div key={dev.id} className="p-6 bg-white border border-gray-100 rounded-xl shadow-sm flex flex-col justify-between hover:border-brand hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
+                <div key={dev.id} className="p-6 bg-surface-primary dark:bg-surface-primary border border-border-primary dark:border-border-primary rounded-xl shadow-sm flex flex-col justify-between hover:border-brand hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
                   <div className="flex flex-col items-center mb-4">
                     <img src={avatarUrl} alt={`Avatar de ${dev.name}`} className="w-20 h-20 rounded-full border-4 border-gray-50 mb-4" />
-                    <h3 className="font-bold text-xl text-gray-900 text-center">{dev.name}</h3>
-                    <p className="text-sm text-gray-600 mt-1 text-center">{dev.role}</p>
-                    <a 
+                    <h3 className="font-bold text-xl text-text-primary dark:text-text-primary text-center">{dev.name}</h3>
+                    <p className="text-sm text-text-secondary dark:text-text-muted mt-1 text-center">{dev.role}</p>
+                    <a
                       href={dev.minorUrl}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -147,12 +147,12 @@ export default function AcercaPage() {
                       {dev.minor}
                     </a>
                   </div>
-                  <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-center space-x-6">
+                  <div className="mt-4 pt-4 border-t border-border-primary dark:border-border-primary flex items-center justify-center space-x-6">
                     <a
                       href={dev.github}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center space-x-2 text-purple-600 hover:text-purple-700 transition-colors text-sm font-medium"
+                      className="inline-flex items-center space-x-2 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors text-sm font-medium"
                     >
                       <Github className="w-5 h-5" />
                       <span>GitHub</span>
@@ -161,7 +161,7 @@ export default function AcercaPage() {
                       href={dev.linkedin}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center space-x-2 text-brand hover:text-brand-hover transition-colors text-sm font-medium"
+                      className="inline-flex items-center space-x-2 text-brand dark:text-brand-light hover:text-brand-hover dark:hover:text-white transition-colors text-sm font-medium"
                     >
                       <Linkedin className="w-5 h-5" />
                       <span>LinkedIn</span>

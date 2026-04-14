@@ -20,7 +20,7 @@ interface CreateResultModalProps {
 export default function CreateResultModal({ isOpen, projectId, members, onClose, onSuccess }: CreateResultModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -73,13 +73,13 @@ export default function CreateResultModal({ isOpen, projectId, members, onClose,
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-700">
           <div className="flex items-center gap-2">
             <Target className="w-5 h-5 text-brand" />
-            <h2 className="text-xl font-bold text-gray-900">Nuevo Resultado Esperado</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Nuevo Resultado Esperado</h2>
           </div>
-          <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full">
+          <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -113,7 +113,7 @@ export default function CreateResultModal({ isOpen, projectId, members, onClose,
           />
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Responsable Único (Owner) <span className="text-red-500">*</span>
             </label>
             <div className="relative">
@@ -126,11 +126,11 @@ export default function CreateResultModal({ isOpen, projectId, members, onClose,
                 ))}
               </Select>
             </div>
-            <p className="text-[11px] text-gray-500 mt-1.5">Esta persona será la encargada de subir las evidencias para avanzar el estado.</p>
+            <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1.5">Esta persona sera la encargada de subir las evidencias para avanzar el estado.</p>
           </div>
 
-          <div className="pt-4 border-t border-gray-100 flex justify-end gap-3">
-            <button type="button" onClick={onClose} disabled={isSubmitting} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+          <div className="pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-3">
+            <button type="button" onClick={onClose} disabled={isSubmitting} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600">
               Cancelar
             </button>
             <button type="submit" disabled={isSubmitting} className="px-6 py-2 text-sm font-medium text-white bg-brand rounded-lg hover:bg-brand-hover flex items-center gap-2">

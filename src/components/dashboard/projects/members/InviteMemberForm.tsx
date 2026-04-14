@@ -84,9 +84,9 @@ export default function InviteMemberForm({ project, onUpdateRole, onRemoveMember
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-xl w-full min-w-[320px] max-w-[400px] p-6 space-y-4 animate-in zoom-in-95 duration-200">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full min-w-[320px] max-w-[400px] p-6 space-y-4 animate-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-bold text-gray-900">Agregar al equipo</h3>
+          <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Agregar al equipo</h3>
           <button
             onClick={onClose}
             className="p-1.5 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
@@ -103,7 +103,7 @@ export default function InviteMemberForm({ project, onUpdateRole, onRemoveMember
               </svg>
             </div>
             <div>
-              <h3 className="text-xl font-bold text-gray-900">¡Invitación enviada!</h3>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">¡Invitación enviada!</h3>
               <p className="text-sm text-gray-500 mt-2">
                 El usuario ha sido invitado al proyecto exitosamente.
               </p>
@@ -112,7 +112,7 @@ export default function InviteMemberForm({ project, onUpdateRole, onRemoveMember
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
               >
                 Cerrar ventana
               </button>
@@ -127,60 +127,60 @@ export default function InviteMemberForm({ project, onUpdateRole, onRemoveMember
           </div>
         ) : (
           <div className="space-y-4">
-          <label className="flex items-center gap-1.5 text-xs text-gray-600 cursor-pointer select-none">
+            <label className="flex items-center gap-1.5 text-xs text-gray-600 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={isExternal}
+                onChange={(e) => { setIsExternal(e.target.checked); setError(null); }}
+                className="w-3.5 h-3.5 text-brand border-gray-300 rounded focus:ring-brand"
+              />
+              Colaborador externo
+            </label>
+
             <input
-              type="checkbox"
-              checked={isExternal}
-              onChange={(e) => { setIsExternal(e.target.checked); setError(null); }}
-              className="w-3.5 h-3.5 text-brand border-gray-300 rounded focus:ring-brand"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleInvite()}
+              placeholder={isExternal ? 'correo@externo.com' : 'correo@alumnos.ucn.cl'}
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none bg-white dark:bg-gray-700 dark:text-gray-100 dark:placeholder:text-gray-500"
             />
-            Colaborador externo
-          </label>
 
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleInvite()}
-            placeholder={isExternal ? 'correo@externo.com' : 'correo@alumnos.ucn.cl'}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none"
-          />
+            {!isExternal && (
+              <Select
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="w-full"
+              >
+                {ROLE_OPTIONS.filter((r) => r.value !== 'EXTERNAL').map((r) => (
+                  <option key={r.value} value={r.value}>{r.label}</option>
+                ))}
+              </Select>
+            )}
 
-          {!isExternal && (
-            <Select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="w-full"
+            {error && (
+              <p className="text-xs text-red-500 flex gap-1 items-start">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" /> {error}
+              </p>
+            )}
+            {success && <p className="text-xs text-green-600">{success}</p>}
+
+            <button
+              onClick={handleInvite}
+              disabled={isSending}
+              className="w-full py-2 text-sm font-medium text-white bg-brand rounded-lg hover:bg-brand-dark transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
             >
-              {ROLE_OPTIONS.filter((r) => r.value !== 'EXTERNAL').map((r) => (
-                <option key={r.value} value={r.value}>{r.label}</option>
-              ))}
-            </Select>
-          )}
-
-          {error && (
-            <p className="text-xs text-red-500 flex gap-1 items-start">
-              <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" /> {error}
-            </p>
-          )}
-          {success && <p className="text-xs text-green-600">{success}</p>}
-
-          <button
-            onClick={handleInvite}
-            disabled={isSending}
-            className="w-full py-2 text-sm font-medium text-white bg-brand rounded-lg hover:bg-brand-dark transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
-          >
-            {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+              {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
               {isSending ? 'Enviando...' : 'Enviar invitación'}
             </button>
           </div>
         )}
 
-        <div className="pt-4 border-t border-gray-100 space-y-3 overflow-y-auto max-h-48 pr-2">
+        <div className="pt-4 border-t border-gray-100 dark:border-gray-700 space-y-3 overflow-y-auto max-h-48 pr-2">
           <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Roles disponibles</h3>
           {ROLE_DESCRIPTIONS.map((r) => (
             <div key={r.role}>
-              <p className="text-xs font-bold text-gray-700">{r.role}</p>
+              <p className="text-xs font-bold text-gray-700 dark:text-gray-300">{r.role}</p>
               <p className="text-xs text-gray-400 leading-relaxed">{r.desc}</p>
             </div>
           ))}
