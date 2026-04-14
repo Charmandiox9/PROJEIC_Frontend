@@ -35,6 +35,7 @@ interface CreateTaskModalProps {
   members: ProjectMember[];
   boards: Board[];
   projectId: string;
+  sprintId?: string;
 }
 
 const PRIORITIES = [
@@ -55,7 +56,7 @@ const getStatusFromBoardName = (boardName: string): string => {
 };
 
 export default function CreateTaskModal({
-  isOpen, onClose, defaultBoardId, taskToEdit, members, boards, projectId
+  isOpen, onClose, defaultBoardId, taskToEdit, members, boards, projectId, sprintId
 }: CreateTaskModalProps) {
   const { user } = useAuth();
   const buildInitialForm = (): TaskFormData => {
@@ -141,6 +142,7 @@ export default function CreateTaskModal({
           assigneeId: formData.assigneeId || undefined,
           priority: formData.priority,
           dueDate: finalDueDate,
+          sprintId: sprintId || undefined,
         };
         const createdResponse = await fetchGraphQL({ query: CREATE_TASK, variables: { input } });
 

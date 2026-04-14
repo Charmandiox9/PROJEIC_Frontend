@@ -21,3 +21,23 @@ export const CREATE_BOARD = `
     }
   }
 `;
+
+export const DELETE_BOARD = `
+  mutation removeBoard($id: String!) {
+    removeBoard(id: $id) {
+      id
+    }
+  }
+`;
+
+export const UPDATE_BOARD = `
+  mutation UpdateBoard($input: UpdateBoardInput!) {
+    updateBoard(updateBoardInput: $input) {
+      id
+      name
+      position
+      color
+      wipLimit
+    }
+  }
+`;

@@ -6,9 +6,11 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale/es';
 import Select from '@/components/ui/Select';
 import { fetchGraphQL } from '@/lib/graphQLClient';
-import { GET_BOARDS_BY_PROJECT, CREATE_BOARD } from '@/graphql/boards/operations';
+import { GET_BOARDS_BY_PROJECT, CREATE_BOARD, UPDATE_BOARD, DELETE_BOARD } from '@/graphql/boards/operations';
 import { GET_TASKS_BY_PROJECT, REMOVE_TASK, UPDATE_TASK } from '@/graphql/tasks/operations';
 import CreateTaskModal from '../../CreateTaskModal';
+import EditBoardModal from '../EditBoardModal';
+import CreateBoardModal from '../CreateBoardModal';
 
 interface ProjectMember {
   id: string;
@@ -63,10 +65,14 @@ export default function KanbanBoard({ projectId, members, userRole, sprintId }: 
   const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
 
   const canManageTasks = userRole === 'LEADER' || userRole === 'STUDENT';
+  const canManageBoards = userRole === 'LEADER';
 
   const [expandedColumns, setExpandedColumns] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
   const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
+
+  const [boardToEdit, setBoardToEdit] = useState<any | null>(null);
+  const [isCreateBoardOpen, setIsCreateBoardOpen] = useState(false);
 
   const handleSort = (key: string) => {
     let direction: 'asc' | 'desc' = 'asc';
@@ -203,6 +209,33 @@ export default function KanbanBoard({ projectId, members, userRole, sprintId }: 
     }
   };
 
+  const handleCreateBoard = () => {
+    setIsCreateBoardOpen(true);
+  };
+
+  const handleEditBoard = (board: any) => {
+    if (board.id.startsWith('fake-')) return;
+    setBoardToEdit(board);
+  };
+
+  const handleDeleteBoard = async (boardId: string) => {
+    if (boardId.startsWith('fake-')) return;
+    
+    if (!window.confirm('¿Estás seguro de eliminar esta columna? Las tareas en su interior podrían eliminarse.')) return;
+
+    try {
+      await fetchGraphQL({
+        query: DELETE_BOARD,
+        variables: { id: boardId }
+      });
+      setBoards(prev => prev.filter(b => b.id !== boardId));
+      loadKanbanData();
+    } catch (error: any) {
+      console.error(error);
+      alert('Error al eliminar la columna: ' + error.message);
+    }
+  };
+
   const openModal = (boardId?: string, task?: any) => {
     setDefaultBoardId(boardId);
     setTaskToEdit(task || null);
@@ -329,7 +362,7 @@ export default function KanbanBoard({ projectId, members, userRole, sprintId }: 
             return (
               <div
                 key={board.id}
-                className={`flex flex-col rounded-[1.25rem] border shrink-0 flex-1 min-w-[220px] max-w-[450px] transition-colors shadow-sm ${isOverWip ? 'bg-red-50/50 dark:bg-red-950/30 border-red-200 dark:border-red-800' : 'bg-[#f4f5f7] dark:bg-surface-secondary border-border-secondary'}`}
+                className={`group/board flex flex-col rounded-[1.25rem] border shrink-0 flex-1 min-w-[220px] max-w-[450px] transition-colors shadow-sm ${isOverWip ? 'bg-red-50/50 dark:bg-red-950/30 border-red-200 dark:border-red-800' : 'bg-[#f4f5f7] dark:bg-surface-secondary border-border-secondary'}`}
                 onDragOver={handleDragOver}
                 onDrop={(e) => handleDrop(e, board.id)}
               >
@@ -339,9 +372,25 @@ export default function KanbanBoard({ projectId, members, userRole, sprintId }: 
                   style={{ borderTop: `4px solid ${isOverWip ? '#ef4444' : boardColor}` }}
                 >
                   <div className="flex flex-col min-w-0 pr-2">
-                    <h3 className={`text-base font-bold truncate ${isOverWip ? 'text-red-600 dark:text-red-400' : 'text-text-primary'}`}>
-                      {board.name}
-                    </h3>
+                    {/* 🔥 Contenedor del título con botones de acción 🔥 */}
+                    <div className="flex items-center gap-2">
+                      <h3 className={`text-base font-bold truncate ${isOverWip ? 'text-red-600 dark:text-red-400' : 'text-text-primary'}`}>
+                        {board.name}
+                      </h3>
+                      
+                      {/* Botones de Editar y Eliminar (Solo para PM y si no es tablero virtual) */}
+                      {canManageBoards && !board.id.startsWith('fake-') && (
+                        <div className="opacity-0 group-hover/board:opacity-100 flex items-center gap-1 transition-opacity">
+                          <button onClick={() => handleEditBoard(board)} className="p-1 text-text-muted hover:text-brand bg-surface-secondary rounded" title="Editar columna">
+                            <Edit2 className="w-3 h-3" />
+                          </button>
+                          <button onClick={() => handleDeleteBoard(board.id)} className="p-1 text-text-muted hover:text-red-500 bg-surface-secondary rounded" title="Eliminar columna">
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
                     {isOverWip && <span className="text-[10px] font-bold text-red-500 uppercase tracking-tighter">Límite excedido</span>}
                   </div>
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-md shrink-0 flex items-center justify-center min-w-[28px] ${isOverWip ? 'bg-red-100 text-red-700' : 'bg-surface-secondary border border-border-primary text-text-muted'}`}>
@@ -455,6 +504,15 @@ export default function KanbanBoard({ projectId, members, userRole, sprintId }: 
               </div>
             );
           })}
+          {canManageBoards && (
+            <button
+              onClick={handleCreateBoard}
+              className="flex flex-col items-center justify-center gap-2 shrink-0 w-[220px] h-[100px] mt-0 border-2 border-dashed border-border-secondary rounded-[1.25rem] text-text-muted hover:text-brand hover:border-brand hover:bg-brand/5 transition-all"
+            >
+              <Plus className="w-6 h-6" />
+              <span className="font-medium text-sm">Añadir columna</span>
+            </button>
+          )}
         </div>
       ) : (
         <div className="bg-surface-primary rounded-xl border border-border-primary overflow-x-auto shadow-sm">
@@ -568,6 +626,26 @@ export default function KanbanBoard({ projectId, members, userRole, sprintId }: 
         members={members}
         boards={activeBoards}
         projectId={projectId}
+        sprintId={sprintId}
+      />
+      <EditBoardModal
+        isOpen={!!boardToEdit}
+        board={boardToEdit}
+        onClose={() => setBoardToEdit(null)}
+        onSuccess={() => {
+          setBoardToEdit(null);
+          loadKanbanData();
+        }}
+      />
+      <CreateBoardModal
+        isOpen={isCreateBoardOpen}
+        onClose={() => setIsCreateBoardOpen(false)}
+        onSuccess={() => {
+          setIsCreateBoardOpen(false);
+          loadKanbanData();
+        }}
+        projectId={projectId}
+        nextPosition={boards.length}
       />
     </div>
   );

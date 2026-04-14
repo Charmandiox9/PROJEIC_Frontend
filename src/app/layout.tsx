@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthProvider";
 import ClientLayout from "@/components/ClientLayout";
+import { Toaster } from 'sonner';
 
 export const metadata: Metadata = {
   title: "Projeic App",
@@ -24,6 +25,7 @@ export default function RootLayout({
             {children}
           </ClientLayout>
         </AuthProvider>
+        <Toaster richColors position="top-right" />
       </body>
     </html>
   );
