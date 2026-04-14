@@ -8,10 +8,9 @@ import logoIcon from '../../../../../public/logo.png';
 
 export default function AuthPage() {
   const handleOAuthLogin = () => {
-    // 1. Intentamos leer la variable de entorno
     let baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-    // 2. Si la variable no existe (undefined o vacía), forzamos según el dominio
+    console.log(baseUrl);
     if (!baseUrl) {
       const isProduction = window.location.hostname.includes('railway.app');
       baseUrl = isProduction 
