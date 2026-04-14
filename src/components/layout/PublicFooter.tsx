@@ -1,4 +1,4 @@
-﻿import Link from 'next/link';
+import Link from 'next/link';
 import Image from 'next/image';
 import { LayoutGrid, Info, GraduationCap, Github, BookOpen, LogIn, TerminalSquare, Building2, Cpu } from 'lucide-react';
 import logoTexto from '../../../public/Logo__Texto.png';
@@ -6,7 +6,7 @@ import logoTexto from '../../../public/Logo__Texto.png';
 export default function PublicFooter() {
   return (
     <footer className="bg-ui-dark dark:bg-ui-darker text-white py-12 px-6 border-t border-white/5">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-8 mb-8">
+      <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div className="flex flex-col space-y-4">
           <Image
             src={logoTexto}
@@ -31,14 +31,6 @@ export default function PublicFooter() {
           <Link href="/eic" className="group inline-flex items-center space-x-2 text-sm text-white/70 hover:text-brand transition-colors">
             <GraduationCap className="w-4 h-4 text-white/40 group-hover:text-brand transition-colors" />
             <span>EIC</span>
-          </Link>
-        </div>
-
-        <div className="flex flex-col space-y-4">
-          <h3 className="font-semibold text-lg text-white/90">Acceso</h3>
-          <Link href="/auth/login" className="group inline-flex items-center space-x-2 text-sm text-white/70 hover:text-brand transition-colors">
-            <LogIn className="w-4 h-4 text-white/40 group-hover:text-brand transition-colors" />
-            <span>Iniciar sesión</span>
           </Link>
         </div>
 
