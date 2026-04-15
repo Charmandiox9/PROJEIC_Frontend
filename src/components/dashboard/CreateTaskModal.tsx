@@ -36,6 +36,7 @@ interface CreateTaskModalProps {
   boards: Board[];
   projectId: string;
   sprintId?: string;
+  readOnly?: boolean;
 }
 
 const PRIORITIES = [
@@ -56,7 +57,7 @@ const getStatusFromBoardName = (boardName: string): string => {
 };
 
 export default function CreateTaskModal({
-  isOpen, onClose, defaultBoardId, taskToEdit, members, boards, projectId, sprintId
+  isOpen, onClose, defaultBoardId, taskToEdit, members, boards, projectId, sprintId, readOnly = false
 }: CreateTaskModalProps) {
   const { user } = useAuth();
   const buildInitialForm = (): TaskFormData => {
@@ -179,12 +180,14 @@ export default function CreateTaskModal({
 
   const isEditing = !!taskToEdit;
 
+  const modalTitle = readOnly ? 'Detalles de la tarea' : (isEditing ? 'Editar tarea' : 'Nueva tarea');
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-surface-primary rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-primary sticky top-0 bg-surface-primary z-10">
           <h2 className="text-lg font-bold text-text-primary">
-            {isEditing ? 'Editar tarea' : 'Nueva tarea'}
+            {modalTitle}
           </h2>
           <button onClick={onClose} className="p-2 text-gray-400 hover:text-text-primary hover:bg-surface-tertiary rounded-full">
             <X className="w-5 h-5" />
@@ -194,27 +197,27 @@ export default function CreateTaskModal({
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {error && <div className="p-3 text-sm text-red-600 bg-red-50 border rounded-lg">{error}</div>}
 
-          <Input id="task-title" label="Título *" name="title" required value={formData.title} onChange={handleChange} />
-          <Textarea id="task-description" label="Descripción" name="description" rows={3} value={formData.description} onChange={handleChange} />
+          <Input id="task-title" label="Título *" name="title" required value={formData.title} onChange={handleChange} disabled={readOnly} />
+          <Textarea id="task-description" label="Descripción" name="description" rows={3} value={formData.description} onChange={handleChange} disabled={readOnly} />
 
           <div className="grid grid-cols-2 gap-4">
-            <Select id="task-board" label="Columna *" name="boardId" value={formData.boardId} onChange={handleChange} required>
+            <Select id="task-board" label="Columna *" name="boardId" value={formData.boardId} onChange={handleChange} disabled={readOnly} required>
               <option value="" disabled>Selecciona una columna</option>
               {boards.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
             </Select>
-            <Select id="task-priority" label="Prioridad *" name="priority" value={formData.priority} onChange={handleChange} required>
+            <Select id="task-priority" label="Prioridad *" name="priority" value={formData.priority} onChange={handleChange} disabled={readOnly} required>
               {PRIORITIES.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
             </Select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <Select id="task-assigned" label="Asignado a" name="assigneeId" value={formData.assigneeId} onChange={handleChange}>
+            <Select id="task-assigned" label="Asignado a" name="assigneeId" value={formData.assigneeId} onChange={handleChange} disabled={readOnly}>
               <option value="">Sin asignar</option>
               {members.filter(m => m.status === 'ACTIVE').map((m) => (
                 <option key={m.id} value={m.user.id}>{m.user.name}</option>
               ))}
             </Select>
-            <Input id="task-due-date" label="Fecha de Término" name="dueDate" type="date" value={formData.dueDate} onChange={handleChange} title="Agrega una fecha límite o de término" />
+            <Input id="task-due-date" label="Fecha de Término" name="dueDate" type="date" value={formData.dueDate} onChange={handleChange} disabled={readOnly} title="Agrega una fecha límite o de término" />
           </div>
 
           <div className="space-y-2">
@@ -223,7 +226,9 @@ export default function CreateTaskModal({
               {formData.tags?.map(tag => (
                 <span key={tag} className="flex items-center gap-1 px-2 py-1 bg-brand/10 text-brand text-xs font-bold rounded-md">
                   {tag}
-                  <button type="button" onClick={() => removeTag(tag)} className="hover:text-brand-dark">×</button>
+                  {!readOnly && (
+                    <button type="button" onClick={() => removeTag(tag)} className="hover:text-brand-dark">×</button>
+                  )}
                 </span>
               ))}
               <input
@@ -232,15 +237,24 @@ export default function CreateTaskModal({
                 onKeyDown={addTag}
                 className="flex-1 outline-none text-sm min-w-[100px] bg-transparent text-text-primary placeholder:text-text-muted"
                 placeholder="prio, bug, frontend..."
+                disabled={readOnly}
               />
             </div>
           </div>
 
           <div className="pt-4 border-t border-border-primary flex justify-end gap-3">
-            <button type="button" onClick={onClose} disabled={isSubmitting} className="px-4 py-2 text-sm text-text-primary border border-border-secondary rounded-lg hover:bg-surface-tertiary bg-surface-primary">Cancelar</button>
-            <button type="submit" disabled={isSubmitting} className="px-6 py-2 text-sm text-white bg-brand rounded-lg hover:bg-brand-dark flex items-center gap-2">
-              {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</> : isEditing ? 'Guardar cambios' : 'Crear tarea'}
-            </button>
+            {readOnly ? (
+              <button type="button" onClick={onClose} className="px-6 py-2 text-sm text-white bg-brand rounded-lg hover:bg-brand-dark">
+                Cerrar
+              </button>
+            ) : (
+              <>
+                <button type="button" onClick={onClose} disabled={isSubmitting} className="px-4 py-2 text-sm text-text-primary border border-border-secondary rounded-lg hover:bg-surface-tertiary bg-surface-primary">Cancelar</button>
+                <button type="submit" disabled={isSubmitting} className="px-6 py-2 text-sm text-white bg-brand rounded-lg hover:bg-brand-dark flex items-center gap-2">
+                  {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</> : isEditing ? 'Guardar cambios' : 'Crear tarea'}
+                </button>
+              </>
+            )}
           </div>
         </form>
       </div>
