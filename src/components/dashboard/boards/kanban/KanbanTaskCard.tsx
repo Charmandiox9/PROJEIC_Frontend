@@ -64,8 +64,17 @@ export default function KanbanTaskCard({ task, members, canManageTasks, isDraggi
 
       <div className="flex items-center justify-between mt-auto pt-4 relative border-t border-border-primary/50">
         {task.dueDate ? (
-          <div title="Vencimiento" className="flex items-center gap-1.5 text-xs font-semibold text-text-muted bg-surface-secondary px-2 py-1 rounded-md border border-border-primary">
-            <Calendar className="w-3.5 h-3.5 text-brand" /> {format(new Date(task.dueDate), "d MMM", { locale: es })}
+          <div title={task.startDate ? `Inicio: ${format(new Date(task.startDate), "d MMM", { locale: es })}` : 'Vencimiento'} className="flex items-center gap-1.5 text-xs font-semibold text-text-muted bg-surface-secondary px-2 py-1 rounded-md border border-border-primary">
+            <Calendar className="w-3.5 h-3.5 text-brand" />
+            {task.startDate
+              ? `${format(new Date(task.startDate), "d MMM", { locale: es })} → ${format(new Date(task.dueDate), "d MMM", { locale: es })}`
+              : format(new Date(task.dueDate), "d MMM", { locale: es })
+            }
+          </div>
+        ) : task.startDate ? (
+          <div title="Fecha de inicio" className="flex items-center gap-1.5 text-xs font-semibold text-text-muted bg-surface-secondary px-2 py-1 rounded-md border border-border-primary">
+            <Calendar className="w-3.5 h-3.5 text-brand" />
+            Inicio: {format(new Date(task.startDate), "d MMM", { locale: es })}
           </div>
         ) : <div />}
 

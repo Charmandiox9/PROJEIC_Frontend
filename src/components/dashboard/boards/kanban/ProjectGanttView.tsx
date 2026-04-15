@@ -12,7 +12,7 @@ export default function ProjectGanttView({ tasks, onEditTask }: ProjectGanttView
     return tasks
       .filter(t => t.createdAt)
       .map(t => {
-        const start = new Date(t.createdAt);
+        const start = t.startDate ? new Date(t.startDate) : new Date(t.createdAt);
         const end = t.dueDate ? new Date(t.dueDate) : addDays(start, 1);
         return { ...t, parsedStart: start, parsedEnd: end };
       })

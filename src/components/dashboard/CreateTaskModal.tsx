@@ -23,6 +23,7 @@ interface TaskFormData {
   boardId: string;
   assigneeId: string;
   priority: string;
+  startDate: string;
   dueDate: string;
   tags?: string[];
 }
@@ -68,6 +69,7 @@ export default function CreateTaskModal({
         boardId: taskToEdit.boardId || '',
         assigneeId: taskToEdit.assigneeId || '',
         priority: taskToEdit.priority || 'MEDIUM',
+        startDate: taskToEdit.startDate ? taskToEdit.startDate.split('T')[0] : '',
         dueDate: taskToEdit.dueDate ? taskToEdit.dueDate.split('T')[0] : '',
       };
     }
@@ -77,6 +79,7 @@ export default function CreateTaskModal({
       boardId: defaultBoardId || (boards.length > 0 ? boards[0].id : ''),
       assigneeId: '',
       priority: 'MEDIUM',
+      startDate: '',
       dueDate: '',
     };
   };
@@ -115,10 +118,9 @@ export default function CreateTaskModal({
     setError(null);
 
     try {
-      let finalDueDate = undefined;
+      let finalDueDate: string | undefined = undefined;
       if (formData.dueDate) {
-        const localEndOfTheDay = new Date(`${formData.dueDate}T23:59:59`);
-        finalDueDate = localEndOfTheDay.toISOString();
+        finalDueDate = `${formData.dueDate}T23:59:59.000Z`;
       }
 
       if (taskToEdit) {
@@ -130,6 +132,7 @@ export default function CreateTaskModal({
           status: calculatedStatus,
           assigneeId: formData.assigneeId || undefined,
           priority: formData.priority,
+          startDate: formData.startDate ? `${formData.startDate}T00:00:00.000Z` : undefined,
           dueDate: finalDueDate,
         };
         await fetchGraphQL({ query: UPDATE_TASK, variables: { input } });
@@ -142,6 +145,7 @@ export default function CreateTaskModal({
           boardId: (formData.boardId && formData.boardId.startsWith('fake-')) ? undefined : (formData.boardId || undefined),
           assigneeId: formData.assigneeId || undefined,
           priority: formData.priority,
+          startDate: formData.startDate ? `${formData.startDate}T00:00:00.000Z` : undefined,
           dueDate: finalDueDate,
           sprintId: sprintId || undefined,
         };
@@ -217,7 +221,31 @@ export default function CreateTaskModal({
                 <option key={m.id} value={m.user.id}>{m.user.name}</option>
               ))}
             </Select>
-            <Input id="task-due-date" label="Fecha de Término" name="dueDate" type="date" value={formData.dueDate} onChange={handleChange} disabled={readOnly} title="Agrega una fecha límite o de término" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              id="task-start-date"
+              label="Fecha de Inicio"
+              name="startDate"
+              type="date"
+              value={formData.startDate}
+              onChange={handleChange}
+              disabled={readOnly}
+              title="Fecha en que la tarea comienza"
+              max={formData.dueDate || undefined}
+            />
+            <Input
+              id="task-due-date"
+              label="Fecha de Término"
+              name="dueDate"
+              type="date"
+              value={formData.dueDate}
+              onChange={handleChange}
+              disabled={readOnly}
+              title="Agrega una fecha límite o de término"
+              min={formData.startDate || undefined}
+            />
           </div>
 
           <div className="space-y-2">

@@ -7,6 +7,7 @@ export const CREATE_TASK = `
       status
       priority
       position
+      startDate
       dueDate
       boardId
       assigneeId
@@ -26,6 +27,7 @@ export const UPDATE_TASK = `
       status
       priority
       position
+      startDate
       dueDate
       boardId
       assigneeId
@@ -53,6 +55,7 @@ export const GET_TASKS_BY_PROJECT = `
       status
       priority
       position
+      startDate
       dueDate
       boardId
       assigneeId
@@ -73,6 +76,7 @@ export const GET_PENDING_TASKS_BY_USER = `
       status
       priority
       position
+      startDate
       dueDate
       boardId
       assigneeId
