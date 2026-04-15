@@ -19,7 +19,8 @@ import {
   Activity,
   BarChart2,
   Users,
-  Target
+  Target,
+  CalendarIcon
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthProvider';
 import { Project } from '@/types/project';
@@ -32,9 +33,9 @@ import TabMiembros from '@/components/dashboard/projects/tabs/TabMiembros';
 import ActivityFeed from '@/components/dashboard/projects/tabs/TabActivity';
 import InviteMemberForm from '@/components/dashboard/projects/members/InviteMemberForm';
 import TabResultados from '@/components/dashboard/projects/tabs/TabResultados';
+import TabCronograma from '@/components/dashboard/projects/tabs/TabCronograma';
 
-// 🔥 Agregamos 'resultados' a los tipos de Tab permitidos
-type TabId = 'resumen' | 'tablero' | 'resultados' | 'actividad' | 'metricas' | 'miembros';
+type TabId = 'resumen' | 'tablero' | 'resultados' | 'actividad' | 'metricas' | 'miembros' | 'cronograma';
 
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -115,17 +116,22 @@ export default function ProjectDetailPage() {
   const currentUserRole = project?.myRole || actualRole || null;
   const isLeader = currentUserRole === 'LEADER';
 
-  // 🔥 GENERACIÓN DINÁMICA DE PESTAÑAS SEGÚN EL MODO
   const currentTabs: { id: TabId; label: string; icon: React.ElementType }[] = [
     { id: 'resumen', label: 'Resumen', icon: Layout },
-    // Si es Híbrido, mostramos Resultados. Si es Clásico, mostramos Tablero.
     project.mode === 'HYBRID'
       ? { id: 'resultados', label: 'Resultados', icon: Target }
       : { id: 'tablero', label: 'Tablero', icon: Columns },
+  ];
+
+  if (project.mode === 'CLASSIC' && (project.methodology === 'SCRUM' || project.methodology === 'SCRUMBAN')) {
+    currentTabs.push({ id: 'cronograma', label: 'Cronograma', icon: CalendarIcon });
+  }
+
+  currentTabs.push(
     { id: 'actividad', label: 'Actividad', icon: Activity },
     { id: 'metricas', label: 'Métricas', icon: BarChart2 },
-    { id: 'miembros', label: 'Miembros', icon: Users },
-  ];
+    { id: 'miembros', label: 'Miembros', icon: Users }
+  );
 
   return (
     <div className="p-4 sm:p-6 md:p-8 max-w-6xl mx-auto space-y-6 pb-12 min-w-0">
@@ -220,6 +226,13 @@ export default function ProjectDetailPage() {
             onUpdateRole={handleUpdateRole}
             onRemoveMember={handleRemoveMember}
             onRefresh={loadProject}
+          />
+        )}
+        {activeTab === 'cronograma' && project.mode === 'CLASSIC' && (
+          <TabCronograma 
+            projectId={project.id} 
+            members={project.members}
+            userRole={currentUserRole}
           />
         )}
       </div>
