@@ -28,43 +28,62 @@ interface KanbanTaskCardProps {
 
 export default function KanbanTaskCard({ task, members, canManageTasks, isDragging, onDragStart, onDragEnd, onEdit, onDelete }: KanbanTaskCardProps) {
   const assigneeMember = members.find(m => m.user.id === task.assigneeId);
+  
+  const visibleTags = task.tags?.slice(0, 3) || [];
+  const extraTagsCount = task.tags?.length > 3 ? task.tags.length - 3 : 0;
 
   return (
     <div
       draggable={canManageTasks}
       onDragStart={(e) => onDragStart(e, task.id)}
       onDragEnd={onDragEnd}
-      className={`group bg-surface-primary p-4 rounded-xl border border-l-[4px] shadow-sm transition-all duration-200 relative ${isDragging ? 'opacity-50 scale-95 shadow-none' : 'border-border-secondary hover:shadow-lg hover:-translate-y-1 cursor-grab active:cursor-grabbing'} ${PRIORITY_BORDER[task.priority] || PRIORITY_BORDER.MEDIUM}`}
+      className={`group bg-surface-primary p-4 rounded-xl border border-l-[4px] shadow-sm transition-all duration-200 relative ${isDragging ? 'opacity-50 scale-95 shadow-none' : 'border-border-secondary hover:shadow-md cursor-grab active:cursor-grabbing'} ${PRIORITY_BORDER[task.priority] || PRIORITY_BORDER.MEDIUM}`}
     >
       <div className="absolute top-0 inset-x-0 h-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
         <GripHorizontal className="w-4 h-4 text-border-primary" />
       </div>
       
       {canManageTasks && !isDragging && (
-        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex bg-surface-primary shadow-sm border border-border-secondary rounded-md overflow-hidden">
-          <button onClick={() => onEdit(task)} className="p-1.5 text-text-muted hover:text-brand hover:bg-brand/5" title="Editar">
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex bg-surface-primary shadow-sm border border-border-secondary rounded-md overflow-hidden z-10">
+          <button onClick={(e) => { e.stopPropagation(); onEdit(task); }} className="p-1.5 text-text-muted hover:text-brand hover:bg-brand/5" title="Editar">
             <Edit2 className="w-3.5 h-3.5" />
           </button>
-          <button onClick={() => onDelete(task.id)} className="p-1.5 text-text-muted hover:text-red-500 hover:bg-red-50" title="Eliminar">
+          <button onClick={(e) => { e.stopPropagation(); onDelete(task.id); }} className="p-1.5 text-text-muted hover:text-red-500 hover:bg-red-50" title="Eliminar">
             <Trash2 className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-1.5 mb-3 pr-12 mt-2">
-        <PriorityBadge priority={task.priority} />
-        {task.tags?.map((tag: string) => (
-          <span key={tag} className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md bg-surface-page text-text-secondary border border-border-secondary">
-            {tag}
-          </span>
-        ))}
+      <div 
+        className="mt-2 cursor-pointer" 
+        onClick={() => onEdit(task)}
+        title="Clic para ver detalles de la tarea"
+      >
+        <div className="flex flex-wrap items-center gap-1.5 mb-3 pr-12">
+          <PriorityBadge priority={task.priority} />
+          
+          {visibleTags.map((tag: string) => (
+            <span key={tag} className="text-[10px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-brand/10 text-brand border border-brand/20">
+              {tag}
+            </span>
+          ))}
+          
+          {extraTagsCount > 0 && (
+            <span className="text-[10px] font-bold text-text-muted px-1.5 py-0.5 rounded-md bg-surface-secondary border border-border-secondary">
+              +{extraTagsCount}
+            </span>
+          )}
+        </div>
+
+        <h4 className="text-sm font-semibold text-text-primary mb-3 hover:text-brand transition-colors">
+          {task.title}
+        </h4>
       </div>
 
-      <h4 className="text-sm font-semibold text-text-primary mb-3">{task.title}</h4>
-
+      {/* Footer de la tarjeta con Fechas y Asignado */}
       <div className="flex items-center justify-between mt-auto pt-4 relative border-t border-border-primary/50">
         {task.dueDate ? (
-          <div title={task.startDate ? `Inicio: ${format(new Date(task.startDate), "d MMM", { locale: es })}` : 'Vencimiento'} className="flex items-center gap-1.5 text-xs font-semibold text-text-muted bg-surface-secondary px-2 py-1 rounded-md border border-border-primary">
+          <div title={task.startDate ? `Inicio: ${format(new Date(task.startDate), "d MMM", { locale: es })}` : 'Vencimiento'} className="flex items-center gap-1.5 text-xs font-semibold text-text-muted bg-surface-secondary px-2 py-1 rounded-md border border-border-primary cursor-help">
             <Calendar className="w-3.5 h-3.5 text-brand" />
             {task.startDate
               ? `${format(new Date(task.startDate), "d MMM", { locale: es })} → ${format(new Date(task.dueDate), "d MMM", { locale: es })}`
@@ -72,14 +91,14 @@ export default function KanbanTaskCard({ task, members, canManageTasks, isDraggi
             }
           </div>
         ) : task.startDate ? (
-          <div title="Fecha de inicio" className="flex items-center gap-1.5 text-xs font-semibold text-text-muted bg-surface-secondary px-2 py-1 rounded-md border border-border-primary">
+          <div title="Fecha de inicio" className="flex items-center gap-1.5 text-xs font-semibold text-text-muted bg-surface-secondary px-2 py-1 rounded-md border border-border-primary cursor-help">
             <Calendar className="w-3.5 h-3.5 text-brand" />
             Inicio: {format(new Date(task.startDate), "d MMM", { locale: es })}
           </div>
         ) : <div />}
 
         {assigneeMember ? (
-          <div className="flex items-center gap-2" title={`Asignado a: ${assigneeMember.user.name}`}>
+          <div className="flex items-center gap-2 cursor-help" title={`Asignado a: ${assigneeMember.user.name}`}>
             {assigneeMember.user.avatarUrl ? (
               <img src={assigneeMember.user.avatarUrl} alt="" className="w-6 h-6 rounded-full object-cover ring-2 ring-surface-primary shadow-sm" />
             ) : (
@@ -89,7 +108,7 @@ export default function KanbanTaskCard({ task, members, canManageTasks, isDraggi
             )}
           </div>
         ) : (
-          <div className="w-6 h-6 rounded-full bg-surface-secondary border border-dashed border-border-primary flex items-center justify-center ring-2 ring-surface-primary" title="Sin asignar">
+          <div className="w-6 h-6 rounded-full bg-surface-secondary border border-dashed border-border-primary flex items-center justify-center ring-2 ring-surface-primary cursor-help" title="Sin asignar">
             <UserIcon className="w-3 h-3 text-text-muted" />
           </div>
         )}

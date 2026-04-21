@@ -14,6 +14,7 @@ export const CREATE_TASK = `
       sprintId
       expectedResultId
       createdAt
+      tags
     }
   }
 `;
@@ -34,6 +35,7 @@ export const UPDATE_TASK = `
       sprintId
       expectedResultId
       updatedAt
+      tags
     }
   }
 `;
@@ -63,6 +65,17 @@ export const GET_TASKS_BY_PROJECT = `
       expectedResultId
       createdAt
       updatedAt
+      tags
+      comments {
+        id
+        content
+        createdAt
+        author {
+          userId
+          name
+          avatarUrl
+        }
+      }
     }
   }
 `;
@@ -82,6 +95,32 @@ export const GET_PENDING_TASKS_BY_USER = `
       assigneeId
       expectedResultId
       createdAt
+      tags
+      comments {
+        id
+        content
+        createdAt
+        author {
+          userId
+          name
+          avatarUrl
+        }
+      }
+    }
+  }
+`;
+
+export const ADD_COMMENT_TO_TASK = `
+  mutation AddCommentToTask($taskId: String!, $content: String!) {
+    addCommentToTask(taskId: $taskId, content: $content) {
+      id
+      content
+      createdAt
+      author {
+        userId
+        name
+        avatarUrl
+      }
     }
   }
 `;
