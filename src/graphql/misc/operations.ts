@@ -307,3 +307,29 @@ export const GET_DASHBOARD_ACTIVITY = `
     }
   }
 `;
+
+export const GET_GITHUB_COMMITS = `
+  query GetGithubCommits($token: String!, $owner: String!, $name: String!, $branch: String!) {
+    getGithubCommits(token: $token, owner: $owner, name: $name, branch: $branch) {
+      totalCommits
+      stats {
+        totalAdditions
+        totalDeletions
+      }
+      commits {
+        oid
+        message
+        additions
+        deletions
+        committedDate
+        author {
+          name
+          user {
+            login
+            avatarUrl
+          }
+        }
+      }
+    }
+  }
+`;

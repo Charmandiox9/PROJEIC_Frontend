@@ -20,7 +20,8 @@ import {
   BarChart2,
   Users,
   Target,
-  CalendarIcon
+  CalendarIcon,
+  Code
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthProvider';
 import { Project } from '@/types/project';
@@ -34,8 +35,9 @@ import ActivityFeed from '@/components/dashboard/projects/tabs/TabActivity';
 import InviteMemberForm from '@/components/dashboard/projects/members/InviteMemberForm';
 import TabResultados from '@/components/dashboard/projects/tabs/TabResultados';
 import TabCronograma from '@/components/dashboard/projects/tabs/TabCronograma';
+import GithubIntegration from '@/components/dashboard/projects/tabs/GithubIntegration';
 
-type TabId = 'resumen' | 'tablero' | 'resultados' | 'actividad' | 'metricas' | 'miembros' | 'cronograma';
+type TabId = 'resumen' | 'tablero' | 'resultados' | 'actividad' | 'metricas' | 'miembros' | 'cronograma' | 'github';
 
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -130,7 +132,8 @@ export default function ProjectDetailPage() {
   currentTabs.push(
     { id: 'actividad', label: 'Actividad', icon: Activity },
     { id: 'metricas', label: 'Métricas', icon: BarChart2 },
-    { id: 'miembros', label: 'Miembros', icon: Users }
+    { id: 'miembros', label: 'Miembros', icon: Users },
+    { id: 'github', label: 'Integración de GitHub', icon: Code }
   );
 
   return (
@@ -235,6 +238,7 @@ export default function ProjectDetailPage() {
             userRole={currentUserRole}
           />
         )}
+        {activeTab === 'github' && <GithubIntegration/>} 
       </div>
 
       {/* MODALES */}
