@@ -53,6 +53,8 @@ export const GET_PROJECT_BY_ID = `
       isInstitutional
       mode
       myRole
+      githubOwner
+      githubRepo
       subject {        
         id
         name
@@ -164,6 +166,8 @@ export const GET_MY_PROJECTS = `
         isInstitutional
         mode
         myRole
+        githubOwner
+        githubRepo
         subject {
           id
           name
@@ -308,28 +312,42 @@ export const GET_DASHBOARD_ACTIVITY = `
   }
 `;
 
-export const GET_GITHUB_COMMITS = `
-  query GetGithubCommits($token: String!, $owner: String!, $name: String!, $branch: String!) {
-    getGithubCommits(token: $token, owner: $owner, name: $name, branch: $branch) {
+export const GET_GITHUB_DATA = `
+  query GetGithubData($token: String!, $owner: String!, $repo: String!, $branch: String!) {
+    getGithubCommits(token: $token, owner: $owner, name: $repo, branch: $branch) {
       totalCommits
-      stats {
-        totalAdditions
-        totalDeletions
-      }
       commits {
         oid
         message
         additions
         deletions
         committedDate
-        author {
-          name
-          user {
-            login
-            avatarUrl
-          }
-        }
+        author { name user { login avatarUrl } }
       }
+    }
+    getWorkflowRuns(token: $token, owner: $owner, repo: $repo) {
+      id
+      status
+      conclusion
+      display_title
+      created_at
+      html_url
+    }
+    getArtifacts(token: $token, owner: $owner, repo: $repo) {
+      id
+      name
+      size_in_bytes
+      expired
+      created_at
+    }
+  }
+`;
+
+export const DISPATCH_WORKFLOW = `
+  mutation DispatchWorkflow($token: String!, $owner: String!, $repo: String!, $workflowId: String!, $ref: String!) {
+    dispatchWorkflow(token: $token, owner: $owner, repo: $repo, workflowId: $workflowId, ref: $ref) {
+      success
+      message
     }
   }
 `;

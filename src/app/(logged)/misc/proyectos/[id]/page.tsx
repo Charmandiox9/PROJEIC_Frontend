@@ -238,7 +238,9 @@ export default function ProjectDetailPage() {
             userRole={currentUserRole}
           />
         )}
-        {activeTab === 'github' && <GithubIntegration/>} 
+        {activeTab === 'github' && (
+          <GithubIntegration project={project} />
+        )}
       </div>
 
       {/* MODALES */}
