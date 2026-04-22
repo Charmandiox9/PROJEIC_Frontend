@@ -133,8 +133,11 @@ export default function ProjectDetailPage() {
     { id: 'actividad', label: 'Actividad', icon: Activity },
     { id: 'metricas', label: 'Métricas', icon: BarChart2 },
     { id: 'miembros', label: 'Miembros', icon: Users },
-    { id: 'github', label: 'Integración de GitHub', icon: Code }
   );
+
+  if(project.githubOwner && project.githubRepo) {
+    currentTabs.push({ id: 'github', label: 'Integración de GitHub', icon: Code });
+  }
 
   return (
     <div className="p-4 sm:p-6 md:p-8 max-w-6xl mx-auto space-y-6 pb-12 min-w-0">
