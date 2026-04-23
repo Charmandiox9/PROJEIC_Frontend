@@ -8,10 +8,10 @@ import logoIcon from '../../../../../public/logo.png';
 
 export default function AuthPage() {
   const handleOAuthLogin = () => {
-    // 1. Intentamos leer la variable inyectada (cubriendo ambas opciones de nombres que usas)
-    let baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || "";
+    // 1. Solo buscamos el dominio del backend, ignoramos la variable de GraphQL
+    let baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
   
-    // 2. Si Next.js no inyectó nada, usamos la lógica de inferencia inteligente
+    // 2. Lógica de inferencia si no hay variable explícita
     if (!baseUrl) {
       if (window.location.hostname.includes('development.up.railway.app')) {
         baseUrl = 'https://projeicbackend-development.up.railway.app';
@@ -19,20 +19,18 @@ export default function AuthPage() {
       else if (window.location.hostname.includes('production.up.railway.app')) {
         baseUrl = 'https://projeicbackend-production.up.railway.app';
       } 
-      // Si estás programando en tu PC (localhost real)
       else if (process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost') {
         baseUrl = 'http://localhost:4000';
       } 
-      // PRODUCCIÓN (Docker en la VM): Dejamos el string vacío para armar una ruta relativa
       else {
+        // Producción Docker: string vacío
         baseUrl = '';
       }
     }
   
-    // 3. Limpiamos el slash final solo si baseUrl tiene contenido
     const cleanBaseUrl = baseUrl ? baseUrl.replace(/\/$/, '') : '';
     
-    // 4. Armamos la URL final
+    // Ahora sí, si baseUrl es "", la URL final será perfectamente "/projeic/api/auth/google"
     const finalUrl = `${cleanBaseUrl}/projeic/api/auth/google`;
     
     console.log("Redirigiendo a:", finalUrl);
