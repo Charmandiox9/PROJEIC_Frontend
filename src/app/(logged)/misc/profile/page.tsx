@@ -1,0 +1,384 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { useAuth } from '@/context/AuthProvider';
+import { fetchGraphQL } from '@/lib/graphQLClient';
+import { GET_PROFILE, GET_MY_PROJECTS, GET_DASHBOARD_ACTIVITY } from '@/graphql/misc/operations';
+import { GET_PENDING_TASKS_BY_USER } from '@/graphql/tasks/operations';
+import { Plus, Briefcase, CheckSquare, Activity, Users, FolderKanban, Clock, ArrowRight } from 'lucide-react';
+import CreateProjectModal from '@/components/dashboard/CreateProjectModal';
+
+interface UserProfile {
+  userId: string;
+  email: string;
+  name: string;
+  avatarUrl?: string;
+}
+
+interface Project {
+  status: string;
+  myRole?: string;
+  members?: {
+    role: string;
+    status: string;
+    user: {
+      id: string;
+    };
+  }[];
+}
+
+interface DashboardMetrics {
+  activeProjects: number | null;
+  pendingTasks: number | null;
+  activityPoints: number | null;
+  collaborators: number | null;
+}
+
+export default function ProfileDashboard() {
+  const [mounted, setMounted] = useState(false);
+  const { user } = useAuth();
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [projects, setProjects] = useState<any[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [metrics, setMetrics] = useState<DashboardMetrics>({
+    activeProjects: null,
+    pendingTasks: null,
+    activityPoints: null,
+    collaborators: null,
+  });
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [recentFeed, setRecentFeed] = useState<any[]>([]);
+
+  useEffect(() => {
+    setMounted(true);
+    let isSubscribed = true;
+
+    const loadData = async () => {
+      try {
+        const [profileRes, projectsRes, tasksRes, activityRes] = await Promise.all([
+          fetchGraphQL({ query: GET_PROFILE }),
+          fetchGraphQL({ query: GET_MY_PROJECTS, variables: { skip: 0, take: 50 } }),
+          fetchGraphQL({ query: GET_PENDING_TASKS_BY_USER }),
+          fetchGraphQL({ query: GET_DASHBOARD_ACTIVITY })
+        ]);
+
+        if (isSubscribed) {
+          if (profileRes?.me) {
+            setProfile(profileRes.me);
+
+            if (projectsRes?.myProjects?.items) {
+              const items = projectsRes.myProjects.items;
+              setProjects(items);
+
+              const leaderProjects = items.filter((p: Project) => {
+                const activeMembers = p.members?.filter(m => m.status === 'ACTIVE') || [];
+                const myMembership = activeMembers.find(m => m.user.id === user?.userId);
+                const role = p.myRole || myMembership?.role;
+                return role === 'LEADER';
+              });
+
+              const collaboratorIds = new Set<string>();
+              leaderProjects.forEach((p: Project) => {
+                p.members
+                  ?.filter(m => m.status === 'ACTIVE' && m.user.id !== user?.userId)
+                  .forEach(m => collaboratorIds.add(m.user.id));
+              });
+
+              const pendingTasksCount = tasksRes?.pendingTasksByUserId?.length || 0;
+
+              setMetrics(prev => ({
+                ...prev,
+                activeProjects: items.filter((p: Project) => p.status === 'ACTIVE').length,
+                collaborators: collaboratorIds.size,
+                pendingTasks: pendingTasksCount,
+              }));
+            }
+
+            if (activityRes) {
+              setRecentFeed(activityRes.myRecentFeed || []);
+              setMetrics(prev => ({
+                ...prev,
+                activityPoints: activityRes.myWeeklyActivityPoints || 0,
+              }));
+            }
+          }
+        }
+      } catch (error: unknown) {
+      } finally {
+        if (isSubscribed) setIsLoading(false);
+      }
+    };
+
+    loadData();
+    return () => { isSubscribed = false; };
+  }, []);
+
+  const handleProjectCreated = () => {
+    setIsLoading(true);
+    Promise.all([
+      fetchGraphQL({ query: GET_PROFILE }),
+      fetchGraphQL({ query: GET_MY_PROJECTS, variables: { skip: 0, take: 50 } })
+    ])
+      .then(([profileRes, projectsRes]) => {
+        if (profileRes?.me && projectsRes?.myProjects?.items) {
+          const items = projectsRes.myProjects.items;
+          setProjects(items);
+
+          const leaderProjects = items.filter((p: Project) => {
+            const activeMembers = p.members?.filter(m => m.status === 'ACTIVE') || [];
+            const myMembership = activeMembers.find(m => m.user.id === user?.userId);
+            const role = p.myRole || myMembership?.role;
+            return role === 'LEADER';
+          });
+
+          const collaboratorIds = new Set<string>();
+          leaderProjects.forEach((p: Project) => {
+            p.members
+              ?.filter(m => m.status === 'ACTIVE' && m.user.id !== user?.userId)
+              .forEach(m => collaboratorIds.add(m.user.id));
+          });
+
+          setMetrics(prev => ({
+            ...prev,
+            activeProjects: items.filter((p: Project) => p.status === 'ACTIVE').length,
+            collaborators: collaboratorIds.size,
+          }));
+        }
+      })
+      .finally(() => setIsLoading(false));
+  };
+
+  const getFormattedDate = () => {
+    const date = new Date();
+    const options: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long' };
+    let formatted = date.toLocaleDateString('es-ES', options);
+    formatted = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+    return `${formatted} · Semestre 2026-1`;
+  };
+
+  const getFirstName = (fullName?: string): string => {
+    if (!fullName) return '...';
+    return fullName.split(' ')[0];
+  };
+
+  const renderMetricValue = (value: number | null) => {
+    if (isLoading || value === null) return '-';
+    return value.toString();
+  };
+
+  const getFeedMessage = (log: any) => {
+    const userName = log.user?.name.split(' ')[0] || 'Alguien';
+
+    let metaData: any = {};
+    if (log.meta) {
+      try {
+        metaData = typeof log.meta === 'string' ? JSON.parse(log.meta) : log.meta;
+      } catch (e) {
+        console.error("Error leyendo los metadatos", e);
+      }
+    }
+
+    const itemName = metaData.title ? `"${metaData.title}"` : 'un elemento';
+    switch (log.action) {
+      case 'CREATED':
+        if (log.entity === 'TASK') return <span><span className="font-medium text-text-primary">{userName}</span> creó la tarea {itemName}</span>;
+        if (log.entity === 'PROJECT') return <span><span className="font-medium text-text-primary">{userName}</span> creó el proyecto {itemName}</span>;
+        if (log.entity === 'EXPECTED_RESULT') return <span><span className="font-medium text-text-primary">{userName}</span> creó el resultado {itemName}</span>;
+        return <span><span className="font-medium text-text-primary">{userName}</span> creó {itemName}</span>;
+
+      case 'UPDATED':
+        if (metaData.newStatus) {
+          return <span><span className="font-medium text-text-primary">{userName}</span> actualizó el estado de {itemName} a <span className="font-medium">{metaData.newStatus}</span></span>;
+        }
+        return <span><span className="font-medium text-text-primary">{userName}</span> actualizó {itemName}</span>;
+
+      case 'MOVED':
+        return <span><span className="font-medium text-text-primary">{userName}</span> movió la tarea {itemName}</span>;
+
+      case 'COMMENTED':
+        return <span><span className="font-medium text-text-primary">{userName}</span> comentó en {itemName}</span>;
+
+      case 'JOINED':
+        return <span><span className="font-medium text-text-primary">{userName}</span> se unió al proyecto</span>;
+
+      case 'ASSIGNED':
+        return <span><span className="font-medium text-text-primary">{userName}</span> reasignó la tarea {itemName}</span>;
+
+      default:
+        return <span><span className="font-medium text-text-primary">{userName}</span> interactuó con {itemName}</span>;
+    }
+  };
+
+  return (
+    <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-8 bg-surface-page">
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-text-primary tracking-tight">
+            Bienvenido, {mounted ? getFirstName(user?.name ?? profile?.name) : '...'}
+          </h1>
+          <p className="text-sm text-text-muted mt-1">
+            {mounted ? getFormattedDate() : 'Cargando...'}
+          </p>
+        </div>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center justify-center gap-2 bg-brand-dark hover:bg-brand-dark-hover text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors"
+        >
+          <Plus className="w-4 h-4" />
+          Nuevo proyecto
+        </button>
+      </header>
+
+      <CreateProjectModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={handleProjectCreated}
+      />
+
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { label: 'Proyectos activos', value: metrics.activeProjects, icon: Briefcase, color: 'text-brand dark:text-brand-light', bg: 'bg-brand-light dark:bg-brand/20' },
+          { label: 'Tareas pendientes', value: metrics.pendingTasks, icon: CheckSquare, color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-500/20' },
+          { label: 'Actividad (7 días)', value: metrics.activityPoints, icon: Activity, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-500/20' },
+          { label: 'Colaboradores', value: metrics.collaborators, icon: Users, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50 dark:bg-purple-500/20' },
+        ].map((stat, idx) => {
+          const Icon = stat.icon;
+          return (
+            <div key={idx} className="bg-surface-primary border text-left border-border-primary p-5 rounded-xl shadow-sm flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-text-muted">{stat.label}</p>
+                <p className="text-2xl font-bold text-text-primary mt-1">{renderMetricValue(stat.value)}</p>
+              </div>
+              <div className={`p-3 rounded-lg ${stat.bg}`}>
+                <Icon className={`w-5 h-5 ${stat.color}`} />
+              </div>
+            </div>
+          );
+        })}
+      </section>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <section className="col-span-1 lg:col-span-2">
+          <div className="bg-surface-primary border border-border-primary rounded-xl shadow-sm h-full flex flex-col">
+            <div className="px-6 py-5 border-b border-border-primary flex items-center justify-between">
+              <h2 className="text-base font-semibold text-text-primary">Mis proyectos</h2>
+            </div>
+            <div className="p-6 flex-1 flex flex-col">
+              {isLoading ? (
+                <div className="flex-1 flex items-center justify-center text-gray-400">
+                  <div className="animate-pulse w-full max-w-sm space-y-4">
+                    <div className="h-20 bg-surface-secondary rounded-xl w-full"></div>
+                    <div className="h-20 bg-surface-secondary rounded-xl w-full"></div>
+                  </div>
+                </div>
+              ) : projects.length === 0 ? (
+                <div className="flex-1 flex flex-col items-center justify-center text-center py-12">
+                  <div className="w-12 h-12 bg-surface-secondary rounded-full flex items-center justify-center mb-3">
+                    <FolderKanban className="w-6 h-6 text-gray-400" />
+                  </div>
+                  <p className="text-sm font-medium text-text-primary">No tienes proyectos aún.</p>
+                  <p className="text-sm text-text-muted mt-1 max-w-sm">Crea un proyecto para empezar a colaborar con otros estudiantes y profesores.</p>
+                </div>
+              ) : (
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {projects.map((proj) => (
+                    <Link
+                      key={proj.id}
+                      href={`/misc/proyectos/${proj.id}`}
+                      className="block group bg-surface-primary rounded-2xl border border-border-primary p-5 hover:shadow-lg transition-all duration-300 relative overflow-hidden"
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="w-3 h-3 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: proj.color ?? 'var(--color-brand)' }}
+                          ></div>
+                          <h3 className="font-semibold text-text-primary leading-tight group-hover:text-brand transition-colors line-clamp-1 text-sm">
+                            {proj.name}
+                          </h3>
+                        </div>
+                      </div>
+                      <p className="text-xs text-text-muted line-clamp-2 mt-auto flex-1 mb-4">
+                        {proj.description || 'Sin descripción...'}
+                      </p>
+
+                      <div className="flex items-center justify-between pt-3 border-t border-border-primary mt-auto">
+                        <span className="text-[10px] font-medium px-2 py-1 bg-surface-secondary text-text-secondary rounded-full uppercase tracking-wider">
+                          {proj.status}
+                        </span>
+                        <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-brand transition-colors" />
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section className="col-span-1 border border-border-primary rounded-xl shadow-sm bg-surface-primary h-full flex flex-col">
+          <div className="px-6 py-5 border-b border-border-primary">
+            <h2 className="text-base font-semibold text-text-primary">Feed de actividad reciente</h2>
+          </div>
+          <div className="p-0 flex-1 flex flex-col overflow-hidden">
+            {isLoading ? (
+              <div className="p-6 space-y-4">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="flex gap-3 animate-pulse">
+                    <div className="w-8 h-8 bg-surface-secondary rounded-full shrink-0"></div>
+                    <div className="space-y-2 flex-1">
+                      <div className="h-3 bg-surface-secondary rounded w-3/4"></div>
+                      <div className="h-2 bg-surface-secondary rounded w-1/4"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : recentFeed.length === 0 ? (
+              <div className="flex-1 flex flex-col items-center justify-center text-center py-12 px-6">
+                <div className="w-12 h-12 bg-surface-secondary rounded-full flex items-center justify-center mb-3">
+                  <Activity className="w-6 h-6 text-gray-400" />
+                </div>
+                <p className="text-sm text-text-muted">Aún no hay actividad reciente en tus proyectos.</p>
+              </div>
+            ) : (
+              <div className="overflow-y-auto custom-scrollbar p-6 space-y-6 max-h-[500px]">
+                {recentFeed.map((log) => (
+                  <div key={log.id} className="flex gap-3 relative group">
+                    {/* Línea conectora (opcional para estilo timeline) */}
+                    <div className="absolute left-4 top-8 bottom-[-24px] w-px bg-surface-secondary group-last:hidden"></div>
+
+                    <div className="w-8 h-8 rounded-full bg-brand/10 border border-brand/20 flex items-center justify-center shrink-0 z-10 overflow-hidden">
+                      {log.user?.avatarUrl ? (
+                        <img src={log.user.avatarUrl} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-[10px] font-bold text-brand">{log.user?.name?.charAt(0) || 'U'}</span>
+                      )}
+                    </div>
+
+                    <div className="flex-1 min-w-0 pt-1">
+                      <p className="text-sm text-text-secondary leading-snug">
+                        {getFeedMessage(log)}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-[11px] text-gray-400 font-medium">
+                          {formatDistanceToNow(new Date(log.createdAt), { addSuffix: true, locale: es })}
+                        </span>
+                        <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                        <span className="text-[11px] text-gray-400 truncate max-w-[120px]" title={log.project?.name}>
+                          {log.project?.name}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}

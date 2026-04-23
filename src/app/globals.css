@@ -1,26 +1,311 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@custom-variant dark (&:where(.dark, .dark *));
+
+* {
+  transition: background-color 0.3s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@theme {
+  /* Colores Neutrales */
+  --color-white: #ffffff;
+  --color-black: #000000;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+
+  /* Aliasing Zinc a Gray */
+  --color-zinc-50: var(--color-gray-50);
+  --color-zinc-100: var(--color-gray-100);
+  --color-zinc-200: var(--color-gray-200);
+  --color-zinc-300: var(--color-gray-300);
+  --color-zinc-400: var(--color-gray-400);
+  --color-zinc-500: var(--color-gray-500);
+  --color-zinc-600: var(--color-gray-600);
+  --color-zinc-700: var(--color-gray-700);
+  --color-zinc-800: var(--color-gray-800);
+  --color-zinc-900: var(--color-gray-900);
+
+  /* Color principal de marca */
+  --color-brand: #2596BE;
+  --color-brand-hover: #1a7a9e;
+  --color-brand-light: #e0f2fe;
+
+  /* Temas de interfaz Oscura */
+  --color-brand-dark: #0f2942;
+  --color-brand-dark-hover: #0a1f33;
+  --color-ui-dark: #0f2942;
+  --color-ui-dark-hover: #0a1f33;
+  --color-ui-darker: #091a2a;
+
+  /* Estados Dinámicos */
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-error: #dc2626;
+
+  /* Clases predeterminadas de Tailwind */
+  --color-red-500: var(--color-error);
+  --color-red-600: #b91c1c;
+  --color-green-500: var(--color-success);
+  --color-green-600: #15803d;
+  --color-blue-500: var(--color-brand);
+  --color-blue-600: var(--color-brand-hover);
+
+  /* Carreras */
+  --color-career-cs: #3b82f6;
+  --color-career-industrial: #f97316;
+  --color-career-ti: #22c55e;
+
+  /* Tokens semánticos */
+  --color-surface-page: var(--surface-page);
+  --color-surface-primary: var(--surface-primary);
+  --color-surface-secondary: var(--surface-secondary);
+  --color-surface-tertiary: var(--surface-tertiary);
+  --color-surface-nav: var(--surface-nav);
+  --color-surface-nav-active: var(--surface-nav-active);
+  --color-surface-nav-hover: var(--surface-nav-hover);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-text-muted: var(--text-muted);
+  --color-border-primary: var(--border-primary);
+  --color-border-secondary: var(--border-secondary);
+  --color-border-subtle: var(--border-subtle);
+
+  --color-surface-btn: var(--surface-btn);
+  --color-surface-btn-hover: var(--surface-btn-hover);
+  --color-text-btn: var(--text-btn);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background-color: var(--color-gray-50);
+  color: var(--color-gray-900);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@keyframes gradientShift {
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradientShift 8s ease infinite;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.shimmer-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transform: translateX(-100%);
+}
+
+.shimmer-btn:hover::after {
+  animation: shimmer 0.6s ease forwards;
+}
+
+.dark body {
+  background-color: var(--color-brand-dark);
+  color: var(--color-gray-100);
+}
+
+/* ── Scrollbar suave reutilizable ── */
+.nice-scrollbar::-webkit-scrollbar {
+  height: 4px;
+  width: 4px;
+}
+
+.nice-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.nice-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-border-secondary);
+  border-radius: 9999px;
+}
+
+.nice-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* ── Kanban board scrollbar ── */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-border-secondary);
+  border-radius: 9999px;
+}
+
+/* ── Role badge colors (light + dark) ── */
+/* Light mode */
+.role-leader {
+  color: #7e22ce;
+  background: #f3e8ff;
+  border: 1px solid #e9d5ff;
+}
+
+.role-student {
+  color: #1d4ed8;
+  background: #dbeafe;
+  border: 1px solid #bfdbfe;
+}
+
+.role-supervisor {
+  color: #c2410c;
+  background: #ffedd5;
+  border: 1px solid #fed7aa;
+}
+
+.role-external {
+  color: #374151;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+}
+
+/* Dark mode — using same selector pattern as @custom-variant dark (&:where(.dark, .dark *)) */
+:where(.dark, .dark *) .role-leader {
+  color: #d8b4fe;
+  background: rgba(126, 34, 206, 0.18);
+  border-color: rgba(167, 85, 247, 0.4);
+}
+
+:where(.dark, .dark *) .role-student {
+  color: #93c5fd;
+  background: rgba(29, 78, 216, 0.18);
+  border-color: rgba(96, 165, 250, 0.4);
+}
+
+:where(.dark, .dark *) .role-supervisor {
+  color: #fdba74;
+  background: rgba(194, 65, 12, 0.18);
+  border-color: rgba(251, 146, 60, 0.4);
+}
+
+:where(.dark, .dark *) .role-external {
+  color: #9ca3af;
+  background: rgba(75, 85, 99, 0.25);
+  border-color: rgba(107, 114, 128, 0.4);
+}
+
+/* Tokens semánticos para variables de modo oscuro */
+
+:root {
+  /* ── Superficies ── */
+  --surface-page: var(--color-gray-50);
+  --surface-primary: #ffffff;
+  --surface-secondary: var(--color-gray-50);
+  --surface-tertiary: var(--color-gray-100);
+  --surface-nav: var(--color-ui-dark);
+  --surface-nav-active: rgba(255, 255, 255, 0.1);
+  --surface-nav-hover: rgba(255, 255, 255, 0.05);
+  --surface-overlay: rgba(17, 24, 39, 0.5);
+
+  /* ── Botones Generales ── */
+  --surface-btn: var(--color-white);
+  --surface-btn-hover: var(--color-gray-100);
+  --text-btn: var(--color-ui-dark);
+
+  /* ── Bordes ── */
+  --border-primary: var(--color-gray-100);
+  --border-secondary: var(--color-gray-200);
+  --border-subtle: var(--color-gray-50);
+
+  /* ── Textos ── */
+  --text-primary: var(--color-gray-900);
+  --text-secondary: var(--color-gray-600);
+  --text-tertiary: var(--color-gray-500);
+  --text-muted: var(--color-gray-400);
+
+  /* ── Badge Institucional (Ramo/Materia) ── */
+  --badge-inst-bg: rgba(249, 250, 251, 0.8);
+  --badge-inst-border: var(--color-gray-100);
+}
+
+.dark {
+  /* Superficies — más contraste entre fondo y cards */
+  --surface-page: #0a1929;
+  --surface-primary: #0f2942;
+  --surface-secondary: #1a3a5c;
+  --surface-tertiary: #1e4470;
+  --surface-nav: #061420;
+  --surface-nav-active: rgba(37, 150, 190, 0.2);
+  --surface-nav-hover: rgba(37, 150, 190, 0.1);
+  --surface-overlay: rgba(0, 0, 0, 0.7);
+
+  /* ── Botones Generales ── */
+  --surface-btn: var(--color-brand);
+  --surface-btn-hover: var(--color-brand-hover);
+  --text-btn: #ffffff;
+
+  /* Bordes — más visibles sobre fondos oscuros */
+  --border-primary: rgba(37, 150, 190, 0.2);
+  --border-secondary: rgba(37, 150, 190, 0.15);
+  --border-subtle: rgba(255, 255, 255, 0.05);
+
+  /* Textos — jerarquía clara */
+  --text-primary: #f0f9ff;
+  --text-secondary: #93c5fd;
+  --text-tertiary: #64a8c8;
+  --text-muted: #4a7f9e;
+
+  /* Badge Institucional */
+  --badge-inst-bg: rgba(37, 150, 190, 0.15);
+  --badge-inst-border: rgba(37, 150, 190, 0.3);
 }

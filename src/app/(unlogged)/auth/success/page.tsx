@@ -1,0 +1,64 @@
+'use client';
+
+import { Suspense, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { jwtDecode } from 'jwt-decode';
+
+interface GoogleUserPayload {
+  email: string;
+  sub: string;
+  name: string;
+  avatar?: string;
+}
+
+function AuthSuccessInner() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const token = searchParams.get('token');
+
+    if (token) {
+      localStorage.setItem('projeic_accessToken', token);
+
+      try {
+        const decoded = jwtDecode<GoogleUserPayload>(token);
+
+        const userData = {
+          userId: decoded.sub,
+          email: decoded.email,
+          name: decoded.name,
+          avatarUrl: decoded.avatar
+        };
+
+        localStorage.setItem('projeic_user', JSON.stringify(userData));
+      } catch (error) {
+        // Falló en la decodificación
+      }
+
+      window.location.href = '/projeic/misc/profile';
+    } else {
+      window.location.href = '/projeic/auth/login';
+    }
+  }, [router, searchParams]);
+
+  return (
+    <div className="flex justify-center items-center h-screen bg-surface-secondary">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand"></div>
+    </div>
+  );
+}
+
+export default function AuthSuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center items-center h-screen bg-surface-secondary">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand"></div>
+        </div>
+      }
+    >
+      <AuthSuccessInner />
+    </Suspense>
+  );
+}
