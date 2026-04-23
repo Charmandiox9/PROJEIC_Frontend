@@ -8,18 +8,32 @@ import logoIcon from '../../../../../public/logo.png';
 
 export default function AuthPage() {
   const handleOAuthLogin = () => {
-    let baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
-
-    console.log(baseUrl);
+    // 1. Intentamos leer la variable inyectada (cubriendo ambas opciones de nombres que usas)
+    let baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || "";
+  
+    // 2. Si Next.js no inyectó nada, usamos la lógica de inferencia inteligente
     if (!baseUrl) {
-      const isProduction = window.location.hostname.includes('railway.app');
-      baseUrl = isProduction 
-        ? 'https://projeicbackend-development.up.railway.app' 
-        : 'http://localhost:4000'; // Ajusta a tu puerto local si es otro
+      if (window.location.hostname.includes('development.up.railway.app')) {
+        baseUrl = 'https://projeicbackend-development.up.railway.app';
+      } 
+      else if (window.location.hostname.includes('production.up.railway.app')) {
+        baseUrl = 'https://projeicbackend-production.up.railway.app';
+      } 
+      // Si estás programando en tu PC (localhost real)
+      else if (process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost') {
+        baseUrl = 'http://localhost:4000';
+      } 
+      // PRODUCCIÓN (Docker en la VM): Dejamos el string vacío para armar una ruta relativa
+      else {
+        baseUrl = '';
+      }
     }
-
-    // 3. Limpieza: Aseguramos que no haya doble slash y redirigimos
-    const finalUrl = `${baseUrl.replace(/\/$/, '')}/projeic/api/auth/google`;
+  
+    // 3. Limpiamos el slash final solo si baseUrl tiene contenido
+    const cleanBaseUrl = baseUrl ? baseUrl.replace(/\/$/, '') : '';
+    
+    // 4. Armamos la URL final
+    const finalUrl = `${cleanBaseUrl}/projeic/api/auth/google`;
     
     console.log("Redirigiendo a:", finalUrl);
     window.location.href = finalUrl;
