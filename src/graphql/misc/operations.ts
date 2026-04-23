@@ -331,6 +331,7 @@ export const GET_GITHUB_DATA = `
       conclusion
       display_title
       created_at
+      updated_at
       html_url
     }
     getArtifacts(token: $token, owner: $owner, repo: $repo) {
@@ -339,6 +340,30 @@ export const GET_GITHUB_DATA = `
       size_in_bytes
       expired
       created_at
+    }
+    getPullRequests(token: $token, owner: $owner, repo: $repo) {
+      id
+      title
+      state
+      html_url
+      created_at
+      user_login
+      user_avatar
+    }
+    getDeployments(token: $token, owner: $owner, repo: $repo) {
+      id
+      environment
+      ref
+      created_at
+      creator_login
+    }
+    getSecurityAlerts(token: $token, owner: $owner, repo: $repo) {
+      number
+      state
+      severity
+      package_name
+      created_at
+      html_url
     }
   }
 `;
