@@ -8,29 +8,36 @@ import logoIcon from '../../../../../public/logo.png';
 
 export default function AuthPage() {
   const handleOAuthLogin = () => {
-    // 1. Solo buscamos el dominio del backend, ignoramos la variable de GraphQL
     let baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
   
-    // 2. Lógica de inferencia si no hay variable explícita
+    if (baseUrl.includes("graphql")) {
+      baseUrl = "";
+    }
+  
     if (!baseUrl) {
-      if (window.location.hostname.includes('development.up.railway.app')) {
+      const { hostname, port } = window.location;
+  
+      if (hostname.includes('development.up.railway.app')) {
         baseUrl = 'https://projeicbackend-development.up.railway.app';
       } 
-      else if (window.location.hostname.includes('production.up.railway.app')) {
+      else if (hostname.includes('production.up.railway.app')) {
         baseUrl = 'https://projeicbackend-production.up.railway.app';
       } 
-      else if (process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost') {
+      // 🛡️ CORRECCIÓN PARA EL TÚNEL: 
+      // Si el hostname es localhost pero el puerto es 8080, usamos ruta relativa.
+      else if (hostname === 'localhost' && port === '8080') {
+        baseUrl = ''; 
+      }
+      // Si es localhost 3000, es desarrollo real en tu PC.
+      else if (hostname === 'localhost' && process.env.NODE_ENV === 'development') {
         baseUrl = 'http://localhost:4000';
       } 
       else {
-        // Producción Docker: string vacío
         baseUrl = '';
       }
     }
   
     const cleanBaseUrl = baseUrl ? baseUrl.replace(/\/$/, '') : '';
-    
-    // Ahora sí, si baseUrl es "", la URL final será perfectamente "/projeic/api/auth/google"
     const finalUrl = `${cleanBaseUrl}/projeic/api/auth/google`;
     
     console.log("Redirigiendo a:", finalUrl);
