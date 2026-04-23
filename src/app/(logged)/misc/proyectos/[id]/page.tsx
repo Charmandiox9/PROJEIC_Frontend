@@ -111,8 +111,11 @@ export default function ProjectDetailPage() {
     }
   };
 
-  if (isLoading) return <div className="min-h-[60vh] flex items-center justify-center"><Loader2 className="w-8 h-8 text-brand animate-spin" /></div>;
-  if (error || !project) return <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-4"><p>{error}</p><Link href="/misc/proyectos">Volver</Link></div>;
+  if (isLoading && !project) return <div className="min-h-[60vh] flex items-center justify-center"><Loader2 className="w-8 h-8 text-brand animate-spin" /></div>;
+  
+  if (error && !project) return <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-4"><p>{error}</p><Link href="/misc/proyectos">Volver</Link></div>;
+
+  if (!project) return null;
 
   const actualRole = project?.members?.find((m) => m.user.id === user?.userId)?.role;
   const currentUserRole = project?.myRole || actualRole || null;
