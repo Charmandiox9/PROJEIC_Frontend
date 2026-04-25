@@ -14,7 +14,7 @@ import { es } from 'date-fns/locale/es';
 interface ProjectMember {
   id: string;
   status: string;
-  user: { id: string; name: string; avatarUrl?: string };
+  user: { id: string; name: string; avatarUrl?: string | null };
 }
 
 interface Board { id: string; name: string; }

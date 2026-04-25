@@ -19,7 +19,7 @@ interface ProjectMember {
   id: string;
   status: string;
   role: string;
-  user: { id: string; name: string; avatarUrl: string | null; };
+  user: { id: string; name: string; avatarUrl?: string | null; };
 }
 
 interface KanbanBoardProps {
