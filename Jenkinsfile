@@ -24,17 +24,19 @@ pipeline {
 
         stage('Actualizar Producción') {
             steps {
-                // 1. Apagamos el proxy (el escudo) temporalmente
-                sh 'docker stop nginx || true'
+                // 1. Desarmamos la torre de arriba hacia abajo
+                sh 'docker rm -f nginx frontend || true'
                 
-                // 2. Destruimos y recreamos el frontend
-                sh 'docker rm -f frontend || true'
-                sh 'docker run -d --name frontend --network projeic_default -p 3000:3000 projeic_frontend:latest'
-                
-                // 3. Volvemos a encender el proxy
-                sh 'docker start nginx || true'
-                
-                // 4. Limpieza de imágenes viejas
+                // 2. El agente lee tu archivo y levanta solo lo que falta usando las imágenes nuevas
+                sh '''
+                docker run --rm \
+                  -v /var/www/projeic:/var/www/projeic \
+                  -v /run/user/1000/podman/podman.sock:/var/run/docker.sock \
+                  -w /var/www/projeic \
+                  docker.io/docker/compose:1.29.2 \
+                  -f docker-compose.yml up -d
+                '''
+                // 3. Limpiamos imágenes viejas
                 sh 'docker image prune -f'
             }
         }
