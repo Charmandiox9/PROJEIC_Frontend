@@ -24,6 +24,8 @@ pipeline {
 
         stage('Actualizar Producción') {
             steps {
+                sh 'docker rm -f frontend || true'
+                
                 sh '''
                 docker run --rm \
                   -v /var/www/projeic:/var/www/projeic \
