@@ -13,17 +13,37 @@ export default function AuthPage() {
   const inviteToken = searchParams.get('invite_token');
 
   const handleOAuthLogin = () => {
-    let baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
-
-    console.log(baseUrl);
-    if (!baseUrl) {
-      const isProduction = window.location.hostname.includes('railway.app');
-      baseUrl = isProduction 
-        ? 'https://projeicbackend-development.up.railway.app' 
-        : 'http://localhost:4000';
+    let baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
+  
+    if (baseUrl.includes("graphql")) {
+      baseUrl = "";
     }
-
-    const finalUrl = `${baseUrl.replace(/\/$/, '')}/projeic/api/auth/google`;
+  
+    if (!baseUrl) {
+      const { hostname, port } = window.location;
+  
+      if (hostname.includes('development.up.railway.app')) {
+        baseUrl = 'https://projeicbackend-development.up.railway.app';
+      } 
+      else if (hostname.includes('production.up.railway.app')) {
+        baseUrl = 'https://projeicbackend-production.up.railway.app';
+      } 
+      // 🛡️ CORRECCIÓN PARA EL TÚNEL: 
+      // Si el hostname es localhost pero el puerto es 8080, usamos ruta relativa.
+      else if (hostname === 'localhost' && port === '8080') {
+        baseUrl = ''; 
+      }
+      // Si es localhost 3000, es desarrollo real en tu PC.
+      else if (hostname === 'localhost' && process.env.NODE_ENV === 'development') {
+        baseUrl = 'http://localhost:4000';
+      } 
+      else {
+        baseUrl = '';
+      }
+    }
+  
+    const cleanBaseUrl = baseUrl ? baseUrl.replace(/\/$/, '') : '';
+    const finalUrl = `${cleanBaseUrl}/projeic/api/auth/google`;
     
     console.log("Redirigiendo a:", finalUrl);
     window.location.href = finalUrl;

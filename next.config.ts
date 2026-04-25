@@ -17,15 +17,22 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
-    // En desarrollo: Next.js actúa como proxy al backend local
-    // En producción (Docker): array vacío → nginx maneja el enrutamiento
-    if (process.env.NODE_ENV !== "development") return [];
+    // En producción (Docker en la VM o Railway): Next.js no hace proxy.
+    // Nginx o la plataforma manejan el enrutamiento directamente.
+    if (process.env.NODE_ENV === "production") {
+      return [];
+    }
+
+    // En desarrollo (npm run dev): Next.js actúa como proxy para evitar errores de CORS.
+    // Buscamos la URL en las variables de entorno, y si no hay, caemos en localhost.
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+    const cleanBackendUrl = backendUrl.replace(/\/$/, '');
+
     return [
       {
-        // Con basePath "/projeic", Next.js ya quitó el prefijo antes de evaluar rewrites.
-        // El navegador pide /projeic/api/graphql → internamente llega como /api/graphql
+        // Con basePath "/projeic", Next.js ya evaluó la ruta internamente.
         source: "/api/:path*",
-        destination: "http://localhost:4000/projeic/api/:path*",
+        destination: `${cleanBackendUrl}/projeic/api/:path*`,
       },
     ];
   },
