@@ -24,7 +24,7 @@ pipeline {
 
         stage('Actualizar Producción') {
             steps {
-                // El agente recrea SOLO el frontend y vuelve a conectar sus dependencias
+                // 1. Recrear el contenedor con el código nuevo
                 sh '''
                 docker run --rm \
                   -v /var/www/projeic:/var/www/projeic \
@@ -34,11 +34,11 @@ pipeline {
                   -f docker-compose.yml up -d --force-recreate --no-deps frontend
                 '''
                 
-                // Reiniciamos Nginx para que "vea" el nuevo frontend
-                sh 'docker restart nginx || true'
+                // 2. Reiniciamos el proxy usando el nombre real del contenedor
+                sh 'docker restart projeic_nginx_1 || true'
                 
-                // Limpiamos imágenes viejas
-                sh 'docker image prune -f'
+                // 3. Limpieza suave (si falla, no rompe el pipeline)
+                sh 'docker image prune -f || true'
             }
         }
     }
