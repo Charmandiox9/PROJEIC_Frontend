@@ -2,13 +2,13 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { ArrowLeft, LayoutDashboard, Users, Bell, Shield } from 'lucide-react';
 import logoTexto from '../../../../../public/Logo__Texto.png';
 import logoIcon from '../../../../../public/logo.png';
 
-export default function AuthPage() {
+function AuthContent() {
   const searchParams = useSearchParams();
   const inviteToken = searchParams.get('invite_token');
 
@@ -29,7 +29,6 @@ export default function AuthPage() {
         baseUrl = 'https://projeicbackend-production.up.railway.app';
       } 
       // 🛡️ CORRECCIÓN PARA EL TÚNEL: 
-      // Si el hostname es localhost pero el puerto es 8080, usamos ruta relativa.
       else if (hostname === 'localhost' && port === '8080') {
         baseUrl = ''; 
       }
@@ -174,5 +173,17 @@ export default function AuthPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-surface-primary">
+        <div className="animate-pulse text-brand font-medium">Cargando plataforma...</div>
+      </div>
+    }>
+      <AuthContent />
+    </Suspense>
   );
 }
