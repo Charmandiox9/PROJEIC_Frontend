@@ -62,10 +62,32 @@ export default function GithubIntegration({ project }: { project: any }) {
   const handleDownloadArtifact = async (artifactId: string, artifactName: string) => {
     setDownloadingId(artifactId);
     try {
-      const res = await fetch(`http://localhost:4000/projeic/api/github/artifacts/${project.githubOwner}/${project.githubRepo}/${artifactId}/download`, {
+      // 1. Inferir la URL base usando nuestra estrategia multi-entorno
+      let baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || "";
+
+      if (!baseUrl) {
+        if (window.location.hostname.includes('development.up.railway.app')) {
+          baseUrl = 'https://projeicbackend-development.up.railway.app';
+        } else if (window.location.hostname.includes('production.up.railway.app')) {
+          baseUrl = 'https://projeicbackend-production.up.railway.app';
+        } else if (process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost') {
+          baseUrl = 'http://localhost:4000';
+        } else {
+          // PRODUCCIÓN DOCKER: Ruta relativa para que pase por Nginx
+          baseUrl = '';
+        }
+      }
+
+      // 2. Limpiar slashes extra y armar el endpoint
+      const cleanBaseUrl = baseUrl ? baseUrl.replace(/\/$/, '') : '';
+      const endpoint = `${cleanBaseUrl}/projeic/api/github/artifacts/${project.githubOwner}/${project.githubRepo}/${artifactId}/download`;
+
+      // 3. Hacer el fetch al endpoint dinámico
+      const res = await fetch(endpoint, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (!res.ok) throw new Error('Fallo la descarga');
+      
+      if (!res.ok) throw new Error('Falló la descarga');
 
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
@@ -77,8 +99,12 @@ export default function GithubIntegration({ project }: { project: any }) {
       a.click();
       window.URL.revokeObjectURL(url);
       a.remove();
-    } catch (err) { alert("Error al descargar el artefacto."); } 
-    finally { setDownloadingId(null); }
+    } catch (err) { 
+      alert("Error al descargar el artefacto."); 
+      console.error(err);
+    } finally { 
+      setDownloadingId(null); 
+    }
   };
 
   if (!project.githubOwner || !project.githubRepo) {
