@@ -3,6 +3,7 @@
 import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { jwtDecode } from 'jwt-decode';
+import { fetchGraphQL } from '@/lib/graphQLClient';
 
 interface GoogleUserPayload {
   email: string;
@@ -11,35 +12,68 @@ interface GoogleUserPayload {
   avatar?: string;
 }
 
+const REDEEM_INVITATION_MUTATION = `
+  mutation RedeemProjectInvitation($token: String!) {
+    redeemProjectInvitation(token: $token) {
+      id
+      projectId
+    }
+  }
+`;
+
 function AuthSuccessInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    const token = searchParams.get('token');
+    const processAuth = async () => {
+      const token = searchParams.get('token');
 
-    if (token) {
-      localStorage.setItem('projeic_accessToken', token);
+      if (token) {
+        localStorage.setItem('projeic_accessToken', token);
 
-      try {
-        const decoded = jwtDecode<GoogleUserPayload>(token);
+        try {
+          const decoded = jwtDecode<GoogleUserPayload>(token);
+          const userData = {
+            userId: decoded.sub,
+            email: decoded.email,
+            name: decoded.name,
+            avatarUrl: decoded.avatar
+          };
+          localStorage.setItem('projeic_user', JSON.stringify(userData));
+        } catch (error) {
+          console.error("Error al decodificar JWT", error);
+        }
 
-        const userData = {
-          userId: decoded.sub,
-          email: decoded.email,
-          name: decoded.name,
-          avatarUrl: decoded.avatar
-        };
+        const pendingInviteToken = localStorage.getItem('pending_invite_token');
+        
+        if (pendingInviteToken) {
+          try {
+            const response = await fetchGraphQL({
+              query: REDEEM_INVITATION_MUTATION,
+              variables: { token: pendingInviteToken }
+            });
 
-        localStorage.setItem('projeic_user', JSON.stringify(userData));
-      } catch (error) {
-        // Falló en la decodificación
+            localStorage.removeItem('pending_invite_token');
+
+            if (!response.errors) {
+              const projectId = response.redeemProjectInvitation.projectId;
+              window.location.href = `/projeic/misc/proyectos/${projectId}`;
+              return;
+            }
+          } catch (error) {
+            console.error("Error al redimir la invitación:", error);
+            localStorage.removeItem('pending_invite_token');
+          }
+        }
+
+        window.location.href = '/projeic/misc/profile';
+      } else {
+        window.location.href = '/projeic/auth/login';
       }
+    };
 
-      window.location.href = '/projeic/misc/profile';
-    } else {
-      window.location.href = '/projeic/auth/login';
-    }
+    processAuth();
   }, [router, searchParams]);
 
   return (

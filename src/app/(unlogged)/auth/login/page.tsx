@@ -2,11 +2,16 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { ArrowLeft, LayoutDashboard, Users, Bell, Shield } from 'lucide-react';
 import logoTexto from '../../../../../public/Logo__Texto.png';
 import logoIcon from '../../../../../public/logo.png';
 
 export default function AuthPage() {
+  const searchParams = useSearchParams();
+  const inviteToken = searchParams.get('invite_token');
+
   const handleOAuthLogin = () => {
     let baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
   
@@ -43,6 +48,12 @@ export default function AuthPage() {
     console.log("Redirigiendo a:", finalUrl);
     window.location.href = finalUrl;
   };
+
+  useEffect(() => {
+    if (inviteToken) {
+      localStorage.setItem('pending_invite_token', inviteToken);
+    }
+  }, [inviteToken]);
 
   return (
     <div className="min-h-screen flex w-full">
@@ -136,6 +147,16 @@ export default function AuthPage() {
           <p className="text-text-muted text-sm mb-10 leading-relaxed">
             Accede directamente al panel de proyectos utilizando tu identidad universitaria provista por la red EIC UCN.
           </p>
+
+          {inviteToken && (
+            <div className="w-full p-4 mb-6 bg-brand/10 border border-brand/20 rounded-xl flex items-start gap-3 text-left animate-in fade-in slide-in-from-top-2">
+              <Users className="w-5 h-5 text-brand shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-bold text-brand">Tienes una invitación pendiente</p>
+                <p className="text-xs text-text-muted mt-1">Inicia sesión con tu cuenta universitaria para aceptarla automáticamente y unirte al proyecto.</p>
+              </div>
+            </div>
+          )}
 
           <button
             onClick={handleOAuthLogin}

@@ -36,4 +36,6 @@ export interface Project {
   myRole?: string;
   mode?: string;
   professor?: { id: string; name: string }[];
+  githubOwner?: string;
+  githubRepo?: string;
 }

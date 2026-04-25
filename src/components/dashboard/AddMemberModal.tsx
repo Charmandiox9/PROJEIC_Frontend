@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { X, Loader2, UserPlus } from 'lucide-react';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { ADD_PROJECT_MEMBER } from '@/graphql/misc/operations';
+import { toast } from 'sonner'; 
 
 interface AddMemberModalProps {
   isOpen: boolean;
@@ -55,10 +56,22 @@ export default function AddMemberModal({ isOpen, projectId, onClose, onSuccess }
         throw new Error(response.errors[0]?.message || 'Error al agregar al miembro.');
       }
 
-      onSuccess(); // Trigger parent reload if needed
+      toast.success('Miembro agregado exitosamente.');
+      onSuccess(); 
       setShowSuccess(true);
+
     } catch (err: any) {
-      setError(err.message || 'Ocurrió un error inesperado al invitar al usuario.');
+      const errorMessage = err.message || 'Ocurrió un error inesperado al invitar al usuario.';
+
+      if (errorMessage.includes('Se ha enviado una invitación por correo')) {
+        toast.success('¡Invitación enviada por correo!');
+        onSuccess();
+        setShowSuccess(true);
+        return;
+      }
+
+      toast.error(errorMessage);
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -93,7 +106,7 @@ export default function AddMemberModal({ isOpen, projectId, onClose, onSuccess }
               </svg>
             </div>
             <div>
-              <h3 className="text-xl font-bold text-text-primary">Invitacion enviada!</h3>
+              <h3 className="text-xl font-bold text-text-primary">¡Listo!</h3>
               <p className="text-sm text-text-muted mt-2">
                 El usuario ha sido invitado al proyecto exitosamente.
               </p>

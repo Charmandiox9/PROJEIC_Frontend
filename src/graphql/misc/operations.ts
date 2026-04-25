@@ -53,6 +53,8 @@ export const GET_PROJECT_BY_ID = `
       isInstitutional
       mode
       myRole
+      githubOwner
+      githubRepo
       subject {        
         id
         name
@@ -164,6 +166,8 @@ export const GET_MY_PROJECTS = `
         isInstitutional
         mode
         myRole
+        githubOwner
+        githubRepo
         subject {
           id
           name
@@ -304,6 +308,71 @@ export const GET_DASHBOARD_ACTIVITY = `
       project {
         name
       }
+    }
+  }
+`;
+
+export const GET_GITHUB_DATA = `
+  query GetGithubData($token: String!, $owner: String!, $repo: String!, $branch: String!) {
+    getGithubCommits(token: $token, owner: $owner, name: $repo, branch: $branch) {
+      totalCommits
+      commits {
+        oid
+        message
+        additions
+        deletions
+        committedDate
+        author { name user { login avatarUrl } }
+      }
+    }
+    getWorkflowRuns(token: $token, owner: $owner, repo: $repo) {
+      id
+      status
+      conclusion
+      display_title
+      created_at
+      updated_at
+      html_url
+    }
+    getArtifacts(token: $token, owner: $owner, repo: $repo) {
+      id
+      name
+      size_in_bytes
+      expired
+      created_at
+    }
+    getPullRequests(token: $token, owner: $owner, repo: $repo) {
+      id
+      title
+      state
+      html_url
+      created_at
+      user_login
+      user_avatar
+    }
+    getDeployments(token: $token, owner: $owner, repo: $repo) {
+      id
+      environment
+      ref
+      created_at
+      creator_login
+    }
+    getSecurityAlerts(token: $token, owner: $owner, repo: $repo) {
+      number
+      state
+      severity
+      package_name
+      created_at
+      html_url
+    }
+  }
+`;
+
+export const DISPATCH_WORKFLOW = `
+  mutation DispatchWorkflow($token: String!, $owner: String!, $repo: String!, $workflowId: String!, $ref: String!) {
+    dispatchWorkflow(token: $token, owner: $owner, repo: $repo, workflowId: $workflowId, ref: $ref) {
+      success
+      message
     }
   }
 `;

@@ -20,7 +20,8 @@ import {
   BarChart2,
   Users,
   Target,
-  CalendarIcon
+  CalendarIcon,
+  Code
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthProvider';
 import { Project } from '@/types/project';
@@ -34,8 +35,9 @@ import ActivityFeed from '@/components/dashboard/projects/tabs/TabActivity';
 import InviteMemberForm from '@/components/dashboard/projects/members/InviteMemberForm';
 import TabResultados from '@/components/dashboard/projects/tabs/TabResultados';
 import TabCronograma from '@/components/dashboard/projects/tabs/TabCronograma';
+import GithubIntegration from '@/components/dashboard/projects/tabs/GithubIntegration';
 
-type TabId = 'resumen' | 'tablero' | 'resultados' | 'actividad' | 'metricas' | 'miembros' | 'cronograma';
+type TabId = 'resumen' | 'tablero' | 'resultados' | 'actividad' | 'metricas' | 'miembros' | 'cronograma' | 'github';
 
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -109,8 +111,11 @@ export default function ProjectDetailPage() {
     }
   };
 
-  if (isLoading) return <div className="min-h-[60vh] flex items-center justify-center"><Loader2 className="w-8 h-8 text-brand animate-spin" /></div>;
-  if (error || !project) return <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-4"><p>{error}</p><Link href="/misc/proyectos">Volver</Link></div>;
+  if (isLoading && !project) return <div className="min-h-[60vh] flex items-center justify-center"><Loader2 className="w-8 h-8 text-brand animate-spin" /></div>;
+  
+  if (error && !project) return <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-4"><p>{error}</p><Link href="/misc/proyectos">Volver</Link></div>;
+
+  if (!project) return null;
 
   const actualRole = project?.members?.find((m) => m.user.id === user?.userId)?.role;
   const currentUserRole = project?.myRole || actualRole || null;
@@ -130,8 +135,12 @@ export default function ProjectDetailPage() {
   currentTabs.push(
     { id: 'actividad', label: 'Actividad', icon: Activity },
     { id: 'metricas', label: 'Métricas', icon: BarChart2 },
-    { id: 'miembros', label: 'Miembros', icon: Users }
+    { id: 'miembros', label: 'Miembros', icon: Users },
   );
+
+  if(project.githubOwner && project.githubRepo) {
+    currentTabs.push({ id: 'github', label: 'Integración de GitHub', icon: Code });
+  }
 
   return (
     <div className="p-4 sm:p-6 md:p-8 max-w-6xl mx-auto space-y-6 pb-12 min-w-0">
@@ -234,6 +243,9 @@ export default function ProjectDetailPage() {
             members={project.members}
             userRole={currentUserRole}
           />
+        )}
+        {activeTab === 'github' && (
+          <GithubIntegration project={project} />
         )}
       </div>
 

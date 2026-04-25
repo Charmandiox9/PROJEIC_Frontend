@@ -339,7 +339,7 @@ export default function KanbanBoard({ projectId, members, userRole, sprintId }: 
 
 
       {/* MODALS */}
-      <CreateTaskModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setTaskToEdit(null); loadKanbanData(); }} defaultBoardId={defaultBoardId} taskToEdit={taskToEdit} members={members} boards={activeBoards} projectId={projectId} sprintId={sprintId} readOnly={!canManageTasks} />
+      <CreateTaskModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setTaskToEdit(null); loadKanbanData(); }} defaultBoardId={defaultBoardId} taskToEdit={taskToEdit} members={members} boards={activeBoards} projectId={projectId} sprintId={sprintId} userRole={userRole} />
       <EditBoardModal isOpen={!!boardToEdit} board={boardToEdit} onClose={() => setBoardToEdit(null)} onSuccess={() => { setBoardToEdit(null); loadKanbanData(); }} />
       <CreateBoardModal isOpen={isCreateBoardOpen} onClose={() => setIsCreateBoardOpen(false)} onSuccess={() => { setIsCreateBoardOpen(false); loadKanbanData(); }} projectId={projectId} nextPosition={boards.length} />
     </div>

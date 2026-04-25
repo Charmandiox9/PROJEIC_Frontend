@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Loader2, BookOpen, CheckCircle2 } from 'lucide-react';
+import { X, Loader2, BookOpen, CheckCircle2, Github } from 'lucide-react';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { UPDATE_PROJECT } from '@/graphql/misc/operations';
 import { GET_ALL_SUBJECTS } from '@/graphql/subjects/operations';
@@ -19,6 +19,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
 
   const [subjects, setSubjects] = useState<any[]>([]);
   const [isLoadingSubjects, setIsLoadingSubjects] = useState(false);
+  const [isSoftwareProject, setIsSoftwareProject] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -30,6 +31,8 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
     isInstitutional: false,
     subjectId: '',
     mode: 'CLASSIC',
+    githubOwner: '',
+    githubRepo: '',
   });
 
   useEffect(() => {
@@ -53,6 +56,9 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
 
   useEffect(() => {
     if (project && isOpen) {
+      const hasGithub = !!(project.githubOwner || project.githubRepo);
+      setIsSoftwareProject(hasGithub);
+
       setFormData({
         name: project.name || '',
         description: project.description || '',
@@ -63,6 +69,8 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
         isInstitutional: project.isInstitutional || false,
         subjectId: project.subject?.id || project.subjectId || '',
         mode: project.mode || 'CLASSIC',
+        githubOwner: project.githubOwner || '',
+        githubRepo: project.githubRepo || '',
       });
       setError(null);
     }
@@ -97,7 +105,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
     }
 
     try {
-      const response = await fetchGraphQL({
+      await fetchGraphQL({
         query: UPDATE_PROJECT,
         variables: {
           input: {
@@ -106,24 +114,21 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
             description: formData.description || undefined,
             color: formData.color,
             status: formData.status,
-            // 🔥 Si cambió a Híbrido, forzamos NONE en la metodología para mantener la integridad de la BD
             methodology: formData.mode === 'HYBRID' ? 'NONE' : formData.methodology,
             isPublic: formData.isPublic,
             isInstitutional: formData.isInstitutional,
             subjectId: formData.isInstitutional ? formData.subjectId : null,
-            mode: formData.mode, // 🔥 Enviamos el modo
+            mode: formData.mode,
+            githubOwner: isSoftwareProject && formData.githubOwner.trim() ? formData.githubOwner.trim() : null,
+            githubRepo: isSoftwareProject && formData.githubRepo.trim() ? formData.githubRepo.trim() : null,
           }
         }
       });
 
-      if (response.errors) {
-        throw new Error(response.errors[0]?.message || 'Error al actualizar el proyecto');
-      }
-
       onSuccess();
       onClose();
     } catch (err: any) {
-      setError(err.message || 'Ocurrió un error inesperado');
+      setError(err.message || 'Ocurrió un error inesperado al actualizar');
     } finally {
       setIsSubmitting(false);
     }
@@ -245,7 +250,6 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
               </select>
             </div>
 
-            {/* Ocultamos la metodología si el modo es HÍBRIDO */}
             {formData.mode === 'CLASSIC' && (
               <div>
                 <label htmlFor="methodology" className="block text-sm font-medium text-text-secondary mb-1">
@@ -284,7 +288,6 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
               </div>
             </label>
 
-            {/* Selector de Ramo */}
             {formData.isInstitutional && (
               <div className="pt-2 animate-in fade-in slide-in-from-top-2">
                 <label htmlFor="subjectId" className="block text-sm font-medium text-text-secondary mb-1">
@@ -306,6 +309,59 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
                   ))}
                 </select>
                 {isLoadingSubjects && <p className="text-xs text-gray-400 mt-1">Cargando ramos...</p>}
+              </div>
+            )}
+          </div>
+
+          {/* SECCIÓN: GITHUB / SOFTWARE */}
+          <div className="p-4 bg-surface-secondary border border-border-secondary rounded-xl space-y-4">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isSoftwareProject}
+                onChange={(e) => setIsSoftwareProject(e.target.checked)}
+                className="w-4 h-4 text-brand border-gray-300 rounded focus:ring-brand"
+              />
+              <div className="flex flex-col">
+                <span className="text-sm font-bold text-text-primary flex items-center gap-1.5">
+                  <Github className="w-4 h-4 text-brand" /> Proyecto de Software
+                </span>
+                <span className="text-xs text-text-muted">Habilita la integración de repositorios y despliegues (CI/CD).</span>
+              </div>
+            </label>
+
+            {isSoftwareProject && (
+              <div className="pt-2 animate-in fade-in slide-in-from-top-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="githubOwner" className="block text-sm font-medium text-text-secondary mb-1">
+                    Propietario / Organización <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="githubOwner"
+                    name="githubOwner"
+                    value={formData.githubOwner}
+                    onChange={handleChange}
+                    placeholder="Ej: DanielDuran"
+                    required={isSoftwareProject}
+                    className="w-full px-4 py-2 border border-border-secondary rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none bg-surface-primary text-text-primary"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="githubRepo" className="block text-sm font-medium text-text-secondary mb-1">
+                    Nombre del Repositorio <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="githubRepo"
+                    name="githubRepo"
+                    value={formData.githubRepo}
+                    onChange={handleChange}
+                    placeholder="Ej: PROJEIC"
+                    required={isSoftwareProject}
+                    className="w-full px-4 py-2 border border-border-secondary rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none bg-surface-primary text-text-primary"
+                  />
+                </div>
               </div>
             )}
           </div>
