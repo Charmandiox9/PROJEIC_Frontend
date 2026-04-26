@@ -102,11 +102,13 @@ export default function ProyectosPage() {
   });
 
   useEffect(() => {
-    if (headerRef.current) {
+    const headerEl = headerRef.current;
+    
+    if (headerEl) {
       import('animejs').then((mod) => {
         const anime = mod.default ?? mod;
         anime({
-          targets: headerRef.current.querySelectorAll('[data-header-anim]'),
+          targets: headerEl.querySelectorAll('[data-header-anim]'),
           opacity: [0, 1],
           translateY: [-20, 0],
           duration: 800,
@@ -118,12 +120,14 @@ export default function ProyectosPage() {
   }, []);
 
   useEffect(() => {
-    if (!loading && gridRef.current && filteredProjects.length > 0) {
+    const gridEl = gridRef.current;
+
+    if (!loading && gridEl && filteredProjects.length > 0) {
       import('animejs').then((mod) => {
         const anime = mod.default ?? mod;
         
         anime({
-          targets: gridRef.current.querySelectorAll('[data-project-card]'),
+          targets: gridEl.querySelectorAll('[data-project-card]'),
           opacity: [0, 1],
           translateY: isFirstLoad.current ? [30, 0] : [10, 0],
           duration: isFirstLoad.current ? 600 : 400,
