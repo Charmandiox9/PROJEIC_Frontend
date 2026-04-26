@@ -27,12 +27,14 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    if (mounted && !animatedEntrance.current && navRef.current) {
+    const navEl = navRef.current;
+
+    if (mounted && !animatedEntrance.current && navEl) {
       animatedEntrance.current = true;
       import('animejs').then((mod) => {
         const anime = mod.default ?? mod;
         anime({
-          targets: navRef.current.querySelectorAll('.nav-animate-item'),
+          targets: navEl.querySelectorAll('.nav-animate-item'),
           opacity: [0, 1],
           translateY: [-10, 0],
           duration: 600,
@@ -44,11 +46,13 @@ export default function Navbar() {
   }, [mounted]);
 
   useEffect(() => {
-    if (isMobileMenuOpen && mobileMenuRef.current) {
+    const mobileEl = mobileMenuRef.current;
+
+    if (isMobileMenuOpen && mobileEl) {
       import('animejs').then((mod) => {
         const anime = mod.default ?? mod;
         anime({
-          targets: mobileMenuRef.current.querySelectorAll('.mobile-item'),
+          targets: mobileEl.querySelectorAll('.mobile-item'),
           opacity: [0, 1],
           translateX: [-15, 0],
           duration: 400,

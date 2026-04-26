@@ -84,14 +84,15 @@ export default function Sidebar() {
     return 'Externo';
   };
 
-  /* ── Animación de entrada inicial (Desktop) ── */
   useEffect(() => {
-    if (mounted && desktopNavRef.current && !animatedRef.current) {
+    const desktopNavEl = desktopNavRef.current;
+    
+    if (mounted && desktopNavEl && !animatedRef.current) {
       animatedRef.current = true;
       import('animejs').then((mod) => {
         const anime = mod.default ?? mod;
         anime({
-          targets: desktopNavRef.current.querySelectorAll('[data-sidebar-item]'),
+          targets: desktopNavEl.querySelectorAll('[data-sidebar-item]'),
           opacity: [0, 1],
           translateX: [-15, 0],
           duration: 500,
@@ -102,13 +103,14 @@ export default function Sidebar() {
     }
   }, [mounted]);
 
-  /* ── Animación de entrada (Mobile) ── */
   useEffect(() => {
-    if (mobileMenuOpen && mobileNavRef.current) {
+    const mobileNavEl = mobileNavRef.current;
+
+    if (mobileMenuOpen && mobileNavEl) {
       import('animejs').then((mod) => {
         const anime = mod.default ?? mod;
         anime({
-          targets: mobileNavRef.current.querySelectorAll('[data-mobile-item]'),
+          targets: mobileNavEl.querySelectorAll('[data-mobile-item]'),
           opacity: [0, 1],
           translateX: [-20, 0],
           duration: 450,
@@ -119,7 +121,6 @@ export default function Sidebar() {
     }
   }, [mobileMenuOpen]);
 
-  /* ── Interacciones Hover (Icono y Texto) ── */
   const handleItemEnter = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
     const target = e.currentTarget;
     const icon = target.querySelector('.nav-icon');
@@ -174,7 +175,6 @@ export default function Sidebar() {
     });
   };
 
-  /* ── Animación Botón de Tema y Colapso ── */
   const handleThemeToggle = (e: React.MouseEvent<HTMLButtonElement>) => {
     toggle();
     const icon = e.currentTarget.querySelector('.nav-icon');

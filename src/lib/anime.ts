@@ -1,23 +1,25 @@
 import type { AnimeParams, AnimeInstance } from "animejs";
 
-let _anime: ((params: AnimeParams) => AnimeInstance) | null = null;
+type AnimeStatic = (params: AnimeParams) => AnimeInstance;
+
+let _anime: any = null;
 
 export async function runAnime(params: AnimeParams): Promise<AnimeInstance> {
   if (!_anime) {
-    const mod = await import("animejs/lib/anime.esm.js").catch(
-      () => import("animejs"),
-    );
-    _anime = (
-      typeof mod.default === "function" ? mod.default : mod
-    ) as typeof _anime;
+    const mod = await import("animejs");
+
+    _anime = mod.default ?? mod;
   }
-  return _anime!(params);
+  return (_anime as AnimeStatic)(params);
 }
 
 export async function getStagger() {
-  const mod = await import("animejs/lib/anime.esm.js").catch(
-    () => import("animejs"),
-  );
-  const anime = (typeof mod.default === "function" ? mod.default : mod) as any;
-  return anime.stagger as (value: number | string, options?: object) => unknown;
+  if (!_anime) {
+    const mod = await import("animejs");
+    _anime = mod.default ?? mod;
+  }
+  return (_anime as any).stagger as (
+    value: number | string,
+    options?: object,
+  ) => unknown;
 }

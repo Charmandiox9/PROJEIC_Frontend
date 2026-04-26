@@ -42,19 +42,21 @@ export default function PublicProjectDetailPage() {
   }, [id]);
 
   useEffect(() => {
-    if (!isLoading && project && contentRef.current) {
+    const el = contentRef.current;
+
+    if (!isLoading && project && el) {
       import('animejs').then((mod) => {
         const anime = mod.default ?? mod;
         const tl = anime.timeline({ easing: 'easeOutExpo' });
 
         tl.add({
-          targets: contentRef.current,
+          targets: el,
           opacity: [0, 1],
           translateY: [40, 0],
           duration: 700,
         })
         .add({
-          targets: contentRef.current.querySelectorAll('[data-anim-item]'),
+          targets: el.querySelectorAll('[data-anim-item]'),
           opacity: [0, 1],
           translateY: [20, 0],
           duration: 600,
