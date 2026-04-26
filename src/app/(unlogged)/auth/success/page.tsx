@@ -58,13 +58,20 @@ function AuthSuccessInner() {
 
             if (!response.errors) {
               const projectId = response.redeemProjectInvitation.projectId;
-              window.location.href = `/projeic/misc/proyectos/${projectId}`;
+              window.location.href = `/projeic/misc/proyectos/${projectId}/invites`;
               return;
             }
           } catch (error) {
             console.error("Error al redimir la invitación:", error);
             localStorage.removeItem('pending_invite_token');
           }
+        }
+
+        const redirectAfterLogin = localStorage.getItem('redirect_after_login');
+        if (redirectAfterLogin) {
+          localStorage.removeItem('redirect_after_login');
+          window.location.href = redirectAfterLogin;
+          return;
         }
 
         window.location.href = '/projeic/misc/profile';

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { RESPOND_TO_INVITATION } from '@/graphql/misc/operations';
@@ -13,6 +13,17 @@ export default function ProjectInvitePage() {
   const projectId = params.id as string;
   
   const [loading, setLoading] = useState<boolean>(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem('projeic_accessToken');
+    if (!token) {
+      localStorage.setItem('redirect_after_login', window.location.pathname);
+      router.push('/projeic/auth/login');
+    } else {
+      setIsCheckingAuth(false);
+    }
+  }, [router]);
 
   const handleResponse = async (accept: boolean) => {
     setLoading(true);
@@ -31,7 +42,7 @@ export default function ProjectInvitePage() {
         router.push(`/misc/proyectos/${projectId}`);
       } else {
         toast.info('Invitación rechazada.');
-        router.push('/dashboard');
+        router.push('/misc/profile');
       }
     } catch (error: any) {
       toast.error(error.message);
@@ -39,6 +50,10 @@ export default function ProjectInvitePage() {
       setLoading(false);
     }
   };
+
+  if (isCheckingAuth) {
+    return <div className="min-h-screen flex items-center justify-center bg-surface-secondary"><Loader2 className="w-8 h-8 animate-spin text-brand" /></div>;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-surface-secondary p-4">
