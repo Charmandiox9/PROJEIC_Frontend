@@ -1,4 +1,7 @@
-﻿import { Eye, History, Users, Github, Linkedin } from 'lucide-react';
+﻿'use client';
+
+import { useEffect, useRef } from 'react';
+import { Eye, History, Users, Github, Linkedin } from 'lucide-react';
 
 const PAGE_TEXTS = {
   heroTitle: 'Acerca de PROJEIC',
@@ -35,10 +38,10 @@ const TECHNOLOGIES = [
   { id: 1, name: 'Next.js', role: 'Frontend React Framework', url: 'https://nextjs.org/docs', iconUrl: 'https://cdn.simpleicons.org/nextdotjs/000000' },
   { id: 2, name: 'NestJS', role: 'Backend Node Framework', url: 'https://docs.nestjs.com/', iconUrl: 'https://cdn.simpleicons.org/nestjs/E0234E' },
   { id: 3, name: 'GraphQL', role: 'Data Query Language', url: 'https://graphql.org/learn/', iconUrl: 'https://cdn.simpleicons.org/graphql/E10098' },
-  { id: 4, name: 'PostgreSQL', role: 'Base de datos relacional', url: 'https://www.postgresql.org/docs/', iconUrl: 'https://cdn.simpleicons.org/postgresql/4169E1' },
-  { id: 5, name: 'Docker', role: 'Contenedorización', url: 'https://docs.docker.com/', iconUrl: 'https://cdn.simpleicons.org/docker/2496ED' },
+  { id: 4, name: 'PostgreSQL', role: 'Relational Database', url: 'https://www.postgresql.org/docs/', iconUrl: 'https://cdn.simpleicons.org/postgresql/4169E1' },
+  { id: 5, name: 'Podman', role: 'Containerization', url: 'https://podman.io/', iconUrl: 'https://cdn.simpleicons.org/podman/5950AA' },
   { id: 6, name: 'Jenkins', role: 'CI/CD Pipeline', url: 'https://www.jenkins.io/', iconUrl: 'https://cdn.simpleicons.org/jenkins/D24939' },
-  { id: 7, name: 'Nginx', role: 'Web Server / Proxy', url: 'https://nginx.org/en/docs/', iconUrl: 'https://cdn.simpleicons.org/nginx/009639' },
+  { id: 7, name: 'Nginx', role: 'Web Server / Reverse Proxy', url: 'https://nginx.org/en/docs/', iconUrl: 'https://cdn.simpleicons.org/nginx/009639' },
 ];
 
 const DEVELOPERS = [
@@ -63,33 +66,165 @@ const DEVELOPERS = [
 ];
 
 export default function AcercaPage() {
+  const heroRef = useRef<HTMLElement>(null);
+  const aboutRef = useRef<HTMLElement>(null);
+  const proposalsRef = useRef<HTMLElement>(null);
+  const techRef = useRef<HTMLElement>(null);
+  const devsRef = useRef<HTMLElement>(null);
+
+  /* ── Animación Inicial (Hero) ── */
+  useEffect(() => {
+    import('animejs').then((mod) => {
+      const anime = mod.default ?? mod;
+      if (heroRef.current) {
+        anime({
+          targets: heroRef.current.querySelectorAll('[data-hero-item]'),
+          opacity: [0, 1],
+          translateY: [30, 0],
+          duration: 800,
+          delay: anime.stagger(150),
+          easing: 'easeOutExpo',
+        });
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    const observerOptions = { threshold: 0.15 };
+
+    const animateSection = (entries: IntersectionObserverEntry[], observer: IntersectionObserver, targetsSelector: string, staggerDelay = 100) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          observer.unobserve(entry.target);
+          import('animejs').then((mod) => {
+            const anime = mod.default ?? mod;
+            anime({
+              targets: entry.target.querySelectorAll(targetsSelector),
+              opacity: [0, 1],
+              translateY: [30, 0],
+              duration: 700,
+              delay: anime.stagger(staggerDelay),
+              easing: 'easeOutExpo',
+            });
+          });
+        }
+      });
+    };
+
+    const aboutObserver = new IntersectionObserver((e) => animateSection(e, aboutObserver, '[data-about-item]', 150), observerOptions);
+    const proposalsObserver = new IntersectionObserver((e) => animateSection(e, proposalsObserver, '[data-proposal-card]', 120), observerOptions);
+    const techObserver = new IntersectionObserver((e) => animateSection(e, techObserver, '[data-tech-card]', 80), observerOptions);
+    const devsObserver = new IntersectionObserver((e) => animateSection(e, devsObserver, '[data-dev-card]', 150), observerOptions);
+
+    if (aboutRef.current) aboutObserver.observe(aboutRef.current);
+    if (proposalsRef.current) proposalsObserver.observe(proposalsRef.current);
+    if (techRef.current) techObserver.observe(techRef.current);
+    if (devsRef.current) devsObserver.observe(devsRef.current);
+
+    return () => {
+      aboutObserver.disconnect();
+      proposalsObserver.disconnect();
+      techObserver.disconnect();
+      devsObserver.disconnect();
+    };
+  }, []);
+
+  const handleCardEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    const icon = target.querySelector('.proposal-icon');
+    import('animejs').then((mod) => {
+      const anime = mod.default ?? mod;
+      anime({ targets: target, translateY: -6, scale: 1.02, duration: 400, easing: 'easeOutExpo' });
+      if (icon) anime({ targets: icon, scale: 1.15, rotate: [0, 10, -8, 0], duration: 600, easing: 'easeOutElastic(1, .6)' });
+    });
+  };
+
+  const handleCardLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    const icon = target.querySelector('.proposal-icon');
+    import('animejs').then((mod) => {
+      const anime = mod.default ?? mod;
+      anime({ targets: target, translateY: 0, scale: 1, duration: 400, easing: 'easeOutExpo' });
+      if (icon) anime({ targets: icon, scale: 1, rotate: 0, duration: 400, easing: 'easeOutExpo' });
+    });
+  };
+
+  const handleTechEnter = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const target = e.currentTarget;
+    const img = target.querySelector('img');
+    import('animejs').then((mod) => {
+      const anime = mod.default ?? mod;
+      anime({ targets: target, translateY: -4, scale: 1.02, duration: 300, easing: 'easeOutQuad' });
+      if (img) anime({ targets: img, scale: 1.15, rotate: [0, -10, 10, 0], duration: 500, easing: 'easeOutElastic(1, .6)' });
+    });
+  };
+
+  const handleTechLeave = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const target = e.currentTarget;
+    const img = target.querySelector('img');
+    import('animejs').then((mod) => {
+      const anime = mod.default ?? mod;
+      anime({ targets: target, translateY: 0, scale: 1, duration: 300, easing: 'easeOutQuad' });
+      if (img) anime({ targets: img, scale: 1, rotate: 0, duration: 400, easing: 'easeOutExpo' });
+    });
+  };
+
+  const handleDevEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    const avatar = target.querySelector('img');
+    import('animejs').then((mod) => {
+      const anime = mod.default ?? mod;
+      anime({ targets: target, translateY: -6, duration: 400, easing: 'easeOutExpo' });
+      if (avatar) anime({ targets: avatar, scale: 1.08, duration: 400, easing: 'easeOutBack' });
+    });
+  };
+
+  const handleDevLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    const avatar = target.querySelector('img');
+    import('animejs').then((mod) => {
+      const anime = mod.default ?? mod;
+      anime({ targets: target, translateY: 0, duration: 400, easing: 'easeOutExpo' });
+      if (avatar) anime({ targets: avatar, scale: 1, duration: 400, easing: 'easeOutExpo' });
+    });
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-surface-primary dark:bg-brand-dark">
-      <section className="bg-surface-primary dark:bg-brand-dark bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-light/30 via-transparent to-transparent text-ui-dark dark:text-text-primary py-16 px-6 border-b border-border-primary dark:border-border-primary">
+      
+      <section ref={heroRef} className="bg-surface-primary dark:bg-brand-dark bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-light/30 via-transparent to-transparent text-ui-dark dark:text-text-primary py-16 px-6 border-b border-border-primary dark:border-border-primary">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-3xl md:text-5xl font-bold mb-4">{PAGE_TEXTS.heroTitle}</h1>
-          <p className="text-text-muted dark:text-text-muted text-lg md:text-xl font-medium">{PAGE_TEXTS.heroSubtitle}</p>
+          <h1 data-hero-item style={{ opacity: 0 }} className="text-3xl md:text-5xl font-bold mb-4">{PAGE_TEXTS.heroTitle}</h1>
+          <p data-hero-item style={{ opacity: 0 }} className="text-text-muted dark:text-text-muted text-lg md:text-xl font-medium">{PAGE_TEXTS.heroSubtitle}</p>
         </div>
       </section>
 
       <main className="flex-grow max-w-5xl mx-auto w-full px-6 py-16 space-y-20">
-        <section className="text-center max-w-3xl mx-auto">
-          <h2 className="text-2xl font-bold text-text-primary dark:text-text-primary mb-6">{PAGE_TEXTS.aboutTitle}</h2>
-          <p className="text-text-secondary dark:text-text-muted leading-relaxed text-lg">
+        
+        <section ref={aboutRef} className="text-center max-w-3xl mx-auto">
+          <h2 data-about-item style={{ opacity: 0 }} className="text-2xl font-bold text-text-primary dark:text-text-primary mb-6">{PAGE_TEXTS.aboutTitle}</h2>
+          <p data-about-item style={{ opacity: 0 }} className="text-text-secondary dark:text-text-muted leading-relaxed text-lg">
             {PAGE_TEXTS.aboutDescription}
           </p>
         </section>
 
-        <section>
+        <section ref={proposalsRef}>
           <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold text-text-primary dark:text-text-primary">{PAGE_TEXTS.proposalTitle}</h2>
+            <h2 data-proposal-card style={{ opacity: 0 }} className="text-2xl font-bold text-text-primary dark:text-text-primary">{PAGE_TEXTS.proposalTitle}</h2>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {PROPOSALS.map((item) => {
               const Icon = item.icon;
               return (
-                <div key={item.id} className="bg-surface-secondary dark:bg-surface-primary border border-border-primary dark:border-border-primary p-8 rounded-2xl text-center hover:bg-surface-primary dark:hover:bg-surface-secondary hover:border-brand hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
-                  <div className="w-14 h-14 bg-brand-light dark:bg-brand/20 text-brand dark:text-brand-light rounded-full flex items-center justify-center mx-auto mb-6">
+                <div 
+                  key={item.id} 
+                  data-proposal-card
+                  style={{ opacity: 0 }}
+                  onMouseEnter={handleCardEnter}
+                  onMouseLeave={handleCardLeave}
+                  className="bg-surface-secondary dark:bg-surface-primary border border-border-primary dark:border-border-primary p-8 rounded-2xl text-center hover:border-brand hover:shadow-lg transition-colors duration-200 cursor-default"
+                >
+                  <div className="proposal-icon w-14 h-14 bg-brand-light dark:bg-brand/20 text-brand dark:text-brand-light rounded-full flex items-center justify-center mx-auto mb-6">
                     <Icon className="w-6 h-6" />
                   </div>
                   <h3 className="text-xl font-bold text-text-primary dark:text-text-primary mb-3">{item.title}</h3>
@@ -102,20 +237,24 @@ export default function AcercaPage() {
           </div>
         </section>
 
-        <section className="border-t border-border-primary dark:border-border-primary pt-20">
+        <section ref={techRef} className="border-t border-border-primary dark:border-border-primary pt-20">
           <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold text-text-primary dark:text-text-primary">{PAGE_TEXTS.technologyTitle}</h2>
+            <h2 data-tech-card style={{ opacity: 0 }} className="text-2xl font-bold text-text-primary dark:text-text-primary">{PAGE_TEXTS.technologyTitle}</h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             {TECHNOLOGIES.map((tech) => (
               <a
                 key={tech.id}
+                data-tech-card
+                style={{ opacity: 0 }}
                 href={tech.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="border border-border-primary dark:border-border-primary p-5 rounded-xl flex flex-col items-center justify-center text-center bg-surface-primary dark:bg-surface-primary hover:border-brand hover:shadow-lg hover:-translate-y-1 transition-all duration-200 group"
+                onMouseEnter={handleTechEnter}
+                onMouseLeave={handleTechLeave}
+                className="border border-border-primary dark:border-border-primary p-5 rounded-xl flex flex-col items-center justify-center text-center bg-surface-primary dark:bg-surface-primary hover:border-brand hover:shadow-lg transition-colors duration-200 group"
               >
-                <img src={tech.iconUrl} alt={`Logo de ${tech.name}`} className={`w-10 h-10 mb-4 group-hover:scale-110 transition-transform duration-300 ${tech.name === 'Next.js' ? 'dark:invert' : ''}`} />
+                <img src={tech.iconUrl} alt={`Logo de ${tech.name}`} className={`w-10 h-10 mb-4 ${tech.name === 'Next.js' ? 'dark:invert' : ''}`} />
                 <span className="font-bold text-text-primary dark:text-text-primary text-sm mb-1 group-hover:text-brand transition-colors">{tech.name}</span>
                 <span className="text-xs text-text-muted dark:text-text-muted">{tech.role}</span>
               </a>
@@ -123,9 +262,9 @@ export default function AcercaPage() {
           </div>
         </section>
 
-        <section className="border-t border-border-primary dark:border-border-primary pt-20">
+        <section ref={devsRef} className="border-t border-border-primary dark:border-border-primary pt-20">
           <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold text-text-primary dark:text-text-primary">{PAGE_TEXTS.developersTitle}</h2>
+            <h2 data-dev-card style={{ opacity: 0 }} className="text-2xl font-bold text-text-primary dark:text-text-primary">{PAGE_TEXTS.developersTitle}</h2>
           </div>
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {DEVELOPERS.map((dev) => {
@@ -133,9 +272,16 @@ export default function AcercaPage() {
               const avatarUrl = `https://github.com/${githubUsername}.png`;
 
               return (
-                <div key={dev.id} className="p-6 bg-surface-primary dark:bg-surface-primary border border-border-primary dark:border-border-primary rounded-xl shadow-sm flex flex-col justify-between hover:border-brand hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
+                <div 
+                  key={dev.id} 
+                  data-dev-card
+                  style={{ opacity: 0 }}
+                  onMouseEnter={handleDevEnter}
+                  onMouseLeave={handleDevLeave}
+                  className="p-6 bg-surface-primary dark:bg-surface-primary border border-border-primary dark:border-border-primary rounded-xl shadow-sm flex flex-col justify-between hover:border-brand hover:shadow-lg transition-colors duration-200"
+                >
                   <div className="flex flex-col items-center mb-4">
-                    <img src={avatarUrl} alt={`Avatar de ${dev.name}`} className="w-20 h-20 rounded-full border-4 border-gray-50 mb-4" />
+                    <img src={avatarUrl} alt={`Avatar de ${dev.name}`} className="w-20 h-20 rounded-full border-4 border-gray-100 dark:border-surface-secondary mb-4 object-cover" />
                     <h3 className="font-bold text-xl text-text-primary dark:text-text-primary text-center">{dev.name}</h3>
                     <p className="text-sm text-text-secondary dark:text-text-muted mt-1 text-center">{dev.role}</p>
                     <a
@@ -177,7 +323,3 @@ export default function AcercaPage() {
     </div>
   );
 }
-
-
-
-

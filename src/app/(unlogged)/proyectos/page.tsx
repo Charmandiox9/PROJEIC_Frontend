@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Search, BookOpen, GraduationCap } from 'lucide-react';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { GET_PUBLIC_PROJECTS } from '@/graphql/misc/operations';
@@ -67,6 +67,10 @@ export default function ProyectosPage() {
   const [statusFilter, setStatusFilter] = useState('Todos');
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
+  const gridRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
+  const isFirstLoad = useRef(true);
+
   useEffect(() => {
     async function loadProjects() {
       try {
@@ -97,16 +101,118 @@ export default function ProyectosPage() {
     return matchesSearch && matchesStatus;
   });
 
+  useEffect(() => {
+    if (headerRef.current) {
+      import('animejs').then((mod) => {
+        const anime = mod.default ?? mod;
+        anime({
+          targets: headerRef.current.querySelectorAll('[data-header-anim]'),
+          opacity: [0, 1],
+          translateY: [-20, 0],
+          duration: 800,
+          delay: anime.stagger(100),
+          easing: 'easeOutExpo',
+        });
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!loading && gridRef.current && filteredProjects.length > 0) {
+      import('animejs').then((mod) => {
+        const anime = mod.default ?? mod;
+        
+        anime({
+          targets: gridRef.current.querySelectorAll('[data-project-card]'),
+          opacity: [0, 1],
+          translateY: isFirstLoad.current ? [30, 0] : [10, 0],
+          duration: isFirstLoad.current ? 600 : 400,
+          delay: anime.stagger(isFirstLoad.current ? 80 : 40, { start: 50 }),
+          easing: 'easeOutExpo',
+        });
+
+        isFirstLoad.current = false;
+      });
+    }
+  }, [loading, filteredProjects, searchTerm, statusFilter]);
+
+  const handleCardEnter = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const target = e.currentTarget;
+    const avatars = target.querySelectorAll('.avatar-img');
+
+    import('animejs').then((mod) => {
+      const anime = mod.default ?? mod;
+      
+      anime({
+        targets: target,
+        translateY: -6,
+        scale: 1.01,
+        duration: 400,
+        easing: 'easeOutExpo',
+      });
+
+      if (avatars.length > 0) {
+        anime({
+          targets: avatars,
+          translateX: (_: HTMLElement, i: number) => i * 4,
+          duration: 400,
+          easing: 'easeOutQuad',
+        });
+      }
+    });
+  };
+
+  const handleCardLeave = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const target = e.currentTarget;
+    const avatars = target.querySelectorAll('.avatar-img');
+
+    import('animejs').then((mod) => {
+      const anime = mod.default ?? mod;
+      
+      anime({
+        targets: target,
+        translateY: 0,
+        scale: 1,
+        duration: 400,
+        easing: 'easeOutExpo',
+      });
+
+      if (avatars.length > 0) {
+        anime({
+          targets: avatars,
+          translateX: 0,
+          duration: 400,
+          easing: 'easeOutExpo',
+        });
+      }
+    });
+  };
+
+  const handleFilterClick = (status: string, e: React.MouseEvent<HTMLButtonElement>) => {
+    setStatusFilter(status);
+    const target = e.currentTarget;
+    
+    import('animejs').then((mod) => {
+      const anime = mod.default ?? mod;
+      anime({
+        targets: target,
+        scale: [0.95, 1],
+        duration: 400,
+        easing: 'easeOutBack',
+      });
+    });
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-surface-primary">
-      <section className="bg-surface-primary text-text-primary py-12 px-6 border-b border-border-primary">
+      <section ref={headerRef} className="bg-surface-primary text-text-primary py-12 px-6 border-b border-border-primary">
         <div className="max-w-6xl mx-auto text-center">
-          <h1 className="text-3xl md:text-4xl font-extrabold mb-3">Proyectos de la EIC</h1>
-          <p className="text-text-muted font-medium">Iniciativas académicas abiertas a la comunidad universitaria.</p>
+          <h1 data-header-anim style={{ opacity: 0 }} className="text-3xl md:text-4xl font-extrabold mb-3">Proyectos de la EIC</h1>
+          <p data-header-anim style={{ opacity: 0 }} className="text-text-muted font-medium">Iniciativas académicas abiertas a la comunidad universitaria.</p>
         </div>
       </section>
 
-      <div className="bg-surface-primary border-b border-border-primary px-6 py-4 sticky top-0 z-10">
+      <div className="bg-surface-primary border-b border-border-primary px-6 py-4 sticky top-0 z-10 shadow-sm">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-4 justify-between items-center">
           <div className="relative w-full md:max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
@@ -118,11 +224,11 @@ export default function ProyectosPage() {
               className="w-full pl-10 pr-4 py-2 border border-border-secondary rounded-lg text-sm text-text-primary focus:ring-2 focus:ring-brand focus:border-brand outline-none transition-colors bg-surface-primary placeholder:text-text-muted"
             />
           </div>
-          <div className="flex gap-2 text-sm w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
+          <div className="flex gap-2 text-sm w-full md:w-auto overflow-x-auto pb-2 md:pb-0 nice-scrollbar">
             {FILTER_OPTIONS.map((status) => (
               <button
                 key={status}
-                onClick={() => setStatusFilter(status)}
+                onClick={(e) => handleFilterClick(status, e)}
                 className={`whitespace-nowrap px-4 py-2 rounded-full font-medium transition-colors ${statusFilter === status
                   ? 'bg-brand-dark text-white'
                   : 'bg-surface-secondary text-text-secondary hover:bg-surface-tertiary'
@@ -145,19 +251,23 @@ export default function ProyectosPage() {
             <p className="text-text-muted">Ocurrió un error al cargar los proyectos. Inténtalo más tarde.</p>
           </div>
         ) : filteredProjects.length === 0 ? (
-          <div className="text-center py-20 bg-surface-primary rounded-xl border border-border-primary">
-            <p className="text-text-muted">No hay proyectos públicos disponibles.</p>
+          <div className="text-center py-20 bg-surface-primary rounded-xl border border-border-primary animate-in fade-in duration-300">
+            <p className="text-text-muted">No se encontraron proyectos con esos criterios.</p>
           </div>
         ) : (
-          <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 md:flex-none md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 md:overflow-visible nice-scrollbar">
+          <div ref={gridRef} className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 md:flex-none md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 md:overflow-visible nice-scrollbar">
             {filteredProjects.map((project) => {
               const activeMembers = project.members?.filter(m => m.status === 'ACTIVE') ?? [];
 
               return (
                 <button
                   onClick={() => setSelectedProjectId(project.id)}
+                  onMouseEnter={handleCardEnter}
+                  onMouseLeave={handleCardLeave}
                   key={project.id}
-                  className="flex flex-col text-left w-[85vw] shrink-0 snap-center md:w-auto md:shrink md:snap-align-none min-h-[200px] bg-surface-primary border border-border-primary rounded-xl p-6 hover:shadow-xl hover:border-brand/40 hover:-translate-y-1 transition-all duration-300 ring-offset-2 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent min-w-0 relative"
+                  data-project-card
+                  style={{ opacity: 0 }}
+                  className="flex flex-col text-left w-[85vw] shrink-0 snap-center md:w-auto md:shrink md:snap-align-none min-h-[200px] bg-surface-primary border border-border-primary rounded-xl p-6 hover:shadow-xl hover:border-brand/40 transition-shadow duration-300 ring-offset-2 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent min-w-0 relative"
                 >
                   <div className="flex flex-col sm:flex-row sm:justify-between items-start mb-4 gap-3 w-full">
                     <h3 className="font-bold text-lg text-text-primary line-clamp-2 decoration-brand group-hover:underline break-words w-full">
@@ -198,14 +308,14 @@ export default function ProyectosPage() {
                     {activeMembers.slice(0, 4).map((member) => (
                       <img
                         key={member.id}
-                        className="w-8 h-8 rounded-full border-2 border-white bg-gray-200 object-cover shrink-0"
+                        className="avatar-img w-8 h-8 rounded-full border-2 border-surface-primary bg-gray-200 object-cover shrink-0 relative z-10"
                         src={member.user.avatarUrl || `${AVATAR_FALLBACK_URL}${member.user.id}`}
                         alt={member.user.name}
                         title={member.user.name}
                       />
                     ))}
                     {activeMembers.length > 4 && (
-                      <div className="w-8 h-8 rounded-full border-2 border-white bg-surface-secondary flex items-center justify-center text-xs font-bold text-text-secondary shrink-0 z-10">
+                      <div className="w-8 h-8 rounded-full border-2 border-surface-primary bg-surface-secondary flex items-center justify-center text-xs font-bold text-text-secondary shrink-0 z-0">
                         +{activeMembers.length - 4}
                       </div>
                     )}
