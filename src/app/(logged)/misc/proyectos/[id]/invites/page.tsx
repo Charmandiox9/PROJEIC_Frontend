@@ -19,7 +19,7 @@ export default function ProjectInvitePage() {
     const token = localStorage.getItem('projeic_accessToken');
     if (!token) {
       localStorage.setItem('redirect_after_login', window.location.pathname);
-      router.push('/projeic/auth/login');
+      router.push('/auth/login');
     } else {
       setIsCheckingAuth(false);
     }

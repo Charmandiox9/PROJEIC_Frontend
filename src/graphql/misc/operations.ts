@@ -197,6 +197,7 @@ export const UPDATE_PROJECT_MEMBER_ROLE = `
     updateProjectMemberRole(input: $input) {
       id
       role
+      projectId
     }
   }
 `;

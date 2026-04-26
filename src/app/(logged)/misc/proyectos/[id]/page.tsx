@@ -90,10 +90,12 @@ export default function ProjectDetailPage() {
   };
 
   const handleUpdateRole = async (memberId: string, newRole: string) => {
+    if (!project?.id) return;
+
     try {
       await fetchGraphQL({
         query: UPDATE_PROJECT_MEMBER_ROLE,
-        variables: { input: { memberId, role: newRole } },
+        variables: { input: { memberId, role: newRole, projectId: project.id } },
       });
       loadProject();
     } catch {
