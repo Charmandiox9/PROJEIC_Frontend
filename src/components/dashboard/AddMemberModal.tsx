@@ -53,7 +53,22 @@ export default function AddMemberModal({ isOpen, projectId, onClose, onSuccess }
       });
 
       if (response.errors) {
-        throw new Error(response.errors[0]?.message || 'Error al agregar al miembro.');
+        const errorMsg = response.errors[0]?.message;
+        
+        if (errorMsg?.includes('Se ha enviado una invitación por correo')) {
+          toast.success('¡Invitación enviada por correo!');
+          onSuccess();
+          setShowSuccess(true);
+          return;
+        }
+
+        if (errorMsg?.includes('ya tiene una invitación pendiente')) {
+          toast.warning('Este usuario ya fue invitado y tiene el acceso pendiente.');
+          setIsSubmitting(false);
+          return; 
+        }
+
+        throw new Error(errorMsg || 'Error al agregar al miembro.');
       }
 
       toast.success('Miembro agregado exitosamente.');
