@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { fetchGraphQL } from '@/lib/graphQLClient';
-import { GET_PUBLIC_PROJECTS } from '@/graphql/misc/operations';
 import { COUNT_SEMESTERS, COUNT_SUBJECTS } from '@/graphql/subjects/operations';
 import { COUNT_PROFESSORS_REGISTERED, COUNT_STUDENTS_REGISTERED } from '@/graphql/users/operations';
+import { GET_PROJECTS_ACTIVE_COUNT } from '@/graphql/projects/operations';
 
 interface StatsState {
   totalProjects: number | null;
@@ -31,11 +31,10 @@ export default function StatsSection() {
     async function loadData() {
       try {
         const data = await fetchGraphQL({
-          query: GET_PUBLIC_PROJECTS,
-          variables: { skip: 0, take: 1 },
+          query: GET_PROJECTS_ACTIVE_COUNT,
         });
-        if (typeof data?.findAll?.total === 'number') {
-          setTotalProjects(data.findAll.total);
+        if (typeof data?.projectsActiveCount === 'number') {
+          setTotalProjects(data.projectsActiveCount);
         }
         const data2 = await fetchGraphQL({
           query: COUNT_PROFESSORS_REGISTERED,
