@@ -132,6 +132,12 @@ export const GET_ACTIVITY_LOGS = `
   }
 `;
 
+export const GET_PROJECTS_ACTIVE_COUNT = `
+  query GetProjectsActiveCount {
+    projectsActiveCount
+  }
+`;
+
 // ─── Mutations ────────────────────────────────────────────────────────────────
 
 /**
