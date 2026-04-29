@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Github, Info } from 'lucide-react';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { GET_GITHUB_DATA, DISPATCH_WORKFLOW } from '@/graphql/misc/operations';
@@ -16,6 +16,14 @@ import CommitTimeline from '../../github/CommitTimeline';
 import AuthorModal from '../../github/AuthorModal';
 
 export default function GithubIntegration({ project }: { project: any }) {
+  // 🔥 NUEVO: Verificación de repositorios
+  const hasRepositories = project?.repositories && project.repositories.length > 0;
+  
+  // 🔥 NUEVO: Estado para el repositorio activo (por defecto el primero)
+  const [activeRepoId, setActiveRepoId] = useState<string>(
+    hasRepositories ? project.repositories[0].id : ''
+  );
+
   const [token, setToken] = useState('');
   const [branch, setBranch] = useState('main'); 
   const [data, setData] = useState<any>(null);
@@ -28,12 +36,21 @@ export default function GithubIntegration({ project }: { project: any }) {
   const [selectedAuthor, setSelectedAuthor] = useState<any | null>(null);
   const [showFullTimeline, setShowFullTimeline] = useState(false);
 
+  const activeRepo = hasRepositories 
+    ? project.repositories.find((r: any) => r.id === activeRepoId) || project.repositories[0]
+    : null;
+
+  useEffect(() => {
+    setData(null);
+  }, [activeRepoId]);
+
   const syncData = async () => {
+    if (!activeRepo) return;
     setLoading(true);
     try {
       const result = await fetchGraphQL({
         query: GET_GITHUB_DATA,
-        variables: { token, owner: project.githubOwner, repo: project.githubRepo, branch }
+        variables: { token, owner: activeRepo.owner, repo: activeRepo.repoName, branch }
       });
       setData(result);
     } catch (err) {
@@ -44,12 +61,19 @@ export default function GithubIntegration({ project }: { project: any }) {
   };
 
   const handleDispatch = async () => {
-    if (!confirm(`¿Deseas disparar manualmente el flujo "${workflowFile}" en la rama "${branch}"?`)) return;
+    if (!activeRepo) return;
+    if (!confirm(`¿Deseas disparar manualmente el flujo "${workflowFile}" en la rama "${branch}" de ${activeRepo.name}?`)) return;
     setDispatching(true);
     try {
       const result = await fetchGraphQL({
         query: DISPATCH_WORKFLOW,
-        variables: { token, owner: project.githubOwner, repo: project.githubRepo, workflowId: workflowFile, ref: branch }
+        variables: { 
+          token, 
+          owner: activeRepo.owner, 
+          repo: activeRepo.repoName, 
+          workflowId: workflowFile, 
+          ref: branch 
+        }
       });
       if (result.dispatchWorkflow?.success) {
         alert("¡Éxito! El workflow se ha solicitado.");
@@ -60,9 +84,9 @@ export default function GithubIntegration({ project }: { project: any }) {
   };
 
   const handleDownloadArtifact = async (artifactId: string, artifactName: string) => {
+    if (!activeRepo) return;
     setDownloadingId(artifactId);
     try {
-      // 1. Inferir la URL base usando nuestra estrategia multi-entorno
       let baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || "";
 
       if (!baseUrl) {
@@ -73,16 +97,14 @@ export default function GithubIntegration({ project }: { project: any }) {
         } else if (process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost') {
           baseUrl = 'http://localhost:4000';
         } else {
-          // PRODUCCIÓN DOCKER: Ruta relativa para que pase por Nginx
           baseUrl = '';
         }
       }
 
-      // 2. Limpiar slashes extra y armar el endpoint
       const cleanBaseUrl = baseUrl ? baseUrl.replace(/\/$/, '') : '';
-      const endpoint = `${cleanBaseUrl}/projeic/api/github/artifacts/${project.githubOwner}/${project.githubRepo}/${artifactId}/download`;
+      // 🔥 Actualizado con el activeRepo
+      const endpoint = `${cleanBaseUrl}/projeic/api/github/artifacts/${activeRepo.owner}/${activeRepo.repoName}/${artifactId}/download`;
 
-      // 3. Hacer el fetch al endpoint dinámico
       const res = await fetch(endpoint, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -107,11 +129,11 @@ export default function GithubIntegration({ project }: { project: any }) {
     }
   };
 
-  if (!project.githubOwner || !project.githubRepo) {
+  if (!hasRepositories || !activeRepo) {
     return (
       <div className="p-12 text-center border-2 border-dashed border-border-primary rounded-xl">
         <Github className="w-12 h-12 mx-auto mb-4 opacity-20" />
-        <p className="text-text-muted">Vincula un repositorio en los ajustes del proyecto.</p>
+        <p className="text-text-muted">Vincula uno o más repositorios en los ajustes del proyecto.</p>
       </div>
     );
   }
@@ -121,10 +143,36 @@ export default function GithubIntegration({ project }: { project: any }) {
       
       {/* PANEL DE CONTROL SUPERIOR */}
       <div className="p-6 bg-surface-primary rounded-xl border border-border-primary space-y-4 shadow-sm">
+        
+        {/* 🔥 NUEVO: Selector de Repositorios Múltiples */}
+        {project.repositories.length > 1 && (
+          <div className="flex items-center gap-3 p-3 bg-surface-secondary border border-border-secondary rounded-lg mb-4">
+            <label className="text-sm font-medium text-text-secondary">Repositorio Activo:</label>
+            <select
+              value={activeRepoId}
+              onChange={(e) => setActiveRepoId(e.target.value)}
+              className="bg-surface-primary border border-border-secondary rounded-lg px-3 py-1.5 text-sm font-medium focus:ring-2 focus:ring-brand focus:border-brand outline-none transition-shadow"
+            >
+              {project.repositories.map((repo: any) => (
+                <option key={repo.id} value={repo.id}>
+                  {repo.name} ({repo.owner}/{repo.repoName})
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Github className="w-6 h-6 text-text-primary" />
-            <h3 className="font-bold text-lg">{project.githubOwner} / {project.githubRepo}</h3>
+            <h3 className="font-bold text-lg flex items-center gap-2">
+              {activeRepo.name}
+              {project.repositories.length === 1 && (
+                <span className="text-sm font-normal text-text-muted">
+                  ({activeRepo.owner}/{activeRepo.repoName})
+                </span>
+              )}
+            </h3>
           </div>
           {data && (
             <span className="px-3 py-1 bg-green-500/10 text-green-500 text-[10px] font-bold rounded-full uppercase tracking-wider flex items-center gap-2">
@@ -160,7 +208,7 @@ export default function GithubIntegration({ project }: { project: any }) {
           <div className="flex-1">
             <Input label="Rama (Branch)" type="text" placeholder="Ej: main, develop..." value={branch} onChange={(e) => setBranch(e.target.value)} />
           </div>
-          <button onClick={syncData} disabled={!token || !branch.trim() || loading} className="w-full md:w-auto px-6 py-[10px] bg-brand text-white rounded-lg font-bold hover:bg-brand-hover disabled:opacity-50 transition-colors">
+          <button onClick={syncData} disabled={!token || !branch.trim() || loading} className="w-full md:w-auto px-6 py-[10px] bg-brand text-white rounded-lg font-bold hover:bg-brand-hover disabled:opacity-50 transition-colors shrink-0">
             {loading ? 'Sincronizando...' : 'Actualizar Datos'}
           </button>
         </div>
@@ -197,8 +245,8 @@ export default function GithubIntegration({ project }: { project: any }) {
             </div>
           </div>
 
-          {/* 3. TIMELINE INFERIOR */}
-          <CommitTimeline 
+            {/* 3. TIMELINE INFERIOR */}
+            <CommitTimeline 
             commits={data.getGithubCommits.commits} 
             totalCommits={data.getGithubCommits.totalCommits} 
             branch={branch} 

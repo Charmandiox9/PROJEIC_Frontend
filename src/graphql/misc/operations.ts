@@ -53,8 +53,12 @@ export const GET_PROJECT_BY_ID = `
       isInstitutional
       mode
       myRole
-      githubOwner
-      githubRepo
+      repositories {
+        id
+        name
+        owner
+        repoName
+      }
       subject {        
         id
         name
@@ -166,8 +170,12 @@ export const GET_MY_PROJECTS = `
         isInstitutional
         mode
         myRole
-        githubOwner
-        githubRepo
+        repositories {
+          id
+          name
+          owner
+          repoName
+        }
         subject {
           id
           name

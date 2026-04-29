@@ -1,16 +1,23 @@
 ﻿'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Loader2, BookOpen, CheckCircle2, Github } from 'lucide-react';
+import { X, Loader2, BookOpen, CheckCircle2, Github, AlertCircle } from 'lucide-react';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { UPDATE_PROJECT } from '@/graphql/misc/operations';
 import { GET_ALL_SUBJECTS } from '@/graphql/subjects/operations';
+import Input from '@/components/ui/Input';
 
 interface UpdateProjectModalProps {
   isOpen: boolean;
   project: any;
   onClose: () => void;
   onSuccess: () => void;
+}
+
+interface PendingRepository {
+  name: string;
+  owner: string;
+  repoName: string;
 }
 
 export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess }: UpdateProjectModalProps) {
@@ -20,6 +27,12 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
   const [subjects, setSubjects] = useState<any[]>([]);
   const [isLoadingSubjects, setIsLoadingSubjects] = useState(false);
   const [isSoftwareProject, setIsSoftwareProject] = useState(false);
+
+  const [repoName, setRepoName] = useState('');
+  const [repoOwner, setRepoOwner] = useState('');
+  const [repoProjectName, setRepoProjectName] = useState('');
+  const [repoError, setRepoError] = useState<string | null>(null);
+  const [pendingRepositories, setPendingRepositories] = useState<PendingRepository[]>([]);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -31,8 +44,6 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
     isInstitutional: false,
     subjectId: '',
     mode: 'CLASSIC',
-    githubOwner: '',
-    githubRepo: '',
   });
 
   useEffect(() => {
@@ -56,41 +67,80 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
 
   useEffect(() => {
     if (project && isOpen) {
-      const hasGithub = !!(project.githubOwner || project.githubRepo);
-      setIsSoftwareProject(hasGithub);
+      const hasRepositories = project.repositories && project.repositories.length > 0;
+      setIsSoftwareProject(hasRepositories);
 
+      // 🔥 CORRECCIÓN: Uso estricto de Nullish Coalescing (??) para evitar inputs descontrolados
       setFormData({
-        name: project.name || '',
-        description: project.description || '',
-        color: project.color || '#2596BE',
-        status: project.status || 'ACTIVE',
-        methodology: project.methodology === 'NONE' ? 'KANBAN' : (project.methodology || 'KANBAN'),
-        isPublic: project.isPublic || false,
-        isInstitutional: project.isInstitutional || false,
-        subjectId: project.subject?.id || project.subjectId || '',
-        mode: project.mode || 'CLASSIC',
-        githubOwner: project.githubOwner || '',
-        githubRepo: project.githubRepo || '',
+        name: project.name ?? '',
+        description: project.description ?? '',
+        color: project.color ?? '#2596BE',
+        status: project.status ?? 'ACTIVE',
+        methodology: project.methodology === 'NONE' ? 'KANBAN' : (project.methodology ?? 'KANBAN'),
+        isPublic: project.isPublic ?? false,
+        isInstitutional: project.isInstitutional ?? false,
+        subjectId: project.subject?.id ?? project.subjectId ?? '',
+        mode: project.mode ?? 'CLASSIC',
       });
+
+      if (hasRepositories) {
+        setPendingRepositories(
+          project.repositories.map((repo: any) => ({
+            name: repo.name,
+            owner: repo.owner,
+            repoName: repo.repoName
+          }))
+        );
+      } else {
+        setPendingRepositories([]);
+      }
+
       setError(null);
+      setRepoError(null);
     }
   }, [project, isOpen]);
 
   if (!isOpen || !project) return null;
 
+  // 🔥 CORRECCIÓN: Manejo simplificado del input para evitar que value sea undefined
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     const isCheckbox = type === 'checkbox';
-    const checkedInfo = isCheckbox ? (e.target as HTMLInputElement).checked : undefined;
-
+    
     setFormData(prev => ({
       ...prev,
-      [name]: isCheckbox ? checkedInfo : value
+      [name]: isCheckbox ? (e.target as HTMLInputElement).checked : value
     }));
   };
 
   const handleModeChange = (mode: 'CLASSIC' | 'HYBRID') => {
     setFormData((prev) => ({ ...prev, mode }));
+  };
+
+  const handleAddRepository = () => {
+    setRepoError(null);
+    const tName = repoName.trim();
+    const tOwner = repoOwner.trim();
+    const tRepo = repoProjectName.trim();
+
+    if (!tName || !tOwner || !tRepo) {
+      setRepoError('Por favor completa los tres campos del repositorio.');
+      return;
+    }
+
+    if (pendingRepositories.some(r => r.owner === tOwner && r.repoName === tRepo)) {
+      setRepoError('Este repositorio ya está en la lista.');
+      return;
+    }
+
+    setPendingRepositories(prev => [...prev, { name: tName, owner: tOwner, repoName: tRepo }]);
+    setRepoName('');
+    setRepoOwner('');
+    setRepoProjectName('');
+  };
+
+  const handleRemoveRepository = (indexToRemove: number) => {
+    setPendingRepositories(prev => prev.filter((_, idx) => idx !== indexToRemove));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -119,8 +169,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
             isInstitutional: formData.isInstitutional,
             subjectId: formData.isInstitutional ? formData.subjectId : null,
             mode: formData.mode,
-            githubOwner: isSoftwareProject && formData.githubOwner.trim() ? formData.githubOwner.trim() : null,
-            githubRepo: isSoftwareProject && formData.githubRepo.trim() ? formData.githubRepo.trim() : null,
+            repositories: isSoftwareProject ? pendingRepositories : [], 
           }
         }
       });
@@ -313,7 +362,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
             )}
           </div>
 
-          {/* SECCIÓN: GITHUB / SOFTWARE */}
+          {/* SECCIÓN: GITHUB / SOFTWARE MÚLTIPLE */}
           <div className="p-4 bg-surface-secondary border border-border-secondary rounded-xl space-y-4">
             <label className="flex items-center gap-3 cursor-pointer">
               <input
@@ -326,42 +375,77 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
                 <span className="text-sm font-bold text-text-primary flex items-center gap-1.5">
                   <Github className="w-4 h-4 text-brand" /> Proyecto de Software
                 </span>
-                <span className="text-xs text-text-muted">Habilita la integración de repositorios y despliegues (CI/CD).</span>
+                <span className="text-xs text-text-muted">Habilita la integración de repositorios de GitHub.</span>
               </div>
             </label>
 
             {isSoftwareProject && (
-              <div className="pt-2 animate-in fade-in slide-in-from-top-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="githubOwner" className="block text-sm font-medium text-text-secondary mb-1">
-                    Propietario / Organización <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="githubOwner"
-                    name="githubOwner"
-                    value={formData.githubOwner}
-                    onChange={handleChange}
-                    placeholder="Ej: DanielDuran"
-                    required={isSoftwareProject}
-                    className="w-full px-4 py-2 border border-border-secondary rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none bg-surface-primary text-text-primary"
-                  />
+              <div className="pt-2 animate-in fade-in slide-in-from-top-2 space-y-3">
+                <div className="flex flex-col gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <Input
+                      type="text"
+                      value={repoName}
+                      onChange={(e) => setRepoName(e.target.value)}
+                      placeholder="Etiqueta (Ej. Backend)"
+                      className="w-full"
+                    />
+                    <Input
+                      type="text"
+                      value={repoOwner}
+                      onChange={(e) => setRepoOwner(e.target.value)}
+                      placeholder="Owner (Ej. fb)"
+                      className="w-full"
+                    />
+                    <Input
+                      type="text"
+                      value={repoProjectName}
+                      onChange={(e) => setRepoProjectName(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddRepository())}
+                      placeholder="Repo (Ej. react)"
+                      className="w-full"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAddRepository}
+                    className="w-full sm:w-auto self-end px-4 py-2 text-sm font-medium bg-brand/10 text-brand rounded-lg hover:bg-brand/20 transition-colors"
+                  >
+                    Agregar Repositorio
+                  </button>
                 </div>
-                <div>
-                  <label htmlFor="githubRepo" className="block text-sm font-medium text-text-secondary mb-1">
-                    Nombre del Repositorio <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="githubRepo"
-                    name="githubRepo"
-                    value={formData.githubRepo}
-                    onChange={handleChange}
-                    placeholder="Ej: PROJEIC"
-                    required={isSoftwareProject}
-                    className="w-full px-4 py-2 border border-border-secondary rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none bg-surface-primary text-text-primary"
-                  />
-                </div>
+
+                {repoError && (
+                  <p className="text-xs text-red-500 flex gap-1 items-center">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    {repoError}
+                  </p>
+                )}
+
+                {pendingRepositories.length > 0 && (
+                  <ul className="space-y-2 mt-2">
+                    {pendingRepositories.map((repo, index) => (
+                      <li
+                        key={index}
+                        className="flex items-center justify-between px-3 py-2 bg-surface-primary rounded-lg border border-border-secondary text-sm shadow-sm"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="truncate text-text-primary font-bold">{repo.name}</span>
+                          <span className="text-xs text-text-muted truncate">
+                            ({repo.owner}/{repo.repoName})
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveRepository(index)}
+                          className="ml-2 p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors shrink-0"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             )}
           </div>

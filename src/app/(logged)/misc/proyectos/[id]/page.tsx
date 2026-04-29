@@ -140,7 +140,7 @@ export default function ProjectDetailPage() {
     { id: 'miembros', label: 'Miembros', icon: Users },
   );
 
-  if(project.githubOwner && project.githubRepo) {
+  if(project.repositories && project.repositories.length > 0) {
     currentTabs.push({ id: 'github', label: 'Integración de GitHub', icon: Code });
   }
 
