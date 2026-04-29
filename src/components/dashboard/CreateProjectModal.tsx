@@ -1,7 +1,8 @@
 ﻿'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Loader2, UserPlus, AlertCircle, CheckCircle2 } from 'lucide-react';
+// 🔥 NUEVO: Importamos el icono de Github
+import { X, Loader2, UserPlus, AlertCircle, CheckCircle2, Github } from 'lucide-react';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { CREATE_PROJECT, ADD_PROJECT_MEMBER, GET_SUBJECTS } from '@/graphql/misc/operations';
 import Select from '@/components/ui/Select';
@@ -32,6 +33,13 @@ interface PendingMember {
   email: string;
   role: string;
   isExternal: boolean;
+}
+
+// 🔥 NUEVO: Interfaz para los repositorios pendientes
+interface PendingRepository {
+  name: string;
+  owner: string;
+  repoName: string;
 }
 
 const UCN_DOMAINS = ['@alumnos.ucn.cl', '@ucn.cl', '@ce.ucn.cl'];
@@ -72,6 +80,13 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
   const [memberError, setMemberError] = useState<string | null>(null);
   const [pendingMembers, setPendingMembers] = useState<PendingMember[]>([]);
 
+  // 🔥 NUEVO: Estados para manejar los repositorios
+  const [repoName, setRepoName] = useState('');
+  const [repoOwner, setRepoOwner] = useState('');
+  const [repoProjectName, setRepoProjectName] = useState('');
+  const [repoError, setRepoError] = useState<string | null>(null);
+  const [pendingRepositories, setPendingRepositories] = useState<PendingRepository[]>([]);
+
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [isLoadingSubjects, setIsLoadingSubjects] = useState(false);
 
@@ -89,6 +104,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
     } else {
       setFormData(INITIAL_FORM);
       setPendingMembers([]);
+      setPendingRepositories([]); // 🔥 Limpiamos los repos al cerrar
     }
   }, [isOpen]);
 
@@ -143,6 +159,33 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
     setPendingMembers((prev) => prev.filter((m) => m.email !== email));
   };
 
+  // 🔥 NUEVO: Lógica para validar y agregar repositorios
+  const handleAddRepository = () => {
+    setRepoError(null);
+    const tName = repoName.trim();
+    const tOwner = repoOwner.trim();
+    const tRepo = repoProjectName.trim();
+
+    if (!tName || !tOwner || !tRepo) {
+      setRepoError('Por favor completa los tres campos del repositorio.');
+      return;
+    }
+
+    if (pendingRepositories.some(r => r.owner === tOwner && r.repoName === tRepo)) {
+      setRepoError('Este repositorio ya fue agregado a la lista.');
+      return;
+    }
+
+    setPendingRepositories(prev => [...prev, { name: tName, owner: tOwner, repoName: tRepo }]);
+    setRepoName('');
+    setRepoOwner('');
+    setRepoProjectName('');
+  };
+
+  const handleRemoveRepository = (indexToRemove: number) => {
+    setPendingRepositories(prev => prev.filter((_, idx) => idx !== indexToRemove));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -163,6 +206,8 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
             isInstitutional: formData.isInstitutional,
             subjectId: formData.subjectId || undefined,
             professorId: formData.isInstitutional ? formData.professorId : undefined,
+            // 🔥 NUEVO: Enviamos el arreglo de repositorios
+            repositories: pendingRepositories.length > 0 ? pendingRepositories : undefined,
           },
         },
       });
@@ -188,6 +233,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
 
       setFormData(INITIAL_FORM);
       setPendingMembers([]);
+      setPendingRepositories([]); // Limpiamos repos
       setMemberEmail('');
       setMemberRole('STUDENT');
       setIsExternal(false);
@@ -229,7 +275,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
               </div>
             )}
 
-            {/* 🔥 NUEVO: Selector de Modalidad */}
+            {/* Selector de Modalidad */}
             <div className="space-y-3">
               <label className="text-sm font-semibold text-text-primary block">
                 Modalidad de Gestión <span className="text-brand">*</span>
@@ -304,7 +350,6 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
                 checked={formData.isInstitutional}
                 onChange={(e) => {
                   handleChange(e);
-                  // Si desmarcan, limpiamos los campos
                   if (!e.target.checked) {
                     setFormData(prev => ({ ...prev, subjectId: '', professorId: '' }));
                   }
@@ -323,7 +368,6 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
                   value={formData.subjectId}
                   onChange={(e) => {
                     handleChange(e);
-                    // Reseteamos el profesor si cambian de ramo
                     setFormData(prev => ({ ...prev, professorId: '' }));
                   }}
                   disabled={isLoadingSubjects}
@@ -347,7 +391,6 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
                   required={formData.isInstitutional}
                 >
                   <option value="">Selecciona un profesor</option>
-                  {/* Buscamos el ramo seleccionado y mapeamos sus profesores */}
                   {subjects
                     .find(s => s.id === formData.subjectId)
                     ?.professors?.map((prof: any) => (
@@ -371,7 +414,6 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
                 <option value="ON_HOLD">En pausa</option>
               </Select>
 
-              {/* Ocultamos la metodología si estamos en Modo Híbrido */}
               {formData.mode === 'CLASSIC' && (
                 <Select
                   id="methodology"
@@ -413,6 +455,82 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
               </label>
             </div>
 
+            {/* 🔥 NUEVO: Sección de Integración de Github Múltiple */}
+            <div className="pt-2 border-t border-border-primary space-y-3">
+              <div className="flex items-center gap-2">
+                <Github className="w-4 h-4 text-gray-500" />
+                <h3 className="text-sm font-semibold text-text-primary">Repositorios de GitHub</h3>
+                <span className="text-xs text-gray-400 font-normal">(opcional)</span>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <Input
+                    type="text"
+                    value={repoName}
+                    onChange={(e) => setRepoName(e.target.value)}
+                    placeholder="Etiqueta (Ej. Backend)"
+                    className="w-full"
+                  />
+                  <Input
+                    type="text"
+                    value={repoOwner}
+                    onChange={(e) => setRepoOwner(e.target.value)}
+                    placeholder="Owner (Ej. fb)"
+                    className="w-full"
+                  />
+                  <Input
+                    type="text"
+                    value={repoProjectName}
+                    onChange={(e) => setRepoProjectName(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddRepository())}
+                    placeholder="Repo (Ej. react)"
+                    className="w-full"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAddRepository}
+                  className="w-full sm:w-auto self-end px-4 py-2 text-sm font-medium bg-brand/10 text-brand rounded-lg hover:bg-brand/20 transition-colors"
+                >
+                  Agregar Repositorio
+                </button>
+              </div>
+
+              {repoError && (
+                <p className="text-xs text-red-500 flex gap-1 items-center">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  {repoError}
+                </p>
+              )}
+
+              {pendingRepositories.length > 0 && (
+                <ul className="space-y-2 mt-2">
+                  {pendingRepositories.map((repo, index) => (
+                    <li
+                      key={index}
+                      className="flex items-center justify-between px-3 py-2 bg-surface-primary rounded-lg border border-border-secondary text-sm shadow-sm"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="truncate text-text-primary font-bold">{repo.name}</span>
+                        <span className="text-xs text-text-muted truncate">
+                          ({repo.owner}/{repo.repoName})
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveRepository(index)}
+                        className="ml-2 p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors shrink-0"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            {/* Sección de Miembros del equipo */}
             <div className="pt-2 border-t border-border-primary space-y-3">
               <div className="flex items-center gap-2">
                 <UserPlus className="w-4 h-4 text-gray-500" />

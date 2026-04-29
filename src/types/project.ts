@@ -19,6 +19,13 @@ export interface ProjectMember {
   user: ProjectUser;
 }
 
+export interface Repository {
+  id: String;
+  name: String;
+  owner: String;
+  repoName: String;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -36,6 +43,5 @@ export interface Project {
   myRole?: string;
   mode?: string;
   professor?: { id: string; name: string }[];
-  githubOwner?: string;
-  githubRepo?: string;
+  repositories: Repository[];
 }
