@@ -50,7 +50,7 @@ export async function fetchGraphQL({
       }
 
       // Si es producción (nuestro Docker), devolvemos string vacío.
-      // Así el fetch quedará como fetch('/projeic/api/graphql') 
+      // Así el fetch quedará como fetch('/projeic/api/graphql')
       // y el navegador usará la IP de tu servidor automáticamente hacia Nginx.
       return "";
     };
@@ -63,6 +63,7 @@ export async function fetchGraphQL({
         query,
         variables,
       }),
+      cache: "no-store",
     });
 
     const result = await response.json();

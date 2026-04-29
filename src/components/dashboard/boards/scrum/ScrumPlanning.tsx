@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Plus, Play, Loader2, GripVertical, Inbox, Target, FileText, CheckCircle2 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { useAuth } from '@/context/AuthProvider';
+import { Plus, Play, Loader2, GripVertical, Inbox, Target, FileText, CheckCircle2, ChevronDown } from 'lucide-react';
 import Input from '@/components/ui/Input';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { GET_TASKS_BY_PROJECT, UPDATE_TASK } from '@/graphql/tasks/operations';
@@ -27,6 +28,8 @@ const priorityLabels: Record<string, string> = {
 };
 
 export default function ScrumPlanning({ projectId, members, onSprintStarted }: ScrumPlanningProps) {
+  const { user } = useAuth();
+  const myRole = members.find(m => m.user.id === user?.userId)?.role;
   const [tasks, setTasks] = useState<any[]>([]);
   const [sprints, setSprints] = useState<any[]>([]);
   const [boards, setBoards] = useState<any[]>([]); // 🔥 Necesitamos los tableros para el Modal
@@ -34,6 +37,8 @@ export default function ScrumPlanning({ projectId, members, onSprintStarted }: S
 
   const [selectedSprintId, setSelectedSprintId] = useState<string | null>(null);
   const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
+  const [isSprintDropdownOpen, setIsSprintDropdownOpen] = useState(false);
+  const sprintDropdownRef = useRef<HTMLDivElement>(null);
 
   // Estados de Modales
   const [isSprintModalOpen, setIsSprintModalOpen] = useState(false);
@@ -64,10 +69,13 @@ export default function ScrumPlanning({ projectId, members, onSprintStarted }: S
           const projectSprints = sprintsRes.sprintsByProject;
           setSprints(projectSprints);
 
-          if (!selectedSprintId) {
-            const pendingSprint = projectSprints.find((s: any) => s.status === 'PENDING');
-            if (pendingSprint) setSelectedSprintId(pendingSprint.id);
-          }
+          setSelectedSprintId((prevSelected) => {
+            if (prevSelected && projectSprints.some((s: any) => s.id === prevSelected)) {
+              return prevSelected;
+            }
+            const pendingSprint = projectSprints.find((s: any) => s.status === 'PLANNED');
+            return pendingSprint ? pendingSprint.id : null;
+          });
         }
       } catch (e) { console.error("❌ Error trayendo Sprints:", e); }
 
@@ -77,6 +85,16 @@ export default function ScrumPlanning({ projectId, members, onSprintStarted }: S
   };
 
   useEffect(() => { loadData(); }, [projectId]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (sprintDropdownRef.current && !sprintDropdownRef.current.contains(e.target as Node)) {
+        setIsSprintDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
     setDraggingTaskId(taskId);
@@ -121,11 +139,13 @@ export default function ScrumPlanning({ projectId, members, onSprintStarted }: S
         variables: { input: { projectId, name: sprintName, goal: sprintGoal } }
       });
       const newSprint = res.createSprint;
+
+      setSprints(prev => [...prev, newSprint]);
+      setSelectedSprintId(newSprint.id);
+
       setIsSprintModalOpen(false);
       setSprintName('');
       setSprintGoal('');
-      setSelectedSprintId(newSprint.id);
-      loadData();
     } catch (error) {
       console.error("Error creando sprint:", error);
     } finally {
@@ -154,7 +174,7 @@ export default function ScrumPlanning({ projectId, members, onSprintStarted }: S
     : [];
 
   const selectedSprint = sprints.find(s => s.id === selectedSprintId);
-  const pendingSprints = sprints.filter(s => s.status === 'PENDING');
+  const pendingSprints = sprints.filter(s => s.status === 'PLANNED');
 
   const renderTaskRow = (task: any) => (
     <div
@@ -251,19 +271,79 @@ export default function ScrumPlanning({ projectId, members, onSprintStarted }: S
 
           <div className="px-5 py-4 border-b border-brand/10 bg-surface-primary dark:bg-surface-primary flex flex-col gap-3 sticky top-0 z-10">
             <div className="flex items-center gap-2.5">
-              <div className="p-1.5 bg-brand/10 rounded-md">
+              <div className="p-1.5 bg-brand/10 rounded-md shrink-0">
                 <Target className="w-4 h-4 text-brand" />
               </div>
               {pendingSprints.length === 0 ? (
                 <h3 className="text-base font-bold text-text-primary dark:text-gray-200">Sin Sprints</h3>
               ) : (
-                <select
-                  value={selectedSprintId || ''}
-                  onChange={(e) => setSelectedSprintId(e.target.value)}
-                  className="w-full text-base font-bold text-brand bg-transparent outline-none cursor-pointer hover:text-brand-dark transition-colors"
-                >
-                  {pendingSprints.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                </select>
+                <div ref={sprintDropdownRef} className="relative flex-1 min-w-0">
+                  {/* Trigger */}
+                  <button
+                    onClick={() => setIsSprintDropdownOpen(prev => !prev)}
+                    className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-brand/20 bg-brand/5 hover:bg-brand/10 hover:border-brand/40 transition-all group"
+                  >
+                    <span className="text-sm font-bold text-brand truncate">
+                      {selectedSprint?.name ?? 'Seleccionar Sprint'}
+                    </span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className="text-[10px] font-bold bg-brand/10 text-brand px-1.5 py-0.5 rounded-full">
+                        {pendingSprints.length}
+                      </span>
+                      <ChevronDown
+                        className={`w-4 h-4 text-brand/70 transition-transform duration-200 ${isSprintDropdownOpen ? 'rotate-180' : ''}`}
+                      />
+                    </div>
+                  </button>
+
+                  {/* Dropdown panel */}
+                  {isSprintDropdownOpen && (
+                    <div className="absolute top-full left-0 right-0 mt-1.5 z-50 bg-surface-primary dark:bg-gray-800 border border-border-primary dark:border-gray-600 rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
+                      <div className="px-3 py-2 border-b border-border-primary dark:border-gray-700">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Sprints Planificados</p>
+                      </div>
+                      <ul className="max-h-52 overflow-y-auto py-1">
+                        {pendingSprints.map((s: any) => {
+                          const taskCount = tasks.filter(t => t.sprintId === s.id).length;
+                          const isSelected = s.id === selectedSprintId;
+                          return (
+                            <li key={s.id}>
+                              <button
+                                onClick={() => { setSelectedSprintId(s.id); setIsSprintDropdownOpen(false); }}
+                                className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 text-left transition-colors ${
+                                  isSelected
+                                    ? 'bg-brand/10 text-brand'
+                                    : 'text-text-primary dark:text-gray-200 hover:bg-surface-secondary dark:hover:bg-gray-700'
+                                }`}
+                              >
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                                    isSelected ? 'bg-brand' : 'bg-border-primary dark:bg-gray-500'
+                                  }`} />
+                                  <span className="text-sm font-semibold truncate">{s.name}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                  {taskCount > 0 && (
+                                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                                      isSelected
+                                        ? 'bg-brand/15 text-brand'
+                                        : 'bg-surface-secondary dark:bg-gray-700 text-text-secondary'
+                                    }`}>
+                                      {taskCount} {taskCount === 1 ? 'tarea' : 'tareas'}
+                                    </span>
+                                  )}
+                                  {isSelected && (
+                                    <CheckCircle2 className="w-3.5 h-3.5 text-brand shrink-0" />
+                                  )}
+                                </div>
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
 
@@ -313,6 +393,7 @@ export default function ScrumPlanning({ projectId, members, onSprintStarted }: S
         members={members || []}
         boards={boards}
         projectId={projectId}
+        userRole={myRole}
       />
 
       {/* ─── MODAL CREAR SPRINT ─── */}
