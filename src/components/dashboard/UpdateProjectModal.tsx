@@ -313,7 +313,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
                 >
                   <option value="KANBAN">Kanban</option>
                   <option value="SCRUM" disabled>Scrum (Próximamente)</option>
-                  <option value="SCRUMBAN" disabled>Scrumban (Próximamente)</option>
+                  <option value="SCRUMBAN">Scrumban (Próximamente)</option>
                 </select>
               </div>
             )}
