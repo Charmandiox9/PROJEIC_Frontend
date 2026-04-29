@@ -28,7 +28,7 @@ export default function BoardRenderer({ methodology, projectId, members, userRol
     return <ScrumBoard projectId={projectId} members={members} userRole={userRole} />;
   }
   if (methodology === 'SCRUMBAN') {
-    return <ScrumbanBoard />;
+    return <ScrumbanBoard projectId={projectId} members={members} userRole={userRole} />;
   }
   return (
     <div className="flex items-center justify-center h-64 text-gray-400 text-sm">
