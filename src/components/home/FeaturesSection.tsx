@@ -2,40 +2,19 @@
 
 import { useRef, useEffect } from 'react';
 import { KanbanSquare, Activity, Globe, Users } from 'lucide-react';
-
-const FEATURES = [
-  {
-    id: 1,
-    title: 'Tablero Kanban',
-    description:
-      'Organiza tareas en columnas configurables con registro automático de actividad.',
-    icon: KanbanSquare,
-  },
-  {
-    id: 2,
-    title: 'Indicadores de salud',
-    description:
-      'Semáforo verde/amarillo/rojo calculado a partir de actividad y tareas vencidas.',
-    icon: Activity,
-  },
-  {
-    id: 3,
-    title: 'Página pública',
-    description:
-      'URL compartible por proyecto, visible sin login para la comunidad universitaria.',
-    icon: Globe,
-  },
-  {
-    id: 4,
-    title: 'Roles flexibles',
-    description:
-      'Administrador, Supervisor, Estudiante y Externo con permisos diferenciados.',
-    icon: Users,
-  },
-];
+import { useT } from '@/hooks/useT';
 
 export default function FeaturesSection() {
+  const { t } = useT();
   const sectionRef = useRef<HTMLDivElement>(null);
+
+  const FEATURES = [
+    { id: 1, title: t('features.kanbanTitle'), description: t('features.kanbanDesc'), icon: KanbanSquare },
+    { id: 2, title: t('features.healthTitle'), description: t('features.healthDesc'), icon: Activity },
+    { id: 3, title: t('features.publicTitle'), description: t('features.publicDesc'), icon: Globe },
+    { id: 4, title: t('features.rolesTitle'), description: t('features.rolesDesc'), icon: Users },
+  ];
+
   const animatedRef = useRef(false);
 
   useEffect(() => {
@@ -143,14 +122,14 @@ export default function FeaturesSection() {
             style={{ opacity: 0 }}
             className="text-2xl sm:text-3xl font-bold text-text-primary mb-3"
           >
-            ¿Qué ofrece PROJEIC?
+            {t('features.heading')}
           </h2>
           <p
             data-heading-item
             style={{ opacity: 0 }}
             className="text-text-secondary max-w-2xl mx-auto text-sm sm:text-base"
           >
-            Herramientas diseñadas para los ritmos y necesidades de la comunidad EIC
+            {t('features.subheading')}
           </p>
         </div>
 

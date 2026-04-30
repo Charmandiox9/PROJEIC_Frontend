@@ -7,12 +7,16 @@ import { Menu, Sun, Moon, X } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthProvider';
 import { useTheme } from '@/hooks/useTheme';
+import { useLocale } from '@/hooks/useLocale';
+import { useT } from '@/hooks/useT';
 import logoTexto from '../../public/Logo__Texto.png';
 
 export default function Navbar() {
   const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuth();
   const { isDark, toggle } = useTheme();
+  const { locale, toggle: toggleLocale } = useLocale();
+  const { t } = useT();
   
   const [mounted, setMounted] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -131,13 +135,13 @@ export default function Navbar() {
 
       <div className="hidden md:flex flex-1 justify-center space-x-6">
         <Link href="/proyectos" className={`nav-animate-item text-sm font-medium px-3 py-1.5 rounded-lg transition-colors dark:text-gray-300 dark:hover:text-white ${pathname.startsWith('/proyectos') ? 'bg-surface-nav-active text-white' : 'text-white/70 hover:bg-surface-nav-hover hover:text-white'}`} style={{ opacity: mounted ? undefined : 0 }}>
-          Proyectos
+          {t('nav.projects')}
         </Link>
         <Link href="/acerca" className={`nav-animate-item text-sm font-medium px-3 py-1.5 rounded-lg transition-colors dark:text-gray-300 dark:hover:text-white ${pathname.startsWith('/acerca') ? 'bg-surface-nav-active text-white' : 'text-white/70 hover:bg-surface-nav-hover hover:text-white'}`} style={{ opacity: mounted ? undefined : 0 }}>
-          Acerca de
+          {t('nav.about')}
         </Link>
         <Link href="/eic" className={`nav-animate-item text-sm font-medium px-3 py-1.5 rounded-lg transition-colors dark:text-gray-300 dark:hover:text-white ${pathname.startsWith('/eic') ? 'bg-surface-nav-active text-white' : 'text-white/70 hover:bg-surface-nav-hover hover:text-white'}`} style={{ opacity: mounted ? undefined : 0 }}>
-          EIC
+          {t('nav.eic')}
         </Link>
       </div>
 
@@ -151,6 +155,14 @@ export default function Navbar() {
         >
           {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
         </button>
+        <button
+          onClick={toggleLocale}
+          aria-label={locale === 'es' ? 'Switch to English' : locale === 'en' ? 'Mudar para português' : 'Cambiar a Español'}
+          className="nav-animate-item p-2 rounded-lg text-white/70 hover:text-white hover:bg-surface-primary/10 transition-colors text-xs font-bold tracking-wide"
+          style={{ opacity: mounted ? undefined : 0 }}
+        >
+          {locale === 'es' ? 'EN' : locale === 'en' ? 'PT' : 'ES'}
+        </button>
         <div className="hidden md:flex items-center space-x-4">
           {!mounted ? (
             <div className="w-64 h-10 animate-pulse bg-surface-primary/10 rounded-lg"></div>
@@ -160,19 +172,19 @@ export default function Navbar() {
                 href="/misc/profile"
                 className="nav-animate-item text-sm font-medium text-white/90 hover:text-white transition-colors"
               >
-                Hola, {user?.name?.split(' ')[0] || 'Usuario'}
+                {t('nav.hello')}, {user?.name?.split(' ')[0] || t('nav.user')}
               </Link>
               <Link
                 href="/misc/profile"
                 className="nav-animate-item px-4 py-2 text-sm font-medium bg-surface-btn text-text-btn hover:bg-surface-btn-hover rounded-lg transition-colors shadow-sm"
               >
-                Mi dashboard
+                {t('nav.dashboard')}
               </Link>
               <button
                 onClick={logout}
                 className="nav-animate-item px-4 py-2 text-sm font-medium text-white/80 border border-white/20 rounded-lg hover:bg-surface-primary/10 hover:text-white transition-colors"
               >
-                Cerrar sesión
+                {t('nav.logout')}
               </button>
             </>
           ) : (
@@ -180,7 +192,7 @@ export default function Navbar() {
               href="/auth/login"
               className="nav-animate-item px-4 py-2 text-sm font-medium text-ui-dark bg-surface-primary border border-transparent rounded-lg hover:bg-surface-secondary transition-colors shadow-sm dark:text-brand dark:bg-transparent dark:border-brand dark:hover:bg-brand/10"
             >
-              Iniciar sesión
+              {t('nav.login')}
             </Link>
           )}
         </div>
@@ -202,7 +214,7 @@ export default function Navbar() {
             className={`mobile-item text-sm font-medium px-3 py-2 rounded-lg transition-colors ${pathname.startsWith('/proyectos') ? 'bg-surface-nav-active text-white' : 'text-white/70 hover:bg-surface-nav-hover hover:text-white'}`}
             style={{ opacity: 0 }}
           >
-            Proyectos
+            {t('nav.projects')}
           </Link>
           <Link
             href="/acerca"
@@ -210,7 +222,7 @@ export default function Navbar() {
             className={`mobile-item text-sm font-medium px-3 py-2 rounded-lg transition-colors ${pathname.startsWith('/acerca') ? 'bg-surface-nav-active text-white' : 'text-white/70 hover:bg-surface-nav-hover hover:text-white'}`}
             style={{ opacity: 0 }}
           >
-            Acerca de
+            {t('nav.about')}
           </Link>
           <Link
             href="/eic"
@@ -218,7 +230,7 @@ export default function Navbar() {
             className={`mobile-item text-sm font-medium px-3 py-2 rounded-lg transition-colors ${pathname.startsWith('/eic') ? 'bg-surface-nav-active text-white' : 'text-white/70 hover:bg-surface-nav-hover hover:text-white'}`}
             style={{ opacity: 0 }}
           >
-            EIC
+            {t('nav.eic')}
           </Link>
 
           <div className="mobile-item w-full h-px bg-surface-primary/10 my-2" style={{ opacity: 0 }}></div>
@@ -226,7 +238,7 @@ export default function Navbar() {
           {!mounted ? null : isAuthenticated ? (
             <div className="flex flex-col space-y-3">
               <span className="mobile-item text-sm font-medium text-white/90 px-3" style={{ opacity: 0 }}>
-                Hola, {user?.name?.split(' ')[0] || 'Usuario'}
+                {t('nav.hello')}, {user?.name?.split(' ')[0] || t('nav.user')}
               </span>
               <Link
                 href="/misc/profile"
@@ -234,14 +246,14 @@ export default function Navbar() {
                 className="mobile-item w-full text-center px-4 py-2 text-sm font-medium bg-surface-btn text-text-btn hover:bg-surface-btn-hover rounded-lg transition-colors shadow-sm"
                 style={{ opacity: 0 }}
               >
-                Mi dashboard
+                {t('nav.dashboard')}
               </Link>
               <button
                 onClick={() => { logout(); setIsMobileMenuOpen(false); }}
                 className="mobile-item w-full px-4 py-2 text-sm font-medium text-white/80 border border-white/20 rounded-lg hover:bg-surface-primary/10 hover:text-white transition-colors"
                 style={{ opacity: 0 }}
               >
-                Cerrar sesión
+                {t('nav.logout')}
               </button>
             </div>
           ) : (
@@ -251,7 +263,7 @@ export default function Navbar() {
               className="mobile-item w-full text-center px-4 py-2 text-sm font-medium text-ui-dark bg-surface-primary rounded-lg hover:bg-surface-secondary transition-colors shadow-sm dark:text-brand dark:bg-transparent dark:border dark:border-brand dark:hover:bg-brand/10"
               style={{ opacity: 0 }}
             >
-              Iniciar sesión
+              {t('nav.login')}
             </Link>
           )}
         </div>

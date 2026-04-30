@@ -8,6 +8,7 @@ import { Plus, FolderKanban, LayoutGrid, List, Search, BookOpen, GraduationCap }
 import CreateProjectModal from '@/components/dashboard/CreateProjectModal';
 import { useAuth } from '@/context/AuthProvider';
 import { AVATAR_FALLBACK_URL } from '@/lib/constants';
+import { useT } from '@/hooks/useT';
 
 interface Professor {
   id: string;
@@ -47,27 +48,12 @@ interface Project {
   mode?: string;
 }
 
-const STATUS_LABELS: Record<string, string> = {
-  ACTIVE: 'Activo',
-  STARTING: 'Iniciando',
-  COMPLETED: 'Completado',
-  ON_HOLD: 'En pausa',
-  CANCELLED: 'Cancelado',
-};
-
 const STATUS_COLORS: Record<string, string> = {
   ACTIVE: 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300',
   STARTING: 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300',
   COMPLETED: 'bg-surface-secondary text-text-secondary',
   ON_HOLD: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300',
   CANCELLED: 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300',
-};
-
-const ROLE_LABELS: Record<string, string> = {
-  LEADER: 'Líder',
-  STUDENT: 'Estudiante',
-  SUPERVISOR: 'Supervisor',
-  EXTERNAL: 'Externo',
 };
 
 const ROLE_COLORS: Record<string, string> = {
@@ -129,7 +115,8 @@ function SkeletonCard() {
   );
 }
 
-function ProjectCard({ project, currentUserId }: { project: Project; currentUserId?: string }) {
+function ProjectCard({ project, currentUserId, tDynamic }: { project: Project; currentUserId?: string; tDynamic: (key: string) => string }) {
+  const { t } = useT();
   const activeMembers = project.members?.filter(m => m.status === 'ACTIVE') || [];
   const myMembership = activeMembers.find(m => m.user.id === currentUserId);
   const role = project.myRole || myMembership?.role || 'STUDENT';
@@ -172,23 +159,23 @@ function ProjectCard({ project, currentUserId }: { project: Project; currentUser
 
             <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2 shrink-0 mt-1 sm:mt-0">
               <span className={`px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md whitespace-nowrap ${STATUS_COLORS[project.status] ?? 'bg-surface-secondary text-text-secondary'}`}>
-                {STATUS_LABELS[project.status] ?? project.status}
+                {tDynamic(`projectStatus.${project.status}`)}
               </span>
               <span className={`px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md whitespace-nowrap ${ROLE_COLORS[role] ?? 'bg-surface-secondary text-text-secondary'}`}>
-                {ROLE_LABELS[role] ?? role}
+                {tDynamic(`projectRole.${role}`)}
               </span>
             </div>
           </div>
         </div>
 
         <p className="text-xs text-text-muted line-clamp-2 flex-1 mb-4">
-          {project.description ?? 'Sin descripción.'}
+          {project.description ?? t('misProyectos.noDescription')}
         </p>
 
         <div className="mt-auto space-y-3 pt-4 border-t border-border-primary">
           <div>
             <div className="flex justify-between text-[10px] text-text-muted mb-1">
-              <span>Progreso</span>
+              <span>{t('misProyectos.progress')}</span>
               <span>0%</span>
             </div>
             <div className="h-1.5 bg-surface-secondary rounded-full overflow-hidden">
@@ -211,6 +198,7 @@ type ViewMode = 'grid' | 'list';
 
 export default function MisProyectosPage() {
   const { user } = useAuth();
+  const { t, tDynamic } = useT();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -278,9 +266,11 @@ export default function MisProyectosPage() {
     <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6">
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary tracking-tight">Mis Proyectos</h1>
+                    <h1 className="text-2xl font-bold text-text-primary tracking-tight">{t('misProyectos.title')}</h1>
           <p className="text-sm text-text-muted mt-0.5">
-            {isLoading ? 'Cargando...' : `${projects.length} proyecto${projects.length !== 1 ? 's' : ''} en total`}
+            {isLoading
+              ? t('misProyectos.loading')
+              : t(projects.length === 1 ? 'misProyectos.count' : 'misProyectos.countPlural').replace('{n}', String(projects.length))}
           </p>
         </div>
         <button
@@ -288,7 +278,7 @@ export default function MisProyectosPage() {
           className="flex items-center gap-2 bg-brand-dark hover:bg-brand-dark-hover text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors shrink-0"
         >
           <Plus className="w-4 h-4" />
-          Nuevo proyecto
+          {t('misProyectos.newProject')}
         </button>
       </header>
 
@@ -297,7 +287,7 @@ export default function MisProyectosPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
           <input
             type="text"
-            placeholder="Buscar proyectos, ramos..."
+            placeholder={t('misProyectos.searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-9 pr-4 py-2 border border-border-secondary rounded-lg text-sm focus:ring-2 focus:ring-brand focus:border-brand outline-none transition-shadow bg-surface-primary placeholder:text-text-muted"
@@ -309,12 +299,12 @@ export default function MisProyectosPage() {
           onChange={(e) => setStatusFilter(e.target.value)}
           className="px-3 py-2 border border-border-secondary rounded-lg text-sm bg-surface-primary focus:ring-2 focus:ring-brand focus:border-brand outline-none"
         >
-          <option value="ALL">Todos los estados</option>
-          <option value="ACTIVE">Activo</option>
-          <option value="STARTING">Iniciando</option>
-          <option value="COMPLETED">Completado</option>
-          <option value="ON_HOLD">En pausa</option>
-          <option value="CANCELLED">Cancelado</option>
+                    <option value="ALL">{t('misProyectos.statusAll')}</option>
+          <option value="ACTIVE">{tDynamic('projectStatus.ACTIVE')}</option>
+          <option value="STARTING">{tDynamic('projectStatus.STARTING')}</option>
+          <option value="COMPLETED">{tDynamic('projectStatus.COMPLETED')}</option>
+          <option value="ON_HOLD">{tDynamic('projectStatus.ON_HOLD')}</option>
+          <option value="CANCELLED">{tDynamic('projectStatus.CANCELLED')}</option>
         </select>
 
         <select
@@ -322,25 +312,25 @@ export default function MisProyectosPage() {
           onChange={(e) => setRoleFilter(e.target.value)}
           className="px-3 py-2 border border-border-secondary rounded-lg text-sm bg-surface-primary focus:ring-2 focus:ring-brand focus:border-brand outline-none"
         >
-          <option value="ALL">Mi rol: Todos</option>
-          <option value="LEADER">Líder</option>
-          <option value="STUDENT">Estudiante</option>
-          <option value="SUPERVISOR">Supervisor</option>
-          <option value="EXTERNAL">Externo</option>
+                    <option value="ALL">{t('misProyectos.roleAll')}</option>
+          <option value="LEADER">{tDynamic('projectRole.LEADER')}</option>
+          <option value="STUDENT">{tDynamic('projectRole.STUDENT')}</option>
+          <option value="SUPERVISOR">{tDynamic('projectRole.SUPERVISOR')}</option>
+          <option value="EXTERNAL">{tDynamic('projectRole.EXTERNAL')}</option>
         </select>
 
         <div className="flex items-center border border-border-secondary rounded-lg overflow-hidden ml-auto">
           <button
             onClick={() => setViewMode('grid')}
             className={`p-2 transition-colors ${viewMode === 'grid' ? 'bg-brand-dark text-white' : 'text-text-muted hover:bg-surface-secondary'}`}
-            title="Vista cuadrícula"
+            title={t('misProyectos.viewGrid')}
           >
             <LayoutGrid className="w-4 h-4" />
           </button>
           <button
             onClick={() => setViewMode('list')}
             className={`p-2 transition-colors ${viewMode === 'list' ? 'bg-brand-dark text-white' : 'text-text-muted hover:bg-surface-secondary'}`}
-            title="Vista lista"
+            title={t('misProyectos.viewList')}
           >
             <List className="w-4 h-4" />
           </button>
@@ -350,7 +340,7 @@ export default function MisProyectosPage() {
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center bg-surface-secondary p-3 rounded-lg border border-border-primary">
         <div className="flex items-center gap-2 text-sm font-medium text-text-secondary">
           <BookOpen className="w-4 h-4 text-brand" />
-          Filtros EIC:
+          {t('misProyectos.eicFilters')}
         </div>
 
         <select
@@ -364,9 +354,9 @@ export default function MisProyectosPage() {
           }}
           className="px-3 py-1.5 border border-border-secondary rounded-md text-xs bg-surface-primary focus:ring-2 focus:ring-brand outline-none"
         >
-          <option value="ALL">Todos los proyectos</option>
-          <option value="YES">Solo Institucionales</option>
-          <option value="NO">Solo Personales</option>
+                    <option value="ALL">{t('misProyectos.filterAll')}</option>
+          <option value="YES">{t('misProyectos.filterInstitutional')}</option>
+          <option value="NO">{t('misProyectos.filterPersonal')}</option>
         </select>
 
         {institutionalFilter === 'YES' && (
@@ -376,7 +366,7 @@ export default function MisProyectosPage() {
               onChange={(e) => setSubjectNameFilter(e.target.value)}
               className="px-3 py-1.5 border border-border-secondary rounded-md text-xs bg-surface-primary focus:ring-2 focus:ring-brand outline-none animate-in fade-in slide-in-from-left-2"
             >
-              <option value="ALL">Todas las materias</option>
+                            <option value="ALL">{t('misProyectos.allSubjects')}</option>
               {uniqueSubjectNames.map(name => (
                 <option key={name} value={name}>{name}</option>
               ))}
@@ -387,7 +377,7 @@ export default function MisProyectosPage() {
               onChange={(e) => setSubjectPeriodFilter(e.target.value)}
               className="px-3 py-1.5 border border-border-secondary rounded-md text-xs bg-surface-primary focus:ring-2 focus:ring-brand outline-none animate-in fade-in slide-in-from-left-2"
             >
-              <option value="ALL">Todos los periodos</option>
+                            <option value="ALL">{t('misProyectos.allPeriods')}</option>
               {uniquePeriods.map(period => (
                 <option key={period} value={period}>{period}</option>
               ))}
@@ -396,7 +386,6 @@ export default function MisProyectosPage() {
         )}
       </div>
 
-      {/* ─── GRID DE PROYECTOS ─── */}
       {isLoading ? (
         <div className={`grid gap-4 ${viewMode === 'grid' ? 'sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
           {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
@@ -406,19 +395,17 @@ export default function MisProyectosPage() {
           <div className="w-14 h-14 bg-surface-primary rounded-full flex items-center justify-center mb-4 shadow-sm border border-border-primary">
             <FolderKanban className="w-7 h-7 text-text-secondary" />
           </div>
-          <p className="text-sm font-semibold text-text-primary mb-1">
-            {projects.length === 0 ? 'No tienes proyectos aún.' : 'Sin resultados para tu búsqueda.'}
+                    <p className="text-sm font-semibold text-text-primary mb-1">
+            {projects.length === 0 ? t('misProyectos.emptyTitle') : t('misProyectos.emptySearchTitle')}
           </p>
           <p className="text-sm text-text-muted max-w-sm">
-            {projects.length === 0
-              ? 'Crea tu primer proyecto y empieza a colaborar.'
-              : 'Prueba con otros términos o limpia los filtros institucionales.'}
+            {projects.length === 0 ? t('misProyectos.emptyDesc') : t('misProyectos.emptySearchDesc')}
           </p>
         </div>
       ) : (
         <div className={`flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 nice-scrollbar md:grid md:overflow-visible md:pb-0 ${viewMode === 'grid' ? 'md:grid-cols-2 lg:grid-cols-3' : 'md:grid-cols-1'}`}>
           {filteredProjects.map((project) => (
-            <ProjectCard key={project.id} project={project} currentUserId={user?.userId} />
+            <ProjectCard key={project.id} project={project} currentUserId={user?.userId} tDynamic={tDynamic} />
           ))}
         </div>
       )}

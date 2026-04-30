@@ -5,8 +5,10 @@ import { fetchGraphQL } from '@/lib/graphQLClient';
 import { COUNT_SEMESTERS, COUNT_SUBJECTS } from '@/graphql/subjects/operations';
 import { COUNT_PROFESSORS_REGISTERED, COUNT_STUDENTS_REGISTERED } from '@/graphql/users/operations';
 import { GET_PROJECTS_ACTIVE_COUNT } from '@/graphql/projects/operations';
+import { useT } from '@/hooks/useT';
 
 export default function StatsSection() {
+  const { t } = useT();
   const [totalProjects, setTotalProjects] = useState<number | null>(null);
   const [totalProfessors, setTotalProfessors] = useState<number | null>(null);
   const [totalStudents, setTotalStudents] = useState<number | null>(null);
@@ -44,11 +46,11 @@ export default function StatsSection() {
   }, []);
 
   const statsView = [
-    { id: 1, label: 'Proyectos activos', value: totalProjects },
-    { id: 2, label: 'Docentes supervisores', value: totalProfessors },
-    { id: 3, label: 'Estudiantes registrados', value: totalStudents },
-    { id: 4, label: 'Semestres en uso', value: totalSemesters },
-    { id: 5, label: 'Asignaturas', value: totalSubjects },
+    { id: 1, label: t('statsSection.activeProjects'), value: totalProjects },
+    { id: 2, label: t('statsSection.supervisorProfessors'), value: totalProfessors },
+    { id: 3, label: t('statsSection.registeredStudents'), value: totalStudents },
+    { id: 4, label: t('statsSection.semestersInUse'), value: totalSemesters },
+    { id: 5, label: t('statsSection.subjects'), value: totalSubjects },
   ];
 
   useEffect(() => {

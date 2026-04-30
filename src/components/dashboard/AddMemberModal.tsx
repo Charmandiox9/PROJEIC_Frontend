@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { X, Loader2, UserPlus } from 'lucide-react';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { ADD_PROJECT_MEMBER } from '@/graphql/misc/operations';
-import { toast } from 'sonner'; 
+import { toast } from 'sonner';
+import { useT } from '@/hooks/useT';
 
 interface AddMemberModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ interface AddMemberModalProps {
 }
 
 export default function AddMemberModal({ isOpen, projectId, onClose, onSuccess }: AddMemberModalProps) {
+  const { t } = useT();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -103,7 +105,7 @@ export default function AddMemberModal({ isOpen, projectId, onClose, onSuccess }
       <div className="bg-surface-primary rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-primary">
           <h2 className="text-xl font-bold text-text-primary flex items-center gap-2">
-            <UserPlus className="w-5 h-5 text-brand" /> Añadir Equipo
+            <UserPlus className="w-5 h-5 text-brand" /> {t('addMember.title')}
           </h2>
           <button
             onClick={onClose}
@@ -121,9 +123,9 @@ export default function AddMemberModal({ isOpen, projectId, onClose, onSuccess }
               </svg>
             </div>
             <div>
-              <h3 className="text-xl font-bold text-text-primary">¡Listo!</h3>
+              <h3 className="text-xl font-bold text-text-primary">{t('addMember.successTitle')}</h3>
               <p className="text-sm text-text-muted mt-2">
-                El usuario ha sido invitado al proyecto exitosamente.
+                {t('addMember.successMessage')}
               </p>
             </div>
             <div className="pt-4 flex justify-center gap-3">
@@ -132,14 +134,14 @@ export default function AddMemberModal({ isOpen, projectId, onClose, onSuccess }
                 onClick={onClose}
                 className="px-5 py-2.5 text-sm font-medium text-text-primary bg-surface-primary border border-border-secondary rounded-lg hover:bg-surface-tertiary transition-colors"
               >
-                Cerrar ventana
+                {t('addMember.closeWindow')}
               </button>
               <button
                 type="button"
                 onClick={handleInviteAnother}
                 className="px-5 py-2.5 text-sm font-medium text-white bg-brand rounded-lg hover:bg-brand-hover transition-colors shadow-sm"
               >
-                Invitar a otro
+                {t('addMember.inviteAnother')}
               </button>
             </div>
           </div>
@@ -153,7 +155,7 @@ export default function AddMemberModal({ isOpen, projectId, onClose, onSuccess }
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-text-secondary mb-1">
-                Correo Institucional del usuario <span className="text-red-500">*</span>
+                {t('addMember.emailLabel')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="email"
@@ -169,7 +171,7 @@ export default function AddMemberModal({ isOpen, projectId, onClose, onSuccess }
 
             <div>
               <label htmlFor="role" className="block text-sm font-medium text-text-secondary mb-1">
-                Rol en el proyecto <span className="text-red-500">*</span>
+                {t('addMember.roleLabel')} <span className="text-red-500">*</span>
               </label>
               <select
                 id="role"
@@ -179,10 +181,10 @@ export default function AddMemberModal({ isOpen, projectId, onClose, onSuccess }
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-border-secondary rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none bg-surface-primary text-text-primary"
               >
-                <option value="STUDENT">Estudiante</option>
-                <option value="LEADER">Líder de Proyecto</option>
-                <option value="SUPERVISOR">Supervisor (Académico)</option>
-                <option value="EXTERNAL">Colaborador Externo</option>
+                <option value="STUDENT">{t('addMember.roleStudent')}</option>
+                <option value="LEADER">{t('addMember.roleLeader')}</option>
+                <option value="SUPERVISOR">{t('addMember.roleSupervisor')}</option>
+                <option value="EXTERNAL">{t('addMember.roleExternal')}</option>
               </select>
             </div>
 
@@ -193,7 +195,7 @@ export default function AddMemberModal({ isOpen, projectId, onClose, onSuccess }
                 disabled={isSubmitting}
                 className="px-4 py-2 text-sm font-medium text-text-primary bg-surface-primary border border-border-secondary rounded-lg hover:bg-surface-tertiary transition-colors disabled:opacity-50"
               >
-                Cancelar
+              {t('modal.cancel')}
               </button>
               <button
                 type="submit"
@@ -203,10 +205,10 @@ export default function AddMemberModal({ isOpen, projectId, onClose, onSuccess }
                 {isSubmitting ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Invitando...
+                    {t('modal.inviting')}
                   </>
                 ) : (
-                  'Agregar Miembro'
+                  t('addMember.addMemberBtn')
                 )}
               </button>
             </div>

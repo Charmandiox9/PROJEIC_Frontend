@@ -9,7 +9,10 @@ interface Props {
   token: string;
 }
 
+import { useT } from '@/hooks/useT';
+
 export default function WorkflowPanel({ workflows, workflowFile, setWorkflowFile, handleDispatch, dispatching, token }: Props) {
+  const { t } = useT();
   const getDuration = (start: string, end: string) => {
     const diff = new Date(end).getTime() - new Date(start).getTime();
     const minutes = Math.floor(diff / 60000);
@@ -23,12 +26,12 @@ export default function WorkflowPanel({ workflows, workflowFile, setWorkflowFile
     <div className="bg-surface-primary border border-border-primary rounded-xl p-5 flex-1 flex flex-col">
       <div className="flex justify-between items-center mb-4">
         <h4 className="font-bold flex items-center gap-2 text-lg">
-          <Activity className="w-5 h-5 text-brand" /> Despliegues (CI/CD)
+          <Activity className="w-5 h-5 text-brand" /> {t('github.deployments')}
         </h4>
         <div className="flex gap-2">
           <input type="text" placeholder="main.yml" value={workflowFile} onChange={(e) => setWorkflowFile(e.target.value)} className="text-[10px] px-2 py-1 bg-surface-secondary border border-border-secondary rounded outline-none focus:border-brand w-24" />
           <button onClick={handleDispatch} disabled={dispatching || !token} className="flex items-center gap-1 px-3 py-1 bg-brand text-white text-[10px] font-bold rounded hover:bg-brand-hover disabled:opacity-50 transition-colors">
-            <Play className="w-3 h-3 fill-current" /> {dispatching ? 'Run...' : 'Ejecutar'}
+            <Play className="w-3 h-3 fill-current" /> {dispatching ? t('github.running') : t('github.run')}
           </button>
         </div>
       </div>
@@ -36,8 +39,8 @@ export default function WorkflowPanel({ workflows, workflowFile, setWorkflowFile
       {workflows.length > 0 && (
         <div className="mb-4 p-3 bg-surface-secondary border border-border-secondary rounded-lg">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider flex items-center gap-1"><BarChart className="w-3 h-3" /> Tiempos</span>
-            <span className="text-[10px] text-text-muted font-mono">Últimas ejecuciones</span>
+            <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider flex items-center gap-1"><BarChart className="w-3 h-3" /> {t('github.times')}</span>
+            <span className="text-[10px] text-text-muted font-mono">{t('github.latestRuns')}</span>
           </div>
           <div className="flex items-end gap-2 h-12 pt-2">
             {workflows.slice().reverse().map((run: any) => {
@@ -75,10 +78,10 @@ export default function WorkflowPanel({ workflows, workflowFile, setWorkflowFile
                 </div>
               </div>
             </div>
-            <a href={run.html_url} target="_blank" rel="noreferrer" className="text-[10px] text-brand font-bold bg-brand/10 hover:bg-brand/20 px-3 py-1.5 rounded uppercase shrink-0 opacity-0 group-hover:opacity-100 transition-all">Logs</a>
+            <a href={run.html_url} target="_blank" rel="noreferrer" className="text-[10px] text-brand font-bold bg-brand/10 hover:bg-brand/20 px-3 py-1.5 rounded uppercase shrink-0 opacity-0 group-hover:opacity-100 transition-all">{t('github.logs')}</a>
           </div>
         ))}
-        {workflows.length === 0 && <p className="text-xs text-center text-text-muted p-2">Sin ejecuciones recientes.</p>}
+        {workflows.length === 0 && <p className="text-xs text-center text-text-muted p-2">{t('github.noRecentRuns')}</p>}
       </div>
     </div>
   );

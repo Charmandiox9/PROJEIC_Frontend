@@ -8,6 +8,7 @@ import Input from '@/components/ui/Input';
 import Textarea from '@/components/ui/Textarea';
 import Select from '@/components/ui/Select';
 import { AVATAR_FALLBACK_URL } from '@/lib/constants';
+import { useT } from '@/hooks/useT';
 
 interface CreateResultModalProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ interface CreateResultModalProps {
 export default function CreateResultModal({ isOpen, projectId, members, onClose, onSuccess }: CreateResultModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useT();
 
   const [formData, setFormData] = useState({
     title: '',
@@ -41,7 +43,7 @@ export default function CreateResultModal({ isOpen, projectId, members, onClose,
     setError(null);
 
     if (!formData.ownerId) {
-      setError('Debes asignar un responsable para este resultado.');
+      setError(t('createResult.errorOwner'));
       setIsSubmitting(false);
       return;
     }
@@ -64,8 +66,8 @@ export default function CreateResultModal({ isOpen, projectId, members, onClose,
       setFormData({ title: '', description: '', ownerId: '' });
       onSuccess();
       onClose();
-    } catch (err: any) {
-      setError(err.message || 'Error al crear el resultado esperado.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : t('createResult.errorCreate'));
     } finally {
       setIsSubmitting(false);
     }
@@ -77,7 +79,7 @@ export default function CreateResultModal({ isOpen, projectId, members, onClose,
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-700">
           <div className="flex items-center gap-2">
             <Target className="w-5 h-5 text-brand" />
-            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Nuevo Resultado Esperado</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">{t('createResult.title')}</h2>
           </div>
           <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full">
             <X className="w-5 h-5" />
@@ -92,33 +94,17 @@ export default function CreateResultModal({ isOpen, projectId, members, onClose,
             </div>
           )}
 
-          <Input
-            id="title"
-            label="Título del Valor Esperado *"
-            name="title"
-            required
-            placeholder="Ej: Base de datos conectada y funcional"
-            value={formData.title}
-            onChange={handleChange}
-          />
+          <Input id="title" label={t('createResult.fieldTitle')} name="title" required placeholder="Ej: Base de datos conectada y funcional" value={formData.title} onChange={handleChange} />
 
-          <Textarea
-            id="description"
-            label="Criterios de Aceptación"
-            name="description"
-            rows={3}
-            placeholder="¿Qué debe ocurrir para considerar esto como completado?"
-            value={formData.description}
-            onChange={handleChange}
-          />
+          <Textarea id="description" label={t('createResult.fieldDescription')} name="description" rows={3} placeholder="¿Qué debe ocurrir para considerar esto como completado?" value={formData.description} onChange={handleChange} />
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Responsable Único (Owner) <span className="text-red-500">*</span>
+              {t('createResult.fieldOwner')}
             </label>
             <div className="relative">
               <Select id="ownerId" name="ownerId" value={formData.ownerId} onChange={handleChange} required>
-                <option value="">-- Seleccionar Responsable --</option>
+                <option value="">{t('createResult.selectOwner')}</option>
                 {activeMembers.map((member: any) => (
                   <option key={member.user.id} value={member.user.id}>
                     {member.user.name} ({member.role})
@@ -126,15 +112,15 @@ export default function CreateResultModal({ isOpen, projectId, members, onClose,
                 ))}
               </Select>
             </div>
-            <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1.5">Esta persona sera la encargada de subir las evidencias para avanzar el estado.</p>
+            <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1.5">{t('createResult.ownerHint')}</p>
           </div>
 
           <div className="pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-3">
             <button type="button" onClick={onClose} disabled={isSubmitting} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600">
-              Cancelar
+              {t('modal.cancel')}
             </button>
             <button type="submit" disabled={isSubmitting} className="px-6 py-2 text-sm font-medium text-white bg-brand rounded-lg hover:bg-brand-hover flex items-center gap-2">
-              {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</> : 'Crear Resultado'}
+              {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" /> {t('modal.saving')}</> : t('createResult.createBtn')}
             </button>
           </div>
         </form>

@@ -5,6 +5,7 @@ import { ADD_PROJECT_MEMBER } from '@/graphql/misc/operations';
 import { AlertCircle, Loader2, UserPlus, X } from 'lucide-react';
 import { UCN_DOMAINS, ROLE_OPTIONS } from '../../project-detail/types';
 import Select from '@/components/ui/Select';
+import { useT } from '@/hooks/useT';
 
 interface InviteMemberFormProps {
   project: Project;
@@ -25,24 +26,25 @@ export default function InviteMemberForm({ project, onUpdateRole, onRemoveMember
   const [error, setError] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
+  const { t, tDynamic } = useT();
 
   const handleInvite = async () => {
     setError(null);
     setSuccess(null);
     const trimmed = email.trim().toLowerCase();
     if (!trimmed) {
-      setError('Ingresa un correo.');
+      setError(t('inviteMember.errorEmailEmpty'));
       return;
     }
 
     if (!isExternal && !isValidUcnEmail(trimmed)) {
-      setError(`El correo debe pertenecer a: ${UCN_DOMAINS.join(', ')}`);
+      setError(`${t('inviteMember.errorEmailDomain')} ${UCN_DOMAINS.join(', ')}`);
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(trimmed)) {
-      setError('Correo inválido.');
+      setError(t('inviteMember.errorEmailInvalid'));
       return;
     }
 
@@ -59,20 +61,20 @@ export default function InviteMemberForm({ project, onUpdateRole, onRemoveMember
         },
       });
       setEmail('');
-      setSuccess('Invitación enviada correctamente.');
+      setSuccess(t('inviteMember.inviteSuccess'));
       onRefresh();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error al enviar la invitación.');
+      setError(err instanceof Error ? err.message : t('inviteMember.errorSendInvite'));
     } finally {
       setIsSending(false);
     }
   };
 
   const ROLE_DESCRIPTIONS = [
-    { role: 'Líder', desc: 'Gestiona el proyecto, invita miembros y tiene control total.' },
-    { role: 'Supervisor', desc: 'Supervisa el avance del equipo.' },
-    { role: 'Estudiante', desc: 'Participa activamente en las tareas del proyecto.' },
-    { role: 'Externo', desc: 'Colaborador con acceso limitado.' },
+    { role: tDynamic('projectRole.LEADER'), desc: t('inviteMember.roleLeaderDesc') },
+    { role: tDynamic('projectRole.SUPERVISOR'), desc: t('inviteMember.roleSupervisorDesc') },
+    { role: tDynamic('projectRole.STUDENT'), desc: t('inviteMember.roleStudentDesc') },
+    { role: tDynamic('projectRole.EXTERNAL'), desc: t('inviteMember.roleExternalDesc') },
   ];
 
   const handleInviteAnother = () => {
@@ -86,7 +88,7 @@ export default function InviteMemberForm({ project, onUpdateRole, onRemoveMember
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full min-w-[320px] max-w-[400px] p-6 space-y-4 animate-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Agregar al equipo</h3>
+          <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">{t('inviteMember.title')}</h3>
           <button
             onClick={onClose}
             className="p-1.5 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
@@ -103,9 +105,9 @@ export default function InviteMemberForm({ project, onUpdateRole, onRemoveMember
               </svg>
             </div>
             <div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">¡Invitación enviada!</h3>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">{t('inviteMember.successTitle')}</h3>
               <p className="text-sm text-gray-500 mt-2">
-                El usuario ha sido invitado al proyecto exitosamente.
+                {t('inviteMember.successMessage')}
               </p>
             </div>
             <div className="pt-4 flex justify-center gap-3">
@@ -114,14 +116,14 @@ export default function InviteMemberForm({ project, onUpdateRole, onRemoveMember
                 onClick={onClose}
                 className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
               >
-                Cerrar ventana
+                {t('inviteMember.closeWindow')}
               </button>
               <button
                 type="button"
                 onClick={handleInviteAnother}
                 className="px-4 py-2 text-sm font-medium text-white bg-brand rounded-lg hover:bg-brand-hover transition-colors shadow-sm"
               >
-                Invitar a otro
+                {t('inviteMember.inviteAnother')}
               </button>
             </div>
           </div>
@@ -134,7 +136,7 @@ export default function InviteMemberForm({ project, onUpdateRole, onRemoveMember
                 onChange={(e) => { setIsExternal(e.target.checked); setError(null); }}
                 className="w-3.5 h-3.5 text-brand border-gray-300 rounded focus:ring-brand"
               />
-              Colaborador externo
+              {t('inviteMember.externalCollaborator')}
             </label>
 
             <input
@@ -153,7 +155,7 @@ export default function InviteMemberForm({ project, onUpdateRole, onRemoveMember
                 className="w-full"
               >
                 {ROLE_OPTIONS.filter((r) => r.value !== 'EXTERNAL').map((r) => (
-                  <option key={r.value} value={r.value}>{r.label}</option>
+                  <option key={r.value} value={r.value}>{tDynamic(`projectRole.${r.value}`)}</option>
                 ))}
               </Select>
             )}
@@ -171,13 +173,13 @@ export default function InviteMemberForm({ project, onUpdateRole, onRemoveMember
               className="w-full py-2 text-sm font-medium text-white bg-brand rounded-lg hover:bg-brand-dark transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
             >
               {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
-              {isSending ? 'Enviando...' : 'Enviar invitación'}
+              {isSending ? t('inviteMember.sending') : t('inviteMember.sendInvitation')}
             </button>
           </div>
         )}
 
         <div className="pt-4 border-t border-gray-100 dark:border-gray-700 space-y-3 overflow-y-auto max-h-48 pr-2">
-          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Roles disponibles</h3>
+          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">{t('inviteMember.availableRoles')}</h3>
           {ROLE_DESCRIPTIONS.map((r) => (
             <div key={r.role}>
               <p className="text-xs font-bold text-gray-700 dark:text-gray-300">{r.role}</p>

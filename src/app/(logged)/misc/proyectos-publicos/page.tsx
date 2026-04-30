@@ -7,6 +7,7 @@ import { fetchGraphQL } from '@/lib/graphQLClient';
 import { GET_PUBLIC_PROJECTS } from '@/graphql/misc/operations';
 import { AVATAR_FALLBACK_URL } from '@/lib/constants';
 import { useAuth } from '@/context/AuthProvider';
+import { useT } from '@/hooks/useT';
 
 interface Professor {
   id: string;
@@ -46,23 +47,13 @@ interface Project {
   members: ProjectMember[];
 }
 
-const STATUS_LABELS: Record<string, string> = {
-  ACTIVE: 'En curso',
-  STARTING: 'Iniciando',
-  COMPLETED: 'Finalizado',
-  ON_HOLD: 'En pausa',
-  CANCELLED: 'Cancelado',
-};
-
 const FILTER_OPTIONS = ['Todos', 'ACTIVE', 'STARTING', 'COMPLETED'];
-
-function getStatusLabel(status: string): string {
-  return STATUS_LABELS[status] ?? status;
-}
 
 export default function ProyectosPublicosLogeadoPage() {
   const router = useRouter();
   const { user } = useAuth();
+  const { t, tDynamic } = useT();
+  const getStatusLabel = (status: string) => tDynamic(`projectStatus.${status}`);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -104,15 +95,15 @@ export default function ProyectosPublicosLogeadoPage() {
       <div className="bg-surface-primary border-b border-border-primary px-6 py-6 sticky top-0 z-10">
         <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
           <div className="flex flex-col shrink-0">
-            <h1 className="text-2xl font-bold text-text-primary">Proyectos Publicos</h1>
-            <p className="text-sm text-text-muted mt-1">Explora iniciativas abiertas a la comunidad</p>
+            <h1 className="text-2xl font-bold text-text-primary">{t('publicProjectsLogeado.heading')}</h1>
+            <p className="text-sm text-text-muted mt-1">{t('publicProjectsLogeado.subheading')}</p>
           </div>
           <div className="flex flex-col md:flex-row w-full md:w-auto gap-4 items-center">
             <div className="relative w-full md:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Buscar proyectos, ramos o profesores..."
+                placeholder={t('publicProjectsLogeado.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-border-secondary rounded-lg text-sm text-text-primary focus:ring-2 focus:ring-brand focus:border-brand outline-none transition-colors bg-surface-primary placeholder:text-text-muted"
@@ -128,7 +119,7 @@ export default function ProyectosPublicosLogeadoPage() {
                     : 'bg-surface-primary border border-border-secondary text-text-secondary hover:bg-surface-tertiary'
                     }`}
                 >
-                  {status === 'Todos' ? 'Todos' : getStatusLabel(status)}
+                  {status === 'Todos' ? t('publicProjectsLogeado.filterAll') : getStatusLabel(status)}
                 </button>
               ))}
             </div>
@@ -143,11 +134,11 @@ export default function ProyectosPublicosLogeadoPage() {
           </div>
         ) : error ? (
           <div className="text-center py-20 bg-surface-primary rounded-xl border border-border-primary">
-            <p className="text-gray-500">Ocurrió un error al cargar los proyectos.</p>
+            <p className="text-gray-500">{t('publicProjectsLogeado.errorLoad')}</p>
           </div>
         ) : filteredProjects.length === 0 ? (
           <div className="text-center py-20 bg-surface-primary rounded-xl border border-border-primary">
-            <p className="text-gray-500">No se encontraron proyectos públicos.</p>
+            <p className="text-gray-500">{t('publicProjectsLogeado.noResults')}</p>
           </div>
         ) : (
           <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 md:flex-none md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 md:overflow-visible nice-scrollbar">
@@ -164,7 +155,7 @@ export default function ProyectosPublicosLogeadoPage() {
                   {isMember && (
                     <div className="absolute -top-3 -right-3 z-10">
                       <span className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider bg-brand text-white shadow-sm rounded-full">
-                        Tu proyecto
+                        {t('publicProjectsLogeado.yourProject')}
                       </span>
                     </div>
                   )}
@@ -187,7 +178,7 @@ export default function ProyectosPublicosLogeadoPage() {
                               <div className="flex items-start gap-1.5 pl-0.5">
                                 <GraduationCap className="w-3.5 h-3.5 text-gray-400 shrink-0 mt-0.5" />
                                 <p className="text-[11px] text-text-secondary line-clamp-1">
-                                  <span className="font-medium text-gray-500 mr-1">Prof:</span>
+                                  <span className="font-medium text-gray-500 mr-1">{t('publicProjectsLogeado.professor')}</span>
                                   {project.subject.professors.map(p => p.name).join(', ')}
                                 </p>
                               </div>
@@ -205,7 +196,7 @@ export default function ProyectosPublicosLogeadoPage() {
                     </div>
                   </div>
 
-                  <p className="text-text-muted text-sm mb-6 line-clamp-3 flex-1">{project.description || 'Sin descripcion detallada.'}</p>
+                  <p className="text-text-muted text-sm mb-6 line-clamp-3 flex-1">{project.description || t('publicProjectsLogeado.noDescription')}</p>
 
                   <div className="flex items-center justify-between pt-4 border-t border-border-primary mt-auto">
                     <div className="flex items-center -space-x-2 relative z-0">
@@ -229,7 +220,7 @@ export default function ProyectosPublicosLogeadoPage() {
                       onClick={() => router.push(`/misc/proyectos/${project.id}`)}
                       className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-brand hover:text-white bg-brand/5 hover:bg-brand rounded-lg transition-colors"
                     >
-                      Ver detalles <Eye className="w-3.5 h-3.5" />
+                      {t('publicProjectsLogeado.viewDetails')} <Eye className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>

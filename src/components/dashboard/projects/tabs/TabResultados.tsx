@@ -8,21 +8,31 @@ import { AVATAR_FALLBACK_URL } from '@/lib/constants';
 import CreateResultModal from '../hybrid/CreateResultModal';
 import UpdateResultStatusModal from '../hybrid/UpdateResultStatusModal';
 import ResultDetailsModal from '../hybrid/ResultDetailsModal';
+import { useT } from '@/hooks/useT';
 
 interface TabResultadosProps {
   project: any;
   isLeader: boolean;
 }
 
-const STATUS_MAP: Record<string, { label: string, color: string }> = {
-  NOT_STARTED: { label: 'Iniciado (Sin avance)', color: 'bg-gray-100 text-gray-600' },
-  STARTED: { label: 'En Progreso (10%)', color: 'bg-blue-100 text-blue-700' },
-  IN_REVIEW: { label: 'En Revisión (50%)', color: 'bg-yellow-100 text-yellow-700' },
-  VALIDATED: { label: 'Testeado (80%)', color: 'bg-purple-100 text-purple-700' },
-  COMPLETED: { label: 'Completado Real (100%)', color: 'bg-green-100 text-green-700' },
+const STATUS_COLORS: Record<string, string> = {
+  NOT_STARTED: 'bg-gray-100 text-gray-600',
+  STARTED: 'bg-blue-100 text-blue-700',
+  IN_REVIEW: 'bg-yellow-100 text-yellow-700',
+  VALIDATED: 'bg-purple-100 text-purple-700',
+  COMPLETED: 'bg-green-100 text-green-700',
 };
 
 export default function TabResultados({ project, isLeader }: TabResultadosProps) {
+  const { t } = useT();
+
+  const STATUS_MAP: Record<string, { label: string; color: string }> = {
+    NOT_STARTED: { label: t('tabResultados.statusNotStarted'), color: STATUS_COLORS.NOT_STARTED },
+    STARTED: { label: t('tabResultados.statusStarted'), color: STATUS_COLORS.STARTED },
+    IN_REVIEW: { label: t('tabResultados.statusInReview'), color: STATUS_COLORS.IN_REVIEW },
+    VALIDATED: { label: t('tabResultados.statusValidated'), color: STATUS_COLORS.VALIDATED },
+    COMPLETED: { label: t('tabResultados.statusCompleted'), color: STATUS_COLORS.COMPLETED },
+  };
   const [results, setResults] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -58,10 +68,10 @@ export default function TabResultados({ project, isLeader }: TabResultadosProps)
         <div>
           <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
             <Target className="w-5 h-5 text-brand" />
-            Panel de Resultados Esperados
+            {t('tabResultados.panelTitle')}
           </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Gestiona el progreso mediante hitos y carga de evidencias obligatorias.
+            {t('tabResultados.panelDesc')}
           </p>
         </div>
         {isLeader && (
@@ -69,7 +79,7 @@ export default function TabResultados({ project, isLeader }: TabResultadosProps)
             onClick={() => setIsCreateModalOpen(true)}
             className="flex items-center gap-2 bg-brand text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-brand-hover transition-colors shrink-0"
           >
-            <Plus className="w-4 h-4" /> Nuevo Resultado
+            <Plus className="w-4 h-4" /> {t('tabResultados.newResult')}
           </button>
         )}
       </div>
@@ -80,8 +90,8 @@ export default function TabResultados({ project, isLeader }: TabResultadosProps)
       ) : results.length === 0 ? (
         <div className="text-center py-20 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-dashed border-gray-200 dark:border-gray-600">
           <Target className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500 dark:text-gray-400 font-medium">No hay resultados esperados definidos.</p>
-          <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Comienza creando el primer objetivo de valor.</p>
+          <p className="text-gray-500 dark:text-gray-400 font-medium">{t('tabResultados.noResults')}</p>
+          <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">{t('tabResultados.noResultsDesc')}</p>
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
@@ -103,13 +113,13 @@ export default function TabResultados({ project, isLeader }: TabResultadosProps)
                 </div>
 
                 <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-6 flex-1">
-                  {result.description || 'Sin criterios de aceptación definidos.'}
+                  {result.description || t('tabResultados.noDescription')}
                 </p>
 
                 {/* Motor de Progreso (Barra) */}
                 <div className="mb-5">
                   <div className="flex justify-between text-xs font-semibold mb-1.5">
-                    <span className="text-gray-600 dark:text-gray-400">Progreso Validado</span>
+                    <span className="text-gray-600 dark:text-gray-400">{t('tabResultados.validatedProgress')}</span>
                     <span className={result.progress === 100 ? 'text-green-600' : 'text-brand'}>{result.progress}%</span>
                   </div>
                   <div className="w-full h-2.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
@@ -127,7 +137,7 @@ export default function TabResultados({ project, isLeader }: TabResultadosProps)
                     />
                     <div>
                       <p className="text-xs font-medium text-gray-900 dark:text-gray-100 leading-none">{result.owner.name}</p>
-                      <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 uppercase tracking-wide">Responsable</p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 uppercase tracking-wide">{t('tabResultados.responsible')}</p>
                     </div>
                   </div>
 
@@ -135,11 +145,11 @@ export default function TabResultados({ project, isLeader }: TabResultadosProps)
                   <div className="flex items-center gap-2">
                     {hasEvidence ? (
                       <div className="flex items-center gap-1 text-[11px] font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-md">
-                        <ShieldCheck className="w-3.5 h-3.5" /> Evidencia OK
+                        <ShieldCheck className="w-3.5 h-3.5" /> {t('tabResultados.evidenceOk')}
                       </div>
                     ) : (
                       <div className="flex items-center gap-1 text-[11px] font-semibold text-orange-600 bg-orange-50 px-2 py-1 rounded-md">
-                        <AlertTriangle className="w-3.5 h-3.5" /> Sin Evidencia
+                        <AlertTriangle className="w-3.5 h-3.5" /> {t('tabResultados.noEvidence')}
                       </div>
                     )}
 

@@ -1,6 +1,7 @@
 import KanbanBoard from './kanban/KanbanBoard';
 import ScrumBoard from './scrum/ScrumBoard';
 import ScrumbanBoard from './scrumban/ScrumbanBoard';
+import { useT } from '@/hooks/useT';
 
 interface ProjectMember {
   id: string;
@@ -21,6 +22,7 @@ interface BoardRendererProps {
 }
 
 export default function BoardRenderer({ methodology, projectId, members, userRole }: BoardRendererProps) {
+  const { t } = useT();
   if (methodology === 'KANBAN') {
     return <KanbanBoard projectId={projectId} members={members} userRole={userRole} />;
   }
@@ -32,7 +34,7 @@ export default function BoardRenderer({ methodology, projectId, members, userRol
   }
   return (
     <div className="flex items-center justify-center h-64 text-gray-400 text-sm">
-      Metodología no reconocida: {methodology}
+      {t('kanban.unrecognizedMethodology')} {methodology}
     </div>
   );
 }

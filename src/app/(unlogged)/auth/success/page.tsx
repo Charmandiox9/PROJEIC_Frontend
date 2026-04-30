@@ -6,6 +6,7 @@ import { jwtDecode } from 'jwt-decode';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
+import { useT } from '@/hooks/useT';
 
 interface GoogleUserPayload {
   email: string;
@@ -28,6 +29,7 @@ function AuthSuccessInner() {
   const searchParams = useSearchParams();
   
   const { isDark } = useTheme();
+  const { t } = useT();
   const [mounted, setMounted] = useState(false);
 
   const [authStatus, setAuthStatus] = useState<'loading' | 'success' | 'error'>('loading');
@@ -161,21 +163,23 @@ function AuthSuccessInner() {
     loading: {
       glowClass: isDarkMode ? 'bg-brand/30' : 'bg-brand/20',
       icon: <Loader2 className="w-10 h-10 text-brand animate-spin" />,
-      title: 'Autenticando...',
-      subtitle: 'Validando credenciales y preparando tu entorno de trabajo en PROJEIC.'
+      title: t('authSuccess.loadingTitle'),
+      subtitle: t('authSuccess.loadingSubtitle'),
     },
     success: {
       glowClass: isDarkMode ? 'bg-green-500/30' : 'bg-green-500/20',
       icon: <CheckCircle2 className={`w-10 h-10 ${isDarkMode ? 'text-green-400' : 'text-green-500'}`} />,
-      title: userName ? `¡Hola, ${userName}!` : '¡Autenticación Exitosa!',
-      subtitle: 'Redirigiendo a tu panel de control...'
+      title: userName
+        ? t('authSuccess.successTitle').replace('{name}', userName)
+        : t('authSuccess.successTitleGeneric'),
+      subtitle: t('authSuccess.successSubtitle'),
     },
     error: {
       glowClass: isDarkMode ? 'bg-red-500/30' : 'bg-red-500/20',
       icon: <XCircle className={`w-10 h-10 ${isDarkMode ? 'text-red-400' : 'text-red-500'}`} />,
-      title: 'Error de Autenticación',
-      subtitle: 'No pudimos verificar tu identidad. Te devolveremos a la pantalla de inicio.'
-    }
+      title: t('authSuccess.errorTitle'),
+      subtitle: t('authSuccess.errorSubtitle'),
+    },
   };
 
   const currentConfig = statusConfig[authStatus];

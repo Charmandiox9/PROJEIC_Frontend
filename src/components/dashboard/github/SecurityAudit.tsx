@@ -1,6 +1,8 @@
 import { ShieldAlert, ShieldCheck } from 'lucide-react';
+import { useT } from '@/hooks/useT';
 
 export default function SecurityAudit({ alerts }: { alerts: any[] }) {
+  const { t } = useT();
   const getSeverityColor = (severity: string) => {
     switch (severity.toLowerCase()) {
       case 'critical': return 'text-red-500 bg-red-500/10 border-red-500/20';
@@ -17,11 +19,11 @@ export default function SecurityAudit({ alerts }: { alerts: any[] }) {
       <div className="flex justify-between items-center mb-4">
         <h4 className="font-bold flex items-center gap-2 text-lg">
           {safeAlerts.length > 0 ? <ShieldAlert className="w-5 h-5 text-red-500 animate-pulse" /> : <ShieldCheck className="w-5 h-5 text-green-500" />} 
-          Auditoría de Seguridad
+          {t('github.securityAudit')}
         </h4>
         {safeAlerts.length === 0 && (
           <span className="text-[10px] bg-green-500/10 text-green-500 px-2 py-1 rounded font-bold uppercase tracking-wider">
-            100% Seguro
+            {t('github.safe')}
           </span>
         )}
       </div>
@@ -36,16 +38,16 @@ export default function SecurityAudit({ alerts }: { alerts: any[] }) {
                   {alert.severity}
                 </span>
               </p>
-              <p className="text-[10px] text-text-muted mt-1">Reportado: {new Date(alert.created_at).toLocaleDateString()}</p>
+              <p className="text-[10px] text-text-muted mt-1">{t('github.reported')} {new Date(alert.created_at).toLocaleDateString()}</p>
             </div>
             <a href={alert.html_url} target="_blank" rel="noreferrer" className="text-[10px] font-bold text-red-500 bg-red-500/10 hover:bg-red-500/20 px-3 py-1.5 rounded uppercase transition-colors shrink-0">
-              Reparar
+              {t('github.fix')}
             </a>
           </div>
         ))}
         {safeAlerts.length === 0 && (
           <div className="p-4 text-center text-sm text-text-muted border border-dashed border-border-secondary rounded-lg">
-            No hay vulnerabilidades detectadas en dependencias.
+            {t('github.noVulnerabilities')}
           </div>
         )}
       </div>

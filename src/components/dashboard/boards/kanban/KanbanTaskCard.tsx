@@ -1,13 +1,16 @@
 import { GripHorizontal, Edit2, Trash2, Calendar, User as UserIcon, AlertCircle, ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale/es';
+import { es, enUS, pt } from 'date-fns/locale';
+import { useT } from '@/hooks/useT';
+import { useLocale } from '@/hooks/useLocale';
 
 export const PriorityBadge = ({ priority }: { priority: string }) => {
+  const { tDynamic } = useT();
   const p = priority || 'MEDIUM';
-  if (p === 'URGENT') return <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400 border border-red-200 dark:border-red-900/50"><AlertCircle className="w-2.5 h-2.5" /> Urgente</span>;
-  if (p === 'HIGH') return <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400 border border-orange-200 dark:border-orange-900/50"><ArrowUp className="w-2.5 h-2.5" /> Alta</span>;
-  if (p === 'LOW') return <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-surface-secondary text-text-secondary border border-border-secondary"><ArrowDown className="w-2.5 h-2.5" /> Baja</span>;
-  return <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400 border border-blue-200 dark:border-blue-900/50"><Minus className="w-2.5 h-2.5" /> Media</span>;
+  if (p === 'URGENT') return <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400 border border-red-200 dark:border-red-900/50"><AlertCircle className="w-2.5 h-2.5" /> {tDynamic('kanbanCard.priorityUrgent')}</span>;
+  if (p === 'HIGH') return <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400 border border-orange-200 dark:border-orange-900/50"><ArrowUp className="w-2.5 h-2.5" /> {tDynamic('kanbanCard.priorityHigh')}</span>;
+  if (p === 'LOW') return <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-surface-secondary text-text-secondary border border-border-secondary"><ArrowDown className="w-2.5 h-2.5" /> {tDynamic('kanbanCard.priorityLow')}</span>;
+  return <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400 border border-blue-200 dark:border-blue-900/50"><Minus className="w-2.5 h-2.5" /> {tDynamic('kanbanCard.priorityMedium')}</span>;
 };
 
 export const PRIORITY_BORDER: Record<string, string> = {
@@ -27,6 +30,9 @@ interface KanbanTaskCardProps {
 }
 
 export default function KanbanTaskCard({ task, members, canManageTasks, isDragging, onDragStart, onDragEnd, onEdit, onDelete }: KanbanTaskCardProps) {
+  const { t } = useT();
+  const { locale } = useLocale();
+  const dateLocale = locale === 'en' ? enUS : locale === 'pt' ? pt : es;
   const assigneeMember = members.find(m => m.user.id === task.assigneeId);
   
   const visibleTags = task.tags?.slice(0, 3) || [];
@@ -45,10 +51,10 @@ export default function KanbanTaskCard({ task, members, canManageTasks, isDraggi
       
       {canManageTasks && !isDragging && (
         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex bg-surface-primary shadow-sm border border-border-secondary rounded-md overflow-hidden z-10">
-          <button onClick={(e) => { e.stopPropagation(); onEdit(task); }} className="p-1.5 text-text-muted hover:text-brand hover:bg-brand/5" title="Editar">
+          <button onClick={(e) => { e.stopPropagation(); onEdit(task); }} className="p-1.5 text-text-muted hover:text-brand hover:bg-brand/5" title={t('kanban.edit')}>
             <Edit2 className="w-3.5 h-3.5" />
           </button>
-          <button onClick={(e) => { e.stopPropagation(); onDelete(task.id); }} className="p-1.5 text-text-muted hover:text-red-500 hover:bg-red-50" title="Eliminar">
+          <button onClick={(e) => { e.stopPropagation(); onDelete(task.id); }} className="p-1.5 text-text-muted hover:text-red-500 hover:bg-red-50" title={t('kanban.delete')}>
             <Trash2 className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -57,7 +63,7 @@ export default function KanbanTaskCard({ task, members, canManageTasks, isDraggi
       <div 
         className="mt-2 cursor-pointer" 
         onClick={() => onEdit(task)}
-        title="Clic para ver detalles de la tarea"
+        title={t('kanbanCard.clickDetails')}
       >
         <div className="flex flex-wrap items-center gap-1.5 mb-3 pr-12">
           <PriorityBadge priority={task.priority} />
@@ -83,22 +89,22 @@ export default function KanbanTaskCard({ task, members, canManageTasks, isDraggi
       {/* Footer de la tarjeta con Fechas y Asignado */}
       <div className="flex items-center justify-between mt-auto pt-4 relative border-t border-border-primary/50">
         {task.dueDate ? (
-          <div title={task.startDate ? `Inicio: ${format(new Date(task.startDate), "d MMM", { locale: es })}` : 'Vencimiento'} className="flex items-center gap-1.5 text-xs font-semibold text-text-muted bg-surface-secondary px-2 py-1 rounded-md border border-border-primary cursor-help">
+          <div title={task.startDate ? `${t('kanbanCard.startDate')} ${format(new Date(task.startDate), "d MMM", { locale: dateLocale })}` : t('kanbanCard.dueDate')} className="flex items-center gap-1.5 text-xs font-semibold text-text-muted bg-surface-secondary px-2 py-1 rounded-md border border-border-primary cursor-help">
             <Calendar className="w-3.5 h-3.5 text-brand" />
             {task.startDate
-              ? `${format(new Date(task.startDate), "d MMM", { locale: es })} → ${format(new Date(task.dueDate), "d MMM", { locale: es })}`
-              : format(new Date(task.dueDate), "d MMM", { locale: es })
+              ? `${format(new Date(task.startDate), "d MMM", { locale: dateLocale })} → ${format(new Date(task.dueDate), "d MMM", { locale: dateLocale })}`
+              : format(new Date(task.dueDate), "d MMM", { locale: dateLocale })
             }
           </div>
         ) : task.startDate ? (
-          <div title="Fecha de inicio" className="flex items-center gap-1.5 text-xs font-semibold text-text-muted bg-surface-secondary px-2 py-1 rounded-md border border-border-primary cursor-help">
+          <div title={t('kanbanCard.startDate')} className="flex items-center gap-1.5 text-xs font-semibold text-text-muted bg-surface-secondary px-2 py-1 rounded-md border border-border-primary cursor-help">
             <Calendar className="w-3.5 h-3.5 text-brand" />
-            Inicio: {format(new Date(task.startDate), "d MMM", { locale: es })}
+            {t('kanbanCard.startDate')} {format(new Date(task.startDate), "d MMM", { locale: dateLocale })}
           </div>
         ) : <div />}
 
         {assigneeMember ? (
-          <div className="flex items-center gap-2 cursor-help" title={`Asignado a: ${assigneeMember.user.name}`}>
+          <div className="flex items-center gap-2 cursor-help" title={`${t('kanbanCard.assignedTo')} ${assigneeMember.user.name}`}>
             {assigneeMember.user.avatarUrl ? (
               <img src={assigneeMember.user.avatarUrl} alt="" className="w-6 h-6 rounded-full object-cover ring-2 ring-surface-primary shadow-sm" />
             ) : (
@@ -108,7 +114,7 @@ export default function KanbanTaskCard({ task, members, canManageTasks, isDraggi
             )}
           </div>
         ) : (
-          <div className="w-6 h-6 rounded-full bg-surface-secondary border border-dashed border-border-primary flex items-center justify-center ring-2 ring-surface-primary cursor-help" title="Sin asignar">
+          <div className="w-6 h-6 rounded-full bg-surface-secondary border border-dashed border-border-primary flex items-center justify-center ring-2 ring-surface-primary cursor-help" title={t('kanbanCard.notAssigned')}>
             <UserIcon className="w-3 h-3 text-text-muted" />
           </div>
         )}

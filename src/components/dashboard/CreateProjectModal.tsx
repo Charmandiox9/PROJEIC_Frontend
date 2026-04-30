@@ -1,21 +1,31 @@
-﻿'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-// 🔥 NUEVO: Importamos el icono de Github
-import { X, Loader2, UserPlus, AlertCircle, CheckCircle2, Github } from 'lucide-react';
-import { fetchGraphQL } from '@/lib/graphQLClient';
-import { CREATE_PROJECT, ADD_PROJECT_MEMBER, GET_SUBJECTS } from '@/graphql/misc/operations';
-import Select from '@/components/ui/Select';
-import Input from '@/components/ui/Input';
-import Textarea from '@/components/ui/Textarea';
-import { Subject } from '@/types/project';
+import { useState, useEffect } from "react";
+import {
+  X,
+  Loader2,
+  UserPlus,
+  AlertCircle,
+  CheckCircle2,
+  Github,
+} from "lucide-react";
+import { fetchGraphQL } from "@/lib/graphQLClient";
+import {
+  CREATE_PROJECT,
+  ADD_PROJECT_MEMBER,
+  GET_SUBJECTS,
+} from "@/graphql/misc/operations";
+import Select from "@/components/ui/Select";
+import Input from "@/components/ui/Input";
+import Textarea from "@/components/ui/Textarea";
+import { Subject } from "@/types/project";
+import { useT } from "@/hooks/useT";
 
 interface CreateProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
-
 interface ProjectFormData {
   name: string;
   description: string;
@@ -28,65 +38,62 @@ interface ProjectFormData {
   isInstitutional: boolean;
   professorId: string;
 }
-
 interface PendingMember {
   email: string;
   role: string;
   isExternal: boolean;
 }
-
-// 🔥 NUEVO: Interfaz para los repositorios pendientes
 interface PendingRepository {
   name: string;
   owner: string;
   repoName: string;
 }
 
-const UCN_DOMAINS = ['@alumnos.ucn.cl', '@ucn.cl', '@ce.ucn.cl'];
-
-function isValidUcnEmail(email: string): boolean {
-  return UCN_DOMAINS.some((domain) => email.toLowerCase().endsWith(domain));
+const UCN_DOMAINS = ["@alumnos.ucn.cl", "@ucn.cl", "@ce.ucn.cl"];
+function isValidUcnEmail(email: string) {
+  return UCN_DOMAINS.some((d) => email.toLowerCase().endsWith(d));
 }
 
-const ROLE_OPTIONS = [
-  { value: 'LEADER', label: 'Líder' },
-  { value: 'STUDENT', label: 'Estudiante' },
-  { value: 'SUPERVISOR', label: 'Supervisor' },
+const ROLE_OPTION_VALUES = [
+  { value: "LEADER", es: "Líder" },
+  { value: "STUDENT", es: "Estudiante" },
+  { value: "SUPERVISOR", es: "Supervisor" },
 ];
 
-const EXTERNAL_ROLE = { value: 'EXTERNAL', label: 'Externo' };
-
 const INITIAL_FORM: ProjectFormData = {
-  name: '',
-  description: '',
-  color: '#2596BE',
-  status: 'ACTIVE',
-  methodology: 'KANBAN',
+  name: "",
+  description: "",
+  color: "#2596BE",
+  status: "ACTIVE",
+  methodology: "KANBAN",
   isPublic: false,
-  subjectId: '',
-  mode: 'CLASSIC',
+  subjectId: "",
+  mode: "CLASSIC",
   isInstitutional: false,
-  professorId: '',
+  professorId: "",
 };
 
-export default function CreateProjectModal({ isOpen, onClose, onSuccess }: CreateProjectModalProps) {
+export default function CreateProjectModal({
+  isOpen,
+  onClose,
+  onSuccess,
+}: CreateProjectModalProps) {
+  const { t } = useT();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<ProjectFormData>(INITIAL_FORM);
-
-  const [memberEmail, setMemberEmail] = useState('');
-  const [memberRole, setMemberRole] = useState('STUDENT');
+  const [memberEmail, setMemberEmail] = useState("");
+  const [memberRole, setMemberRole] = useState("STUDENT");
   const [isExternal, setIsExternal] = useState(false);
   const [memberError, setMemberError] = useState<string | null>(null);
   const [pendingMembers, setPendingMembers] = useState<PendingMember[]>([]);
-
-  // 🔥 NUEVO: Estados para manejar los repositorios
-  const [repoName, setRepoName] = useState('');
-  const [repoOwner, setRepoOwner] = useState('');
-  const [repoProjectName, setRepoProjectName] = useState('');
+  const [repoName, setRepoName] = useState("");
+  const [repoOwner, setRepoOwner] = useState("");
+  const [repoProjectName, setRepoProjectName] = useState("");
   const [repoError, setRepoError] = useState<string | null>(null);
-  const [pendingRepositories, setPendingRepositories] = useState<PendingRepository[]>([]);
-
+  const [pendingRepositories, setPendingRepositories] = useState<
+    PendingRepository[]
+  >([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [isLoadingSubjects, setIsLoadingSubjects] = useState(false);
 
@@ -95,102 +102,111 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
       setIsLoadingSubjects(true);
       fetchGraphQL({ query: GET_SUBJECTS })
         .then((res) => {
-          if (res?.subjects) {
-            setSubjects(res.subjects as Subject[]);
-          }
+          if (res?.subjects) setSubjects(res.subjects as Subject[]);
         })
         .catch(console.error)
         .finally(() => setIsLoadingSubjects(false));
     } else {
       setFormData(INITIAL_FORM);
       setPendingMembers([]);
-      setPendingRepositories([]); // 🔥 Limpiamos los repos al cerrar
+      setPendingRepositories([]);
     }
   }, [isOpen]);
 
   if (!isOpen) return null;
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
   ) => {
     const { name, value, type } = e.target;
-    const isCheckbox = type === 'checkbox';
-    const checked = isCheckbox ? (e.target as HTMLInputElement).checked : undefined;
+    const isCheckbox = type === "checkbox";
+    const checked = isCheckbox
+      ? (e.target as HTMLInputElement).checked
+      : undefined;
     setFormData((prev) => ({ ...prev, [name]: isCheckbox ? checked : value }));
   };
 
-  const handleModeChange = (mode: 'CLASSIC' | 'HYBRID') => {
+  const handleModeChange = (mode: "CLASSIC" | "HYBRID") =>
     setFormData((prev) => ({ ...prev, mode }));
-  };
 
   const handleAddMember = () => {
     setMemberError(null);
     const trimmed = memberEmail.trim().toLowerCase();
-
     if (!trimmed) {
-      setMemberError('Ingresa un correo electrónico.');
+      setMemberError(t("createProject.errorEmailEmpty"));
       return;
     }
-
     if (pendingMembers.some((m) => m.email === trimmed)) {
-      setMemberError('Este correo ya fue agregado.');
+      setMemberError(t("createProject.errorEmailDuplicate"));
       return;
     }
-
     if (isExternal) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(trimmed)) {
-        setMemberError('Ingresa un correo válido para el colaborador externo.');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+        setMemberError(t("createProject.errorEmailExternal"));
         return;
       }
-      setPendingMembers((prev) => [...prev, { email: trimmed, role: EXTERNAL_ROLE.value, isExternal: true }]);
+      setPendingMembers((prev) => [
+        ...prev,
+        { email: trimmed, role: "EXTERNAL", isExternal: true },
+      ]);
     } else {
       if (!isValidUcnEmail(trimmed)) {
-        setMemberError(`El correo debe pertenecer a: ${UCN_DOMAINS.join(', ')}`);
+        setMemberError(
+          t("createProject.errorEmailDomain").replace(
+            "{domains}",
+            UCN_DOMAINS.join(", "),
+          ),
+        );
         return;
       }
-      setPendingMembers((prev) => [...prev, { email: trimmed, role: memberRole, isExternal: false }]);
+      setPendingMembers((prev) => [
+        ...prev,
+        { email: trimmed, role: memberRole, isExternal: false },
+      ]);
     }
-
-    setMemberEmail('');
+    setMemberEmail("");
   };
 
-  const handleRemoveMember = (email: string) => {
+  const handleRemoveMember = (email: string) =>
     setPendingMembers((prev) => prev.filter((m) => m.email !== email));
-  };
 
-  // 🔥 NUEVO: Lógica para validar y agregar repositorios
   const handleAddRepository = () => {
     setRepoError(null);
-    const tName = repoName.trim();
-    const tOwner = repoOwner.trim();
-    const tRepo = repoProjectName.trim();
-
+    const [tName, tOwner, tRepo] = [
+      repoName.trim(),
+      repoOwner.trim(),
+      repoProjectName.trim(),
+    ];
     if (!tName || !tOwner || !tRepo) {
-      setRepoError('Por favor completa los tres campos del repositorio.');
+      setRepoError(t("createProject.errorRepoFields"));
       return;
     }
-
-    if (pendingRepositories.some(r => r.owner === tOwner && r.repoName === tRepo)) {
-      setRepoError('Este repositorio ya fue agregado a la lista.');
+    if (
+      pendingRepositories.some(
+        (r) => r.owner === tOwner && r.repoName === tRepo,
+      )
+    ) {
+      setRepoError(t("createProject.errorRepoDuplicate"));
       return;
     }
-
-    setPendingRepositories(prev => [...prev, { name: tName, owner: tOwner, repoName: tRepo }]);
-    setRepoName('');
-    setRepoOwner('');
-    setRepoProjectName('');
+    setPendingRepositories((prev) => [
+      ...prev,
+      { name: tName, owner: tOwner, repoName: tRepo },
+    ]);
+    setRepoName("");
+    setRepoOwner("");
+    setRepoProjectName("");
   };
 
-  const handleRemoveRepository = (indexToRemove: number) => {
-    setPendingRepositories(prev => prev.filter((_, idx) => idx !== indexToRemove));
-  };
+  const handleRemoveRepository = (i: number) =>
+    setPendingRepositories((prev) => prev.filter((_, idx) => idx !== i));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
-
     try {
       const response = await fetchGraphQL({
         query: CREATE_PROJECT,
@@ -205,59 +221,59 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
             mode: formData.mode,
             isInstitutional: formData.isInstitutional,
             subjectId: formData.subjectId || undefined,
-            professorId: formData.isInstitutional ? formData.professorId : undefined,
-            // 🔥 NUEVO: Enviamos el arreglo de repositorios
-            repositories: pendingRepositories.length > 0 ? pendingRepositories : undefined,
+            professorId: formData.isInstitutional
+              ? formData.professorId
+              : undefined,
+            repositories:
+              pendingRepositories.length > 0 ? pendingRepositories : undefined,
           },
         },
       });
-
-      if (response.errors) {
-        throw new Error(response.errors[0]?.message ?? 'Error al crear el proyecto');
-      }
-
-      const projectId: string = response.data?.createProject?.id ?? response.createProject?.id;
-
+      if (response.errors)
+        throw new Error(
+          response.errors[0]?.message ?? t("createProject.errorCreate"),
+        );
+      const projectId: string =
+        response.data?.createProject?.id ?? response.createProject?.id;
       if (projectId && pendingMembers.length > 0) {
         await Promise.allSettled(
           pendingMembers.map((m) =>
             fetchGraphQL({
               query: ADD_PROJECT_MEMBER,
-              variables: {
-                input: { projectId, email: m.email, role: m.role },
-              },
-            })
-          )
+              variables: { input: { projectId, email: m.email, role: m.role } },
+            }),
+          ),
         );
       }
-
       setFormData(INITIAL_FORM);
       setPendingMembers([]);
-      setPendingRepositories([]); // Limpiamos repos
-      setMemberEmail('');
-      setMemberRole('STUDENT');
+      setPendingRepositories([]);
+      setMemberEmail("");
+      setMemberRole("STUDENT");
       setIsExternal(false);
       onSuccess();
       onClose();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Ocurrió un error inesperado';
-      setError(message);
+      setError(
+        err instanceof Error ? err.message : t("createProject.errorUnexpected"),
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const roleLabel = (member: PendingMember) => {
-    if (member.isExternal) return 'Externo';
-    return ROLE_OPTIONS.find((r) => r.value === member.role)?.label ?? member.role;
+  const roleLabel = (m: PendingMember) => {
+    if (m.isExternal) return t("createProject.roleExternal");
+    return ROLE_OPTION_VALUES.find((r) => r.value === m.role)?.es ?? m.role;
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-surface-primary rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
-
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-primary bg-surface-primary shrink-0">
-          <h2 className="text-xl font-bold text-text-primary">Crear nuevo proyecto</h2>
+          <h2 className="text-xl font-bold text-text-primary">
+            {t("createProject.title")}
+          </h2>
           <button
             onClick={onClose}
             className="p-2 text-gray-400 hover:text-text-primary hover:bg-surface-tertiary rounded-full transition-colors"
@@ -267,7 +283,11 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
         </div>
 
         <div className="overflow-y-auto flex-1 custom-scrollbar">
-          <form id="create-project-form" onSubmit={handleSubmit} className="p-6 space-y-6">
+          <form
+            id="create-project-form"
+            onSubmit={handleSubmit}
+            className="p-6 space-y-6"
+          >
             {error && (
               <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100 flex gap-2 items-start">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
@@ -275,45 +295,38 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
               </div>
             )}
 
-            {/* Selector de Modalidad */}
             <div className="space-y-3">
               <label className="text-sm font-semibold text-text-primary block">
-                Modalidad de Gestión <span className="text-brand">*</span>
+                {t("createProject.managementMode")}{" "}
+                <span className="text-brand">*</span>
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => handleModeChange('CLASSIC')}
-                  className={`relative p-4 rounded-xl text-left border-2 transition-all duration-200 flex flex-col gap-1 ${formData.mode === 'CLASSIC'
-                    ? 'border-brand bg-brand/5 shadow-sm'
-                    : 'border-border-primary hover:border-border-secondary bg-surface-primary'
-                    }`}
-                >
-                  <div className="flex justify-between items-center w-full">
-                    <span className={`font-bold text-sm ${formData.mode === 'CLASSIC' ? 'text-brand' : 'text-text-secondary'}`}>Modo Clasico</span>
-                    {formData.mode === 'CLASSIC' && <CheckCircle2 className="w-4 h-4 text-brand" />}
-                  </div>
-                  <span className="text-xs text-text-muted leading-relaxed">
-                    Basado en progreso de Tareas y metodologías ágiles (Scrum, Kanban).
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleModeChange('HYBRID')}
-                  className={`relative p-4 rounded-xl text-left border-2 transition-all duration-200 flex flex-col gap-1 ${formData.mode === 'HYBRID'
-                    ? 'border-brand bg-brand/5 shadow-sm'
-                    : 'border-border-primary hover:border-border-secondary bg-surface-primary'
-                    }`}
-                >
-                  <div className="flex justify-between items-center w-full">
-                    <span className={`font-bold text-sm ${formData.mode === 'HYBRID' ? 'text-brand' : 'text-text-secondary'}`}>Projeic Native (EIC)</span>
-                    {formData.mode === 'HYBRID' && <CheckCircle2 className="w-4 h-4 text-brand" />}
-                  </div>
-                  <span className="text-xs text-text-muted leading-relaxed">
-                    Orientado a Resultados Esperados y validación por carga de Evidencias.
-                  </span>
-                </button>
+                {(["CLASSIC", "HYBRID"] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => handleModeChange(mode)}
+                    className={`relative p-4 rounded-xl text-left border-2 transition-all duration-200 flex flex-col gap-1 ${formData.mode === mode ? "border-brand bg-brand/5 shadow-sm" : "border-border-primary hover:border-border-secondary bg-surface-primary"}`}
+                  >
+                    <div className="flex justify-between items-center w-full">
+                      <span
+                        className={`font-bold text-sm ${formData.mode === mode ? "text-brand" : "text-text-secondary"}`}
+                      >
+                        {mode === "CLASSIC"
+                          ? t("createProject.modeClassic")
+                          : t("createProject.modeHybrid")}
+                      </span>
+                      {formData.mode === mode && (
+                        <CheckCircle2 className="w-4 h-4 text-brand" />
+                      )}
+                    </div>
+                    <span className="text-xs text-text-muted leading-relaxed">
+                      {mode === "CLASSIC"
+                        ? t("createProject.modeClassicDesc")
+                        : t("createProject.modeHybridDesc")}
+                    </span>
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -321,7 +334,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
 
             <Input
               id="name"
-              label="Nombre del proyecto *"
+              label={t("createProject.projectName")}
               name="name"
               type="text"
               required
@@ -331,10 +344,9 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
               onChange={handleChange}
               placeholder="Ej: Plataforma de Trazabilidad UCN"
             />
-
             <Textarea
               id="description"
-              label="Descripción"
+              label={t("createProject.description")}
               name="description"
               rows={3}
               maxLength={500}
@@ -350,52 +362,56 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
                 checked={formData.isInstitutional}
                 onChange={(e) => {
                   handleChange(e);
-                  if (!e.target.checked) {
-                    setFormData(prev => ({ ...prev, subjectId: '', professorId: '' }));
-                  }
+                  if (!e.target.checked)
+                    setFormData((prev) => ({
+                      ...prev,
+                      subjectId: "",
+                      professorId: "",
+                    }));
                 }}
                 className="w-4 h-4 text-brand border-gray-300 rounded focus:ring-brand"
               />
-              <span className="text-sm font-semibold text-text-primary">Este es un proyecto de Asignatura (Institucional)</span>
+              <span className="text-sm font-semibold text-text-primary">
+                {t("createProject.institutionalCheckbox")}
+              </span>
             </label>
 
             {formData.isInstitutional && (
               <div className="grid md:grid-cols-2 gap-4 p-4 bg-brand/5 border border-brand/10 rounded-xl animate-in fade-in slide-in-from-top-2">
                 <Select
                   id="subjectId"
-                  label="Asignatura *"
+                  label={t("createProject.subject")}
                   name="subjectId"
                   value={formData.subjectId}
                   onChange={(e) => {
                     handleChange(e);
-                    setFormData(prev => ({ ...prev, professorId: '' }));
+                    setFormData((prev) => ({ ...prev, professorId: "" }));
                   }}
                   disabled={isLoadingSubjects}
                   required={formData.isInstitutional}
                 >
-                  <option value="">Selecciona un ramo</option>
-                  {subjects.map((subject) => (
-                    <option key={subject.id} value={subject.id}>
-                      {subject.name} {subject.code ? `(${subject.code})` : ''}
+                  <option value="">{t("createProject.selectSubject")}</option>
+                  {subjects.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name} {s.code ? `(${s.code})` : ""}
                     </option>
                   ))}
                 </Select>
-
                 <Select
                   id="professorId"
-                  label="Profesor a cargo *"
+                  label={t("createProject.professor")}
                   name="professorId"
                   value={formData.professorId}
                   onChange={handleChange}
                   disabled={!formData.subjectId}
                   required={formData.isInstitutional}
                 >
-                  <option value="">Selecciona un profesor</option>
+                  <option value="">{t("createProject.selectProfessor")}</option>
                   {subjects
-                    .find(s => s.id === formData.subjectId)
-                    ?.professors?.map((prof: any) => (
-                      <option key={prof.id} value={prof.id}>
-                        {prof.name}
+                    .find((s) => s.id === formData.subjectId)
+                    ?.professors?.map((p: { id: string; name: string }) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name}
                       </option>
                     ))}
                 </Select>
@@ -405,34 +421,44 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
             <div className="grid md:grid-cols-2 gap-4">
               <Select
                 id="status"
-                label="Estado"
+                label={t("createProject.status")}
                 name="status"
                 value={formData.status}
                 onChange={handleChange}
               >
-                <option value="ACTIVE">Activo</option>
-                <option value="ON_HOLD">En pausa</option>
+                <option value="ACTIVE">
+                  {t("createProject.statusActive")}
+                </option>
+                <option value="ON_HOLD">
+                  {t("createProject.statusOnHold")}
+                </option>
               </Select>
-
-              {formData.mode === 'CLASSIC' && (
+              {formData.mode === "CLASSIC" && (
                 <Select
                   id="methodology"
-                  label="Metodología"
+                  label={t("createProject.methodology")}
                   name="methodology"
                   value={formData.methodology}
                   onChange={handleChange}
                 >
                   <option value="KANBAN">Kanban</option>
-                  <option value="SCRUM" disabled>Scrum (Próximamente)</option>
-                  <option value="SCRUMBAN">Scrumban (Próximamente)</option>
+                  <option value="SCRUM">
+                    {t("createProject.methodologyScrum")}
+                  </option>
+                  <option value="SCRUMBAN">
+                    {t("createProject.methodologyScrumban")}
+                  </option>
                 </Select>
               )}
             </div>
 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-surface-secondary rounded-xl border border-border-secondary">
               <div className="flex items-center gap-3">
-                <label htmlFor="color" className="text-sm font-medium text-text-secondary">
-                  Color de etiqueta:
+                <label
+                  htmlFor="color"
+                  className="text-sm font-medium text-text-secondary"
+                >
+                  {t("createProject.labelColor")}
                 </label>
                 <input
                   type="color"
@@ -451,18 +477,22 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
                   onChange={handleChange}
                   className="w-4 h-4 text-brand border-gray-300 rounded focus:ring-brand"
                 />
-                <span className="text-sm font-medium text-text-secondary">Hacer proyecto publico</span>
+                <span className="text-sm font-medium text-text-secondary">
+                  {t("createProject.makePublic")}
+                </span>
               </label>
             </div>
 
-            {/* 🔥 NUEVO: Sección de Integración de Github Múltiple */}
             <div className="pt-2 border-t border-border-primary space-y-3">
               <div className="flex items-center gap-2">
                 <Github className="w-4 h-4 text-gray-500" />
-                <h3 className="text-sm font-semibold text-text-primary">Repositorios de GitHub</h3>
-                <span className="text-xs text-gray-400 font-normal">(opcional)</span>
+                <h3 className="text-sm font-semibold text-text-primary">
+                  {t("createProject.githubRepos")}
+                </h3>
+                <span className="text-xs text-gray-400 font-normal">
+                  {t("createProject.optional")}
+                </span>
               </div>
-
               <div className="flex flex-col gap-2">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <Input
@@ -483,7 +513,10 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
                     type="text"
                     value={repoProjectName}
                     onChange={(e) => setRepoProjectName(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddRepository())}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" &&
+                      (e.preventDefault(), handleAddRepository())
+                    }
                     placeholder="Repo (Ej. react)"
                     className="w-full"
                   />
@@ -493,17 +526,15 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
                   onClick={handleAddRepository}
                   className="w-full sm:w-auto self-end px-4 py-2 text-sm font-medium bg-brand/10 text-brand rounded-lg hover:bg-brand/20 transition-colors"
                 >
-                  Agregar Repositorio
+                  {t("createProject.addRepository")}
                 </button>
               </div>
-
               {repoError && (
                 <p className="text-xs text-red-500 flex gap-1 items-center">
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   {repoError}
                 </p>
               )}
-
               {pendingRepositories.length > 0 && (
                 <ul className="space-y-2 mt-2">
                   {pendingRepositories.map((repo, index) => (
@@ -512,7 +543,9 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
                       className="flex items-center justify-between px-3 py-2 bg-surface-primary rounded-lg border border-border-secondary text-sm shadow-sm"
                     >
                       <div className="flex items-center gap-2 min-w-0">
-                        <span className="truncate text-text-primary font-bold">{repo.name}</span>
+                        <span className="truncate text-text-primary font-bold">
+                          {repo.name}
+                        </span>
                         <span className="text-xs text-text-muted truncate">
                           ({repo.owner}/{repo.repoName})
                         </span>
@@ -530,14 +563,16 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
               )}
             </div>
 
-            {/* Sección de Miembros del equipo */}
             <div className="pt-2 border-t border-border-primary space-y-3">
               <div className="flex items-center gap-2">
                 <UserPlus className="w-4 h-4 text-gray-500" />
-                <h3 className="text-sm font-semibold text-text-primary">Miembros del equipo</h3>
-                <span className="text-xs text-gray-400 font-normal">(opcional)</span>
+                <h3 className="text-sm font-semibold text-text-primary">
+                  {t("createProject.teamMembers")}
+                </h3>
+                <span className="text-xs text-gray-400 font-normal">
+                  {t("createProject.optional")}
+                </span>
               </div>
-
               <label className="flex items-center gap-1.5 text-xs text-text-secondary cursor-pointer select-none w-fit">
                 <input
                   type="checkbox"
@@ -548,16 +583,19 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
                   }}
                   className="w-3.5 h-3.5 text-brand border-gray-300 rounded focus:ring-brand"
                 />
-                Colaborador externo
+                {t("createProject.externalCollaborator")}
               </label>
-
               <div className="flex flex-col sm:flex-row gap-2">
                 <Input
                   type="email"
                   value={memberEmail}
                   onChange={(e) => setMemberEmail(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddMember())}
-                  placeholder={isExternal ? 'correo@externo.com' : 'correo@alumnos.ucn.cl'}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" && (e.preventDefault(), handleAddMember())
+                  }
+                  placeholder={
+                    isExternal ? "correo@externo.com" : "correo@alumnos.ucn.cl"
+                  }
                   className="flex-1 min-w-0"
                 />
                 <div className="flex gap-2">
@@ -567,8 +605,10 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
                       onChange={(e) => setMemberRole(e.target.value)}
                       className="w-full sm:w-auto"
                     >
-                      {ROLE_OPTIONS.map((r) => (
-                        <option key={r.value} value={r.value}>{r.label}</option>
+                      {ROLE_OPTION_VALUES.map((r) => (
+                        <option key={r.value} value={r.value}>
+                          {r.es}
+                        </option>
                       ))}
                     </Select>
                   )}
@@ -577,18 +617,16 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
                     onClick={handleAddMember}
                     className="px-4 py-2 text-sm font-medium bg-brand/10 text-brand rounded-lg hover:bg-brand/20 transition-colors shrink-0"
                   >
-                    Agregar
+                    {t("createProject.addMember")}
                   </button>
                 </div>
               </div>
-
               {memberError && (
                 <p className="text-xs text-red-500 flex gap-1 items-center">
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   {memberError}
                 </p>
               )}
-
               {pendingMembers.length > 0 && (
                 <ul className="space-y-2 mt-4">
                   {pendingMembers.map((m) => (
@@ -597,8 +635,12 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
                       className="flex items-center justify-between px-3 py-2 bg-surface-primary rounded-lg border border-border-secondary text-sm shadow-sm"
                     >
                       <div className="flex items-center gap-2 min-w-0">
-                        <span className="truncate text-text-primary font-medium">{m.email}</span>
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md uppercase shrink-0 ${m.isExternal ? 'bg-gray-200 text-gray-600' : 'bg-brand/10 text-brand'}`}>
+                        <span className="truncate text-text-primary font-medium">
+                          {m.email}
+                        </span>
+                        <span
+                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md uppercase shrink-0 ${m.isExternal ? "bg-gray-200 text-gray-600" : "bg-brand/10 text-brand"}`}
+                        >
                           {roleLabel(m)}
                         </span>
                       </div>
@@ -617,7 +659,6 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
           </form>
         </div>
 
-        {/* Action Footer */}
         <div className="p-4 border-t border-border-primary bg-surface-secondary flex justify-end gap-3 shrink-0">
           <button
             type="button"
@@ -625,7 +666,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
             disabled={isSubmitting}
             className="px-4 py-2 text-sm font-medium text-text-primary bg-surface-primary border border-border-secondary rounded-lg hover:bg-surface-tertiary transition-colors disabled:opacity-50"
           >
-            Cancelar
+            {t("modal.cancel")}
           </button>
           <button
             type="submit"
@@ -636,10 +677,10 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess }: Creat
             {isSubmitting ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Creando...
+                {t("modal.creating")}
               </>
             ) : (
-              'Crear Proyecto'
+              t("createProject.createProject")
             )}
           </button>
         </div>

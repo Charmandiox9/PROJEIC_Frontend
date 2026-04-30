@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import { X, Loader2, BookOpen, CheckCircle2, Github, AlertCircle } from 'lucide-react';
@@ -6,6 +6,7 @@ import { fetchGraphQL } from '@/lib/graphQLClient';
 import { UPDATE_PROJECT } from '@/graphql/misc/operations';
 import { GET_ALL_SUBJECTS } from '@/graphql/subjects/operations';
 import Input from '@/components/ui/Input';
+import { useT } from '@/hooks/useT';
 
 interface UpdateProjectModalProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ interface PendingRepository {
 }
 
 export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess }: UpdateProjectModalProps) {
+  const { t } = useT();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -124,12 +126,12 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
     const tRepo = repoProjectName.trim();
 
     if (!tName || !tOwner || !tRepo) {
-      setRepoError('Por favor completa los tres campos del repositorio.');
+      setRepoError(t('updateProject.errorRepoFields'));
       return;
     }
 
     if (pendingRepositories.some(r => r.owner === tOwner && r.repoName === tRepo)) {
-      setRepoError('Este repositorio ya está en la lista.');
+      setRepoError(t('updateProject.errorRepoDuplicate'));
       return;
     }
 
@@ -149,7 +151,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
     setError(null);
 
     if (formData.isInstitutional && !formData.subjectId) {
-      setError('Debes seleccionar un ramo si el proyecto es institucional.');
+      setError(t('updateProject.errorInstitutional'));
       setIsSubmitting(false);
       return;
     }
@@ -176,8 +178,8 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
 
       onSuccess();
       onClose();
-    } catch (err: any) {
-      setError(err.message || 'Ocurrió un error inesperado al actualizar');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : t('updateProject.errorUnexpected'));
     } finally {
       setIsSubmitting(false);
     }
@@ -187,7 +189,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-surface-primary rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-primary shrink-0">
-          <h2 className="text-xl font-bold text-text-primary">Editar proyecto</h2>
+          <h2 className="text-xl font-bold text-text-primary">{t('updateProject.title')}</h2>
           <button
             onClick={onClose}
             className="p-2 text-gray-400 hover:text-text-primary hover:bg-surface-tertiary rounded-full transition-colors"
@@ -206,7 +208,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
           {/* SELECTOR DE MODALIDAD */}
           <div className="space-y-3">
             <label className="text-sm font-semibold text-text-primary block">
-              Modalidad de Gestión <span className="text-brand">*</span>
+              {t('createProject.managementMode')} <span className="text-brand">*</span>
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
@@ -218,12 +220,10 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
                   }`}
               >
                 <div className="flex justify-between items-center w-full">
-                  <span className={`font-bold text-sm ${formData.mode === 'CLASSIC' ? 'text-brand' : 'text-text-secondary'}`}>Modo Clásico</span>
+                    <span className={`font-bold text-sm ${formData.mode === 'CLASSIC' ? 'text-brand' : 'text-text-secondary'}`}>{t('updateProject.modeClassic')}</span>
                   {formData.mode === 'CLASSIC' && <CheckCircle2 className="w-4 h-4 text-brand" />}
                 </div>
-                <span className="text-xs text-text-muted leading-relaxed">
-                  Basado en progreso de Tareas y metodologías ágiles (Scrum, Kanban).
-                </span>
+                <span className="text-xs text-text-muted leading-relaxed">{t('updateProject.modeClassicDesc')}</span>
               </button>
 
               <button
@@ -235,12 +235,10 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
                   }`}
               >
                 <div className="flex justify-between items-center w-full">
-                  <span className={`font-bold text-sm ${formData.mode === 'HYBRID' ? 'text-brand' : 'text-text-secondary'}`}>Modo Híbrido (EIC)</span>
+                    <span className={`font-bold text-sm ${formData.mode === 'HYBRID' ? 'text-brand' : 'text-text-secondary'}`}>{t('updateProject.modeHybrid')}</span>
                   {formData.mode === 'HYBRID' && <CheckCircle2 className="w-4 h-4 text-brand" />}
                 </div>
-                <span className="text-xs text-text-muted leading-relaxed">
-                  Orientado a Resultados Esperados y validación por carga de Evidencias.
-                </span>
+                <span className="text-xs text-text-muted leading-relaxed">{t('updateProject.modeHybridDesc')}</span>
               </button>
             </div>
           </div>
@@ -249,7 +247,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
 
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-text-secondary mb-1">
-              Nombre del proyecto <span className="text-red-500">*</span>
+              {t('updateProject.projectName')} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -266,7 +264,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
 
           <div>
             <label htmlFor="description" className="block text-sm font-medium text-text-secondary mb-1">
-              Descripción
+              {t('updateProject.description')}
             </label>
             <textarea
               id="description"
@@ -282,7 +280,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="status" className="block text-sm font-medium text-text-secondary mb-1">
-                Estado
+                {t('updateProject.status')}
               </label>
               <select
                 id="status"
@@ -291,18 +289,18 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-border-secondary rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none bg-surface-primary text-text-primary"
               >
-                <option value="STARTING">Iniciando</option>
-                <option value="ACTIVE">Activo</option>
-                <option value="ON_HOLD">En pausa</option>
-                <option value="COMPLETED">Completado</option>
-                <option value="CANCELLED">Cancelado</option>
+                <option value="STARTING">{t('updateProject.statusStarting')}</option>
+                <option value="ACTIVE">{t('updateProject.statusActive')}</option>
+                <option value="ON_HOLD">{t('updateProject.statusOnHold')}</option>
+                <option value="COMPLETED">{t('updateProject.statusCompleted')}</option>
+                <option value="CANCELLED">{t('updateProject.statusCancelled')}</option>
               </select>
             </div>
 
             {formData.mode === 'CLASSIC' && (
               <div>
                 <label htmlFor="methodology" className="block text-sm font-medium text-text-secondary mb-1">
-                  Metodología
+                  {t('updateProject.methodology')}
                 </label>
                 <select
                   id="methodology"
@@ -312,8 +310,8 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
                   className="w-full px-4 py-2 border border-border-secondary rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none bg-surface-primary text-text-primary"
                 >
                   <option value="KANBAN">Kanban</option>
-                  <option value="SCRUM" disabled>Scrum (Próximamente)</option>
-                  <option value="SCRUMBAN">Scrumban (Próximamente)</option>
+                  <option value="SCRUM">{t('updateProject.methodologyScrum')}</option>
+                  <option value="SCRUMBAN">{t('updateProject.methodologyScrumban')}</option>
                 </select>
               </div>
             )}
@@ -331,16 +329,16 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
               />
               <div className="flex flex-col">
                 <span className="text-sm font-bold text-text-primary flex items-center gap-1.5">
-                  <BookOpen className="w-4 h-4 text-brand" /> Proyecto Institucional (EIC)
+                  <BookOpen className="w-4 h-4 text-brand" /> {t('updateProject.institutional')}
                 </span>
-                <span className="text-xs text-text-muted">Vincular este proyecto a un ramo de la escuela.</span>
+                <span className="text-xs text-text-muted">{t('updateProject.institutionalDesc')}</span>
               </div>
             </label>
 
             {formData.isInstitutional && (
               <div className="pt-2 animate-in fade-in slide-in-from-top-2">
                 <label htmlFor="subjectId" className="block text-sm font-medium text-text-secondary mb-1">
-                  Selecciona el Ramo <span className="text-red-500">*</span>
+                  {t('updateProject.selectSubject')} <span className="text-red-500">*</span>
                 </label>
                 <select
                   id="subjectId"
@@ -350,14 +348,14 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
                   disabled={isLoadingSubjects}
                   className="w-full px-4 py-2 border border-border-secondary rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none bg-surface-primary text-text-primary disabled:opacity-50"
                 >
-                  <option value="">-- Seleccionar Ramo --</option>
+                  <option value="">{t('updateProject.selectSubjectPlaceholder')}</option>
                   {subjects.map((subject) => (
                     <option key={subject.id} value={subject.id}>
                       {subject.name} ({subject.period})
                     </option>
                   ))}
                 </select>
-                {isLoadingSubjects && <p className="text-xs text-gray-400 mt-1">Cargando ramos...</p>}
+                {isLoadingSubjects && <p className="text-xs text-gray-400 mt-1">{t('updateProject.loadingSubjects')}</p>}
               </div>
             )}
           </div>
@@ -373,9 +371,9 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
               />
               <div className="flex flex-col">
                 <span className="text-sm font-bold text-text-primary flex items-center gap-1.5">
-                  <Github className="w-4 h-4 text-brand" /> Proyecto de Software
+                  <Github className="w-4 h-4 text-brand" /> {t('updateProject.softwareProject')}
                 </span>
-                <span className="text-xs text-text-muted">Habilita la integración de repositorios de GitHub.</span>
+                <span className="text-xs text-text-muted">{t('updateProject.softwareProjectDesc')}</span>
               </div>
             </label>
 
@@ -411,7 +409,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
                     onClick={handleAddRepository}
                     className="w-full sm:w-auto self-end px-4 py-2 text-sm font-medium bg-brand/10 text-brand rounded-lg hover:bg-brand/20 transition-colors"
                   >
-                    Agregar Repositorio
+                    {t('updateProject.addRepository')}
                   </button>
                 </div>
 
@@ -453,7 +451,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-surface-secondary rounded-xl border border-border-secondary">
             <div className="flex items-center gap-3">
               <label htmlFor="color" className="block text-sm font-medium text-text-secondary">
-                Color de etiqueta:
+                {t('updateProject.labelColor')}
               </label>
               <div className="relative">
                 <input
@@ -475,7 +473,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
                 onChange={handleChange}
                 className="w-4 h-4 text-brand border-gray-300 rounded focus:ring-brand"
               />
-              <span className="text-sm font-medium text-text-secondary">Proyecto publico</span>
+              <span className="text-sm font-medium text-text-secondary">{t('updateProject.makePublic')}</span>
             </label>
           </div>
         </form>
@@ -487,7 +485,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
             disabled={isSubmitting}
             className="px-4 py-2 text-sm font-medium text-text-primary bg-surface-primary border border-border-secondary rounded-lg hover:bg-surface-tertiary transition-colors disabled:opacity-50"
           >
-            Cancelar
+            {t('modal.cancel')}
           </button>
           <button
             type="submit"
@@ -497,10 +495,10 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" /> Guardando...
+                <Loader2 className="w-4 h-4 animate-spin" /> {t('modal.saving')}
               </>
             ) : (
-              'Guardar Cambios'
+              t('updateProject.saveChanges')
             )}
           </button>
         </div>

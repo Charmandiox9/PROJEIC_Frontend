@@ -1,10 +1,11 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState, useRef } from 'react';
 import { Search, BookOpen, GraduationCap } from 'lucide-react';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { GET_PUBLIC_PROJECTS } from '@/graphql/misc/operations';
 import { AVATAR_FALLBACK_URL } from '@/lib/constants';
+import { useT } from '@/hooks/useT';
 import PublicProjectModal from '@/components/public/PublicProjectModal';
 
 interface Professor {
@@ -45,26 +46,16 @@ interface Project {
   members: ProjectMember[];
 }
 
-const STATUS_LABELS: Record<string, string> = {
-  ACTIVE: 'En curso',
-  STARTING: 'Iniciando',
-  COMPLETED: 'Finalizado',
-  ON_HOLD: 'En pausa',
-  CANCELLED: 'Cancelado',
-};
-
-const FILTER_OPTIONS = ['Todos', 'ACTIVE', 'STARTING', 'COMPLETED'];
-
-function getStatusLabel(status: string): string {
-  return STATUS_LABELS[status] ?? status;
-}
+const FILTER_OPTIONS = ['ALL', 'ACTIVE', 'STARTING', 'COMPLETED'];
 
 export default function ProyectosPage() {
+  const { t, tDynamic } = useT();
+  const getStatusLabel = (status: string) => tDynamic(`projectStatus.${status}`);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('Todos');
+  const [statusFilter, setStatusFilter] = useState('ALL');
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
   const gridRef = useRef<HTMLDivElement>(null);
@@ -97,7 +88,7 @@ export default function ProyectosPage() {
       (project.subject?.name.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
       (project.subject?.professors?.some(p => p.name.toLowerCase().includes(searchTerm.toLowerCase())) ?? false);
 
-    const matchesStatus = statusFilter === 'Todos' || project.status === statusFilter;
+    const matchesStatus = statusFilter === 'ALL' || project.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
@@ -211,8 +202,8 @@ export default function ProyectosPage() {
     <div className="min-h-screen flex flex-col bg-surface-primary">
       <section ref={headerRef} className="bg-surface-primary text-text-primary py-12 px-6 border-b border-border-primary">
         <div className="max-w-6xl mx-auto text-center">
-          <h1 data-header-anim style={{ opacity: 0 }} className="text-3xl md:text-4xl font-extrabold mb-3">Proyectos de la EIC</h1>
-          <p data-header-anim style={{ opacity: 0 }} className="text-text-muted font-medium">Iniciativas académicas abiertas a la comunidad universitaria.</p>
+          <h1 data-header-anim style={{ opacity: 0 }} className="text-3xl md:text-4xl font-extrabold mb-3">{t('proyectosPage.heading')}</h1>
+          <p data-header-anim style={{ opacity: 0 }} className="text-text-muted font-medium">{t('proyectosPage.subheading')}</p>
         </div>
       </section>
 
@@ -222,7 +213,7 @@ export default function ProyectosPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
             <input
               type="text"
-              placeholder="Buscar proyectos, ramos o profesores..."
+              placeholder={t('proyectosPage.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-border-secondary rounded-lg text-sm text-text-primary focus:ring-2 focus:ring-brand focus:border-brand outline-none transition-colors bg-surface-primary placeholder:text-text-muted"
@@ -238,7 +229,7 @@ export default function ProyectosPage() {
                   : 'bg-surface-secondary text-text-secondary hover:bg-surface-tertiary'
                   }`}
               >
-                {status === 'Todos' ? 'Todos' : getStatusLabel(status)}
+                {status === 'ALL' ? t('proyectosPage.filterAll') : getStatusLabel(status)}
               </button>
             ))}
           </div>
@@ -252,11 +243,11 @@ export default function ProyectosPage() {
           </div>
         ) : error ? (
           <div className="text-center py-20 bg-surface-primary rounded-xl border border-border-primary">
-            <p className="text-text-muted">Ocurrió un error al cargar los proyectos. Inténtalo más tarde.</p>
+            <p className="text-text-muted">{t('proyectosPage.errorLoad')}</p>
           </div>
         ) : filteredProjects.length === 0 ? (
           <div className="text-center py-20 bg-surface-primary rounded-xl border border-border-primary animate-in fade-in duration-300">
-            <p className="text-text-muted">No se encontraron proyectos con esos criterios.</p>
+            <p className="text-text-muted">{t('proyectosPage.noResults')}</p>
           </div>
         ) : (
           <div ref={gridRef} className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 md:flex-none md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 md:overflow-visible nice-scrollbar">
@@ -306,7 +297,7 @@ export default function ProyectosPage() {
                     </div>
                   )}
 
-                  <p className="text-text-secondary text-sm mb-6 line-clamp-3">{project.description || 'Sin descripción detallada.'}</p>
+                  <p className="text-text-secondary text-sm mb-6 line-clamp-3">{project.description || t('proyectosPage.noDescription')}</p>
 
                   <div className="flex items-center -space-x-2 relative z-0 mt-auto">
                     {activeMembers.slice(0, 4).map((member) => (

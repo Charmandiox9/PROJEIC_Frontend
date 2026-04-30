@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { GET_PUBLIC_PROJECTS } from '@/graphql/misc/operations';
 import { AVATAR_FALLBACK_URL } from '@/lib/constants';
+import { useT } from '@/hooks/useT';
 
 interface PublicUser {
   id: string;
@@ -27,14 +28,6 @@ interface Project {
   members: ProjectMember[];
 }
 
-const STATUS_LABEL: Record<string, string> = {
-  ACTIVE: 'Activo',
-  STARTING: 'Iniciando',
-  COMPLETED: 'Completado',
-  ON_HOLD: 'En pausa',
-  CANCELLED: 'Cancelado',
-};
-
 const STATUS_BADGE: Record<string, string> = {
   ACTIVE: 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300',
   STARTING: 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300',
@@ -47,6 +40,7 @@ export default function RecentProjectsSection() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const { t, tDynamic } = useT();
 
   const headingRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -213,14 +207,14 @@ export default function RecentProjectsSection() {
             style={{ opacity: 0 }}
             className="text-2xl sm:text-3xl font-bold text-text-primary mb-2"
           >
-            Proyectos recientes de la EIC
+            {t('recentProjects.heading')}
           </h2>
           <p
             data-heading-item
             style={{ opacity: 0 }}
             className="text-sm sm:text-base text-text-secondary"
           >
-            Iniciativas visibles de la comunidad
+            {t('recentProjects.subheading')}
           </p>
         </div>
 
@@ -230,7 +224,7 @@ export default function RecentProjectsSection() {
           </div>
         ) : error || projects.length === 0 ? (
           <div className="text-center py-10">
-            <p className="text-text-muted">Aún no hay proyectos recientes para mostrar.</p>
+            <p className="text-text-muted">{t('recentProjects.noProjects')}</p>
           </div>
         ) : (
           <div
@@ -259,12 +253,12 @@ export default function RecentProjectsSection() {
                     <span
                       className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full whitespace-nowrap shrink-0 ${STATUS_BADGE[project.status] ?? STATUS_BADGE.STARTING}`}
                     >
-                      {STATUS_LABEL[project.status] ?? project.status}
+                      {tDynamic(`projectStatus.${project.status}`) ?? project.status}
                     </span>
                   </div>
 
                   <p className="text-text-secondary text-xs sm:text-sm mb-6 line-clamp-3 flex-1">
-                    {project.description ?? 'Sin descripción.'}
+                    {project.description ?? t('recentProjects.noDescription')}
                   </p>
 
                   <div

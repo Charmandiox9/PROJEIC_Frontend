@@ -3,13 +3,15 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { es, enUS, pt } from 'date-fns/locale';
 import { useAuth } from '@/context/AuthProvider';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { GET_PROFILE, GET_MY_PROJECTS, GET_DASHBOARD_ACTIVITY } from '@/graphql/misc/operations';
 import { GET_PENDING_TASKS_BY_USER } from '@/graphql/tasks/operations';
 import { Plus, Briefcase, CheckSquare, Activity, Users, FolderKanban, Clock, ArrowRight } from 'lucide-react';
 import CreateProjectModal from '@/components/dashboard/CreateProjectModal';
+import { useT } from '@/hooks/useT';
+import { useLocale } from '@/hooks/useLocale';
 
 interface UserProfile {
   userId: string;
@@ -40,6 +42,9 @@ interface DashboardMetrics {
 export default function ProfileDashboard() {
   const [mounted, setMounted] = useState(false);
   const { user } = useAuth();
+  const { t } = useT();
+  const { locale } = useLocale();
+  const dateLocale = locale === 'en' ? enUS : locale === 'pt' ? pt : es;
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [projects, setProjects] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -154,9 +159,10 @@ export default function ProfileDashboard() {
   const getFormattedDate = () => {
     const date = new Date();
     const options: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long' };
-    let formatted = date.toLocaleDateString('es-ES', options);
+    const langCode = locale === 'en' ? 'en-US' : 'es-ES';
+    let formatted = date.toLocaleDateString(langCode, options);
     formatted = formatted.charAt(0).toUpperCase() + formatted.slice(1);
-    return `${formatted} · Semestre 2026-1`;
+    return `${formatted} · ${t('profile.semester')}`;
   };
 
   const getFirstName = (fullName?: string): string => {
@@ -169,46 +175,49 @@ export default function ProfileDashboard() {
     return value.toString();
   };
 
-  const getFeedMessage = (log: any) => {
-    const userName = log.user?.name.split(' ')[0] || 'Alguien';
+  const getFeedMessage = (log: { action: string; entity?: string; meta?: string | Record<string, unknown>; user?: { name?: string }; }) => {
+    const userName = log.user?.name?.split(' ')[0] || t('profile.feedSomeone');
 
-    let metaData: any = {};
+    let metaData: Record<string, unknown> = {};
     if (log.meta) {
       try {
         metaData = typeof log.meta === 'string' ? JSON.parse(log.meta) : log.meta;
       } catch (e) {
-        console.error("Error leyendo los metadatos", e);
+        console.error('Error leyendo los metadatos', e);
       }
     }
 
-    const itemName = metaData.title ? `"${metaData.title}"` : 'un elemento';
+    const itemName = metaData.title ? `"${metaData.title}"` : t('profile.feedElement');
+    const interpolate = (key: Parameters<typeof t>[0], vars: Record<string, string>) =>
+      Object.entries(vars).reduce((s, [k, v]) => s.replace(`{${k}}`, v), t(key));
+
     switch (log.action) {
       case 'CREATED':
-        if (log.entity === 'TASK') return <span><span className="font-medium text-text-primary">{userName}</span> creó la tarea {itemName}</span>;
-        if (log.entity === 'PROJECT') return <span><span className="font-medium text-text-primary">{userName}</span> creó el proyecto {itemName}</span>;
-        if (log.entity === 'EXPECTED_RESULT') return <span><span className="font-medium text-text-primary">{userName}</span> creó el resultado {itemName}</span>;
-        return <span><span className="font-medium text-text-primary">{userName}</span> creó {itemName}</span>;
+        if (log.entity === 'TASK') return <span dangerouslySetInnerHTML={{ __html: interpolate('profile.feedCreatedTask', { user: `<span class="font-medium text-text-primary">${userName}</span>`, item: itemName }) }} />;
+        if (log.entity === 'PROJECT') return <span dangerouslySetInnerHTML={{ __html: interpolate('profile.feedCreatedProject', { user: `<span class="font-medium text-text-primary">${userName}</span>`, item: itemName }) }} />;
+        if (log.entity === 'EXPECTED_RESULT') return <span dangerouslySetInnerHTML={{ __html: interpolate('profile.feedCreatedResult', { user: `<span class="font-medium text-text-primary">${userName}</span>`, item: itemName }) }} />;
+        return <span dangerouslySetInnerHTML={{ __html: interpolate('profile.feedCreated', { user: `<span class="font-medium text-text-primary">${userName}</span>`, item: itemName }) }} />;
 
       case 'UPDATED':
         if (metaData.newStatus) {
-          return <span><span className="font-medium text-text-primary">{userName}</span> actualizó el estado de {itemName} a <span className="font-medium">{metaData.newStatus}</span></span>;
+          return <span dangerouslySetInnerHTML={{ __html: interpolate('profile.feedUpdatedStatus', { user: `<span class="font-medium text-text-primary">${userName}</span>`, item: itemName, status: `<span class="font-medium">${String(metaData.newStatus)}</span>` }) }} />;
         }
-        return <span><span className="font-medium text-text-primary">{userName}</span> actualizó {itemName}</span>;
+        return <span dangerouslySetInnerHTML={{ __html: interpolate('profile.feedUpdated', { user: `<span class="font-medium text-text-primary">${userName}</span>`, item: itemName }) }} />;
 
       case 'MOVED':
-        return <span><span className="font-medium text-text-primary">{userName}</span> movió la tarea {itemName}</span>;
+        return <span dangerouslySetInnerHTML={{ __html: interpolate('profile.feedMoved', { user: `<span class="font-medium text-text-primary">${userName}</span>`, item: itemName }) }} />;
 
       case 'COMMENTED':
-        return <span><span className="font-medium text-text-primary">{userName}</span> comentó en {itemName}</span>;
+        return <span dangerouslySetInnerHTML={{ __html: interpolate('profile.feedCommented', { user: `<span class="font-medium text-text-primary">${userName}</span>`, item: itemName }) }} />;
 
       case 'JOINED':
-        return <span><span className="font-medium text-text-primary">{userName}</span> se unió al proyecto</span>;
+        return <span dangerouslySetInnerHTML={{ __html: interpolate('profile.feedJoined', { user: `<span class="font-medium text-text-primary">${userName}</span>` }) }} />;
 
       case 'ASSIGNED':
-        return <span><span className="font-medium text-text-primary">{userName}</span> reasignó la tarea {itemName}</span>;
+        return <span dangerouslySetInnerHTML={{ __html: interpolate('profile.feedAssigned', { user: `<span class="font-medium text-text-primary">${userName}</span>`, item: itemName }) }} />;
 
       default:
-        return <span><span className="font-medium text-text-primary">{userName}</span> interactuó con {itemName}</span>;
+        return <span dangerouslySetInnerHTML={{ __html: interpolate('profile.feedDefault', { user: `<span class="font-medium text-text-primary">${userName}</span>`, item: itemName }) }} />;
     }
   };
 
@@ -216,11 +225,13 @@ export default function ProfileDashboard() {
     <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-8 bg-surface-page">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary tracking-tight">
-            Bienvenido, {mounted ? getFirstName(user?.name ?? profile?.name) : '...'}
+                  <h1 className="text-2xl font-bold text-text-primary tracking-tight">
+            {mounted
+              ? t('profile.welcome').replace('{name}', getFirstName(user?.name ?? profile?.name))
+              : '...'}
           </h1>
           <p className="text-sm text-text-muted mt-1">
-            {mounted ? getFormattedDate() : 'Cargando...'}
+            {mounted ? getFormattedDate() : t('profile.loading')}
           </p>
         </div>
         <button
@@ -228,7 +239,7 @@ export default function ProfileDashboard() {
           className="flex items-center justify-center gap-2 bg-brand-dark hover:bg-brand-dark-hover text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors"
         >
           <Plus className="w-4 h-4" />
-          Nuevo proyecto
+          {t('profile.newProject')}
         </button>
       </header>
 
@@ -240,10 +251,10 @@ export default function ProfileDashboard() {
 
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Proyectos activos', value: metrics.activeProjects, icon: Briefcase, color: 'text-brand dark:text-brand-light', bg: 'bg-brand-light dark:bg-brand/20' },
-          { label: 'Tareas pendientes', value: metrics.pendingTasks, icon: CheckSquare, color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-500/20' },
-          { label: 'Actividad (7 días)', value: metrics.activityPoints, icon: Activity, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-500/20' },
-          { label: 'Colaboradores', value: metrics.collaborators, icon: Users, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50 dark:bg-purple-500/20' },
+          { label: t('profile.metricActiveProjects'), value: metrics.activeProjects, icon: Briefcase, color: 'text-brand dark:text-brand-light', bg: 'bg-brand-light dark:bg-brand/20' },
+          { label: t('profile.metricPendingTasks'), value: metrics.pendingTasks, icon: CheckSquare, color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-500/20' },
+          { label: t('profile.metricActivity'), value: metrics.activityPoints, icon: Activity, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-500/20' },
+          { label: t('profile.metricCollaborators'), value: metrics.collaborators, icon: Users, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50 dark:bg-purple-500/20' },
         ].map((stat, idx) => {
           const Icon = stat.icon;
           return (
@@ -264,7 +275,7 @@ export default function ProfileDashboard() {
         <section className="col-span-1 lg:col-span-2">
           <div className="bg-surface-primary border border-border-primary rounded-xl shadow-sm h-full flex flex-col">
             <div className="px-6 py-5 border-b border-border-primary flex items-center justify-between">
-              <h2 className="text-base font-semibold text-text-primary">Mis proyectos</h2>
+                            <h2 className="text-base font-semibold text-text-primary">{t('profile.myProjects')}</h2>
             </div>
             <div className="p-6 flex-1 flex flex-col">
               {isLoading ? (
@@ -279,8 +290,8 @@ export default function ProfileDashboard() {
                   <div className="w-12 h-12 bg-surface-secondary rounded-full flex items-center justify-center mb-3">
                     <FolderKanban className="w-6 h-6 text-gray-400" />
                   </div>
-                  <p className="text-sm font-medium text-text-primary">No tienes proyectos aún.</p>
-                  <p className="text-sm text-text-muted mt-1 max-w-sm">Crea un proyecto para empezar a colaborar con otros estudiantes y profesores.</p>
+                                    <p className="text-sm font-medium text-text-primary">{t('profile.emptyProjectsTitle')}</p>
+                  <p className="text-sm text-text-muted mt-1 max-w-sm">{t('profile.emptyProjectsDesc')}</p>
                 </div>
               ) : (
                 <div className="grid sm:grid-cols-2 gap-4">
@@ -302,7 +313,7 @@ export default function ProfileDashboard() {
                         </div>
                       </div>
                       <p className="text-xs text-text-muted line-clamp-2 mt-auto flex-1 mb-4">
-                        {proj.description || 'Sin descripción...'}
+                        {proj.description || t('profile.noDescription')}
                       </p>
 
                       <div className="flex items-center justify-between pt-3 border-t border-border-primary mt-auto">
@@ -321,7 +332,7 @@ export default function ProfileDashboard() {
 
         <section className="col-span-1 border border-border-primary rounded-xl shadow-sm bg-surface-primary h-full flex flex-col">
           <div className="px-6 py-5 border-b border-border-primary">
-            <h2 className="text-base font-semibold text-text-primary">Feed de actividad reciente</h2>
+                        <h2 className="text-base font-semibold text-text-primary">{t('profile.activityFeed')}</h2>
           </div>
           <div className="p-0 flex-1 flex flex-col overflow-hidden">
             {isLoading ? (
@@ -341,7 +352,7 @@ export default function ProfileDashboard() {
                 <div className="w-12 h-12 bg-surface-secondary rounded-full flex items-center justify-center mb-3">
                   <Activity className="w-6 h-6 text-gray-400" />
                 </div>
-                <p className="text-sm text-text-muted">Aún no hay actividad reciente en tus proyectos.</p>
+                                <p className="text-sm text-text-muted">{t('profile.noActivity')}</p>
               </div>
             ) : (
               <div className="overflow-y-auto custom-scrollbar p-6 space-y-6 max-h-[500px]">
@@ -364,7 +375,7 @@ export default function ProfileDashboard() {
                       </p>
                       <div className="flex items-center gap-2 mt-1">
                         <span className="text-[11px] text-gray-400 font-medium">
-                          {formatDistanceToNow(new Date(log.createdAt), { addSuffix: true, locale: es })}
+                          {formatDistanceToNow(new Date(log.createdAt), { addSuffix: true, locale: dateLocale })}
                         </span>
                         <span className="w-1 h-1 rounded-full bg-gray-300"></span>
                         <span className="text-[11px] text-gray-400 truncate max-w-[120px]" title={log.project?.name}>

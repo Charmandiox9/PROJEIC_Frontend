@@ -7,6 +7,7 @@ import MemberAvatar from '../../project-detail/MemberAvatar';
 import RoleBadge from '../../project-detail/RoleBadge';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { ADD_PROJECT_MEMBER } from '@/graphql/misc/operations';
+import { useT } from '@/hooks/useT';
 
 interface TabMiembrosProps {
   project: Project;
@@ -35,6 +36,7 @@ export default function TabMiembros({
   onRemoveMember,
   onRefresh,
 }: TabMiembrosProps) {
+  const { t, tDynamic } = useT();
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('STUDENT');
   const [isExternal, setIsExternal] = useState(false);
@@ -46,15 +48,15 @@ export default function TabMiembros({
     setError(null);
     setSuccess(null);
     const trimmed = email.trim().toLowerCase();
-    if (!trimmed) { setError('Ingresa un correo.'); return; }
+    if (!trimmed) { setError(t('tabMiembros.errorEmailEmpty')); return; }
 
     if (!isExternal && !isValidUcnEmail(trimmed)) {
-      setError(`El correo debe pertenecer a: ${UCN_DOMAINS.join(', ')}`);
+      setError(`${t('tabMiembros.errorEmailDomain')} ${UCN_DOMAINS.join(', ')}`);
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(trimmed)) { setError('Correo inválido.'); return; }
+    if (!emailRegex.test(trimmed)) { setError(t('tabMiembros.errorEmailInvalid')); return; }
 
     setIsSending(true);
     try {
@@ -69,10 +71,10 @@ export default function TabMiembros({
         },
       });
       setEmail('');
-      setSuccess('Invitación enviada correctamente.');
+      setSuccess(t('tabMiembros.inviteSuccess'));
       onRefresh();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error al enviar la invitación.');
+      setError(err instanceof Error ? err.message : t('tabMiembros.errorSendInvite'));
     } finally {
       setIsSending(false);
     }
@@ -86,22 +88,29 @@ export default function TabMiembros({
   };
 
   const ROLE_DESCRIPTIONS = [
-    { role: 'Líder', desc: 'Gestiona el proyecto, invita miembros y tiene control total.' },
-    { role: 'Supervisor', desc: 'Supervisa el avance del equipo. Rol típico para docentes.' },
-    { role: 'Estudiante', desc: 'Participa activamente en las tareas del proyecto.' },
-    { role: 'Externo', desc: 'Colaborador fuera de la institución con acceso limitado.' },
+    { key: 'leader', desc: t('tabMiembros.roleLeaderDesc') },
+    { key: 'supervisor', desc: t('tabMiembros.roleSupervisorDesc') },
+    { key: 'student', desc: t('tabMiembros.roleStudentDesc') },
+    { key: 'external', desc: t('tabMiembros.roleExternalDesc') },
   ];
+
+  const roleNames: Record<string, string> = {
+    leader: t('projectRole.LEADER'),
+    supervisor: t('projectRole.SUPERVISOR'),
+    student: t('projectRole.STUDENT'),
+    external: t('projectRole.EXTERNAL'),
+  };
 
   const activeMembers = project.members.filter(m => m.status === 'ACTIVE');
 
   return (
     <div className={`grid grid-cols-1 ${isLeader ? 'lg:grid-cols-3' : ''} gap-6`}>
       <div className={`${isLeader ? 'md:col-span-2' : ''} bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6 space-y-4`}>
-        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Integrantes ({activeMembers.length})</h3>
+        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">{t('tabMiembros.members')} ({activeMembers.length})</h3>
         {activeMembers.length === 0 ? (
           <div className="text-center py-12">
             <User className="w-6 h-6 text-gray-300 mx-auto mb-2" />
-            <p className="text-sm text-gray-400">No hay miembros registrados.</p>
+            <p className="text-sm text-gray-400">{t('tabMiembros.noMembers')}</p>
           </div>
         ) : (
           <ul className="space-y-3">
@@ -115,7 +124,7 @@ export default function TabMiembros({
                     </p>
                     {m.status === 'PENDING' && (
                       <span className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-100 border border-amber-200 rounded-md">
-                        <Loader2 className="w-3 h-3 animate-spin" /> Pendiente
+                        <Loader2 className="w-3 h-3 animate-spin" /> {t('tabMiembros.pending')}
                       </span>
                     )}
                   </div>
@@ -124,7 +133,7 @@ export default function TabMiembros({
                   {isLeader ? (
                     <label className="relative cursor-pointer" title="Cambiar rol">
                       <span className={`inline-flex items-center px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md whitespace-nowrap ${roleClass(m.role)}`}>
-                        {ROLE_OPTIONS.find(r => r.value === m.role)?.label ?? m.role}
+                        {tDynamic('projectRole.' + m.role) || m.role}
                       </span>
                       <select
                         value={m.role}
@@ -133,14 +142,14 @@ export default function TabMiembros({
                       >
                         {ROLE_OPTIONS.map((r) => (
                           <option key={r.value} value={r.value} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-                            {r.label}
+                            {tDynamic('projectRole.' + r.value)}
                           </option>
                         ))}
                       </select>
                     </label>
                   ) : (
                     <span className={`inline-flex items-center px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md whitespace-nowrap ${roleClass(m.role)}`}>
-                      {ROLE_OPTIONS.find(r => r.value === m.role)?.label ?? m.role}
+                      {tDynamic('projectRole.' + m.role) || m.role}
                     </span>
                   )}
                   {isLeader && (
@@ -167,19 +176,19 @@ export default function TabMiembros({
                 <Check className="w-8 h-8" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">¡Invitación enviada!</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">El usuario ha sido invitado exitosamente.</p>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{t('tabMiembros.inviteSent')}</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('tabMiembros.inviteSentDesc')}</p>
               </div>
               <button
                 onClick={handleInviteAnother}
                 className="mt-4 px-6 py-2 text-sm font-medium text-white bg-brand rounded-lg hover:bg-brand-dark transition-colors"
               >
-                Invitar a otro
+                {t('tabMiembros.inviteAnother')}
               </button>
             </div>
           ) : (
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6 space-y-4">
-              <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Agregar miembro</h3>
+              <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">{t('tabMiembros.addMember')}</h3>
 
               <label className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400 cursor-pointer select-none">
                 <input
@@ -188,7 +197,7 @@ export default function TabMiembros({
                   onChange={(e) => { setIsExternal(e.target.checked); setError(null); }}
                   className="w-3.5 h-3.5 text-brand border-gray-300 rounded focus:ring-brand"
                 />
-                Colaborador externo
+                {t('tabMiembros.externalCollaborator')}
               </label>
 
               <input
@@ -206,7 +215,7 @@ export default function TabMiembros({
                   onChange={(e) => setRole(e.target.value)}
                 >
                   {ROLE_OPTIONS.filter((r) => r.value !== 'EXTERNAL').map((r) => (
-                    <option key={r.value} value={r.value}>{r.label}</option>
+                    <option key={r.value} value={r.value}>{tDynamic('projectRole.' + r.value)}</option>
                   ))}
                 </Select>
               )}
@@ -223,16 +232,16 @@ export default function TabMiembros({
                 className="w-full py-2 text-sm font-medium text-white bg-brand rounded-lg hover:bg-brand-dark transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
               >
                 {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
-                {isSending ? 'Enviando...' : 'Enviar invitación'}
+                {isSending ? t('tabMiembros.sending') : t('tabMiembros.sendInvitation')}
               </button>
             </div>
           )}
 
           <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6 space-y-3 overflow-y-auto max-h-64">
-            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Roles disponibles</h3>
+            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">{t('tabMiembros.availableRoles')}</h3>
             {ROLE_DESCRIPTIONS.map((r) => (
-              <div key={r.role}>
-                <p className="text-xs font-bold text-gray-700 dark:text-gray-300">{r.role}</p>
+              <div key={r.key}>
+                <p className="text-xs font-bold text-gray-700 dark:text-gray-300">{roleNames[r.key]}</p>
                 <p className="text-xs text-gray-400 leading-relaxed">{r.desc}</p>
               </div>
             ))}

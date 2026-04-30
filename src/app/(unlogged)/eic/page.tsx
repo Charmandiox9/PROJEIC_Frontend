@@ -1,11 +1,12 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useRef } from 'react';
 import { ExternalLink, BookOpen, Building2, Cpu, Laptop, LucideIcon } from 'lucide-react';
+import { useT } from '@/hooks/useT';
 
 interface LinkItem {
   id: number;
-  label: string;
+  labelKey: string;
   url: string;
   icon: LucideIcon;
   colorClass: string;
@@ -16,7 +17,7 @@ interface LinkItem {
 
 interface CareerItem {
   id: number;
-  name: string;
+  nameKey: string;
   url: string;
   bgClass: string;
   borderClass: string;
@@ -25,19 +26,10 @@ interface CareerItem {
   hoverBorderClass: string;
 }
 
-const PAGE_TEXTS = {
-  heroTitle: 'Escuela de Ingeniería Coquimbo',
-  heroSubtitle: 'Universidad Católica del Norte.',
-  aboutTitle: '¿Quiénes somos?',
-  aboutDescription: 'La Escuela de Ingeniería Coquimbo (EIC) es la unidad académica de la Universidad Católica del Norte, sede Coquimbo, encargada de proyectar, coordinar y desarrollar la docencia, investigación y vinculación con el medio en el ámbito de las ciencias de la ingeniería. Formamos profesionales integrales, con sólida base científica y tecnológica, capaces de resolver problemas complejos con una mirada ética y sostenible.',
-  linksTitle: 'Enlaces oficiales',
-  careersTitle: 'Nuestras carreras'
-};
-
 const OFFICIAL_LINKS: LinkItem[] = [
   {
     id: 1,
-    label: 'Sitio oficial UCN',
+    labelKey: 'eicPage.linkUcn',
     url: 'https://www.ucn.cl',
     icon: Building2,
     colorClass: 'text-blue-500 dark:text-blue-400',
@@ -47,7 +39,7 @@ const OFFICIAL_LINKS: LinkItem[] = [
   },
   {
     id: 2,
-    label: 'Escuela de Ingeniería',
+    labelKey: 'eicPage.linkEic',
     url: 'https://eic.ucn.cl',
     icon: Cpu,
     colorClass: 'text-brand',
@@ -57,50 +49,51 @@ const OFFICIAL_LINKS: LinkItem[] = [
   },
   {
     id: 3,
-    label: 'Campus Virtual',
+    labelKey: 'eicPage.linkCampus',
     url: 'https://campusvirtual.ucn.cl/login/index.php',
     icon: Laptop,
     colorClass: 'text-orange-500 dark:text-orange-400',
     bgClass: 'bg-orange-50 dark:bg-orange-500/10',
     hoverClass: 'hover:border-orange-500 dark:hover:border-orange-400',
     groupHoverClass: 'group-hover:bg-orange-500 group-hover:text-white',
-  }
+  },
 ];
 
 const CAREERS: CareerItem[] = [
   {
     id: 1,
-    name: 'Ingeniería Civil en Computación e Informática',
+    nameKey: 'eicPage.careerCS',
     url: 'https://eic.ucn.cl/pregrados/Ingenieria-Civil-en-Computacion-e-Informatica',
     bgClass: 'bg-career-cs/10',
     borderClass: 'border-career-cs',
     textClass: 'text-career-cs',
     groupHoverTextClass: 'group-hover:text-career-cs',
-    hoverBorderClass: 'hover:border-career-cs'
+    hoverBorderClass: 'hover:border-career-cs',
   },
   {
     id: 2,
-    name: 'Ingeniería Civil Industrial',
+    nameKey: 'eicPage.careerIndustrial',
     url: 'https://eic.ucn.cl/pregrados/Ingenieria-Civil-Industrial',
     bgClass: 'bg-career-industrial/10',
     borderClass: 'border-career-industrial',
     textClass: 'text-career-industrial',
     groupHoverTextClass: 'group-hover:text-career-industrial',
-    hoverBorderClass: 'hover:border-career-industrial'
+    hoverBorderClass: 'hover:border-career-industrial',
   },
   {
     id: 3,
-    name: 'Ingeniería en Tecnologías de Información',
+    nameKey: 'eicPage.careerTI',
     url: 'https://eic.ucn.cl/pregrados/Ingenieria-en-Tecnologias-de-Informacion',
     bgClass: 'bg-career-ti/10',
     borderClass: 'border-career-ti',
     textClass: 'text-career-ti',
     groupHoverTextClass: 'group-hover:text-career-ti',
-    hoverBorderClass: 'hover:border-career-ti'
-  }
+    hoverBorderClass: 'hover:border-career-ti',
+  },
 ];
 
 export default function EicPage() {
+  const { t } = useT();
   const heroRef = useRef<HTMLElement>(null);
   const aboutRef = useRef<HTMLElement>(null);
   const linksRef = useRef<HTMLElement>(null);
@@ -125,7 +118,12 @@ export default function EicPage() {
   useEffect(() => {
     const observerOptions = { threshold: 0.15 };
 
-    const animateSection = (entries: IntersectionObserverEntry[], observer: IntersectionObserver, targetsSelector: string, staggerDelay = 100) => {
+    const animateSection = (
+      entries: IntersectionObserverEntry[],
+      observer: IntersectionObserver,
+      targetsSelector: string,
+      staggerDelay = 100,
+    ) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           observer.unobserve(entry.target);
@@ -144,9 +142,18 @@ export default function EicPage() {
       });
     };
 
-    const aboutObserver = new IntersectionObserver((e) => animateSection(e, aboutObserver, '[data-about-item]', 150), observerOptions);
-    const linksObserver = new IntersectionObserver((e) => animateSection(e, linksObserver, '[data-link-card]', 120), observerOptions);
-    const careersObserver = new IntersectionObserver((e) => animateSection(e, careersObserver, '[data-career-card]', 120), observerOptions);
+    const aboutObserver = new IntersectionObserver(
+      (e) => animateSection(e, aboutObserver, '[data-about-item]', 150),
+      observerOptions,
+    );
+    const linksObserver = new IntersectionObserver(
+      (e) => animateSection(e, linksObserver, '[data-link-card]', 120),
+      observerOptions,
+    );
+    const careersObserver = new IntersectionObserver(
+      (e) => animateSection(e, careersObserver, '[data-career-card]', 120),
+      observerOptions,
+    );
 
     if (aboutRef.current) aboutObserver.observe(aboutRef.current);
     if (linksRef.current) linksObserver.observe(linksRef.current);
@@ -163,7 +170,7 @@ export default function EicPage() {
     const target = e.currentTarget;
     const iconContainer = target.querySelector('.link-icon-container');
     const arrow = target.querySelector('.link-arrow');
-    
+
     import('animejs').then((mod) => {
       const anime = mod.default ?? mod;
       anime({ targets: target, translateY: -6, scale: 1.02, duration: 400, easing: 'easeOutExpo' });
@@ -176,7 +183,7 @@ export default function EicPage() {
     const target = e.currentTarget;
     const iconContainer = target.querySelector('.link-icon-container');
     const arrow = target.querySelector('.link-arrow');
-    
+
     import('animejs').then((mod) => {
       const anime = mod.default ?? mod;
       anime({ targets: target, translateY: 0, scale: 1, duration: 400, easing: 'easeOutExpo' });
@@ -189,7 +196,7 @@ export default function EicPage() {
     const target = e.currentTarget;
     const icon = target.querySelector('.career-icon');
     const arrow = target.querySelector('.career-arrow');
-    
+
     import('animejs').then((mod) => {
       const anime = mod.default ?? mod;
       anime({ targets: target, translateY: -6, scale: 1.01, duration: 400, easing: 'easeOutExpo' });
@@ -202,7 +209,7 @@ export default function EicPage() {
     const target = e.currentTarget;
     const icon = target.querySelector('.career-icon');
     const arrow = target.querySelector('.career-arrow');
-    
+
     import('animejs').then((mod) => {
       const anime = mod.default ?? mod;
       anime({ targets: target, translateY: 0, scale: 1, duration: 400, easing: 'easeOutExpo' });
@@ -213,24 +220,35 @@ export default function EicPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-surface-primary dark:bg-brand-dark">
-      <section ref={heroRef} className="bg-surface-primary dark:bg-brand-dark bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-light/30 via-transparent to-transparent text-ui-dark dark:text-text-primary py-16 px-6 border-b border-border-primary dark:border-border-primary">
+      <section
+        ref={heroRef}
+        className="bg-surface-primary dark:bg-brand-dark bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-light/30 via-transparent to-transparent text-ui-dark dark:text-text-primary py-16 px-6 border-b border-border-primary dark:border-border-primary"
+      >
         <div className="max-w-4xl mx-auto text-center">
-          <h1 data-hero-item style={{ opacity: 0 }} className="text-3xl md:text-5xl font-bold mb-4">{PAGE_TEXTS.heroTitle}</h1>
-          <p data-hero-item style={{ opacity: 0 }} className="text-text-muted dark:text-text-muted text-lg md:text-xl font-medium">{PAGE_TEXTS.heroSubtitle}</p>
+          <h1 data-hero-item style={{ opacity: 0 }} className="text-3xl md:text-5xl font-bold mb-4">
+            {t('eicPage.heroTitle')}
+          </h1>
+          <p data-hero-item style={{ opacity: 0 }} className="text-text-muted dark:text-text-muted text-lg md:text-xl font-medium">
+            {t('eicPage.heroSubtitle')}
+          </p>
         </div>
       </section>
 
       <main className="flex-grow max-w-5xl mx-auto w-full px-6 py-16 space-y-16">
 
         <section ref={aboutRef} className="bg-surface-secondary dark:bg-surface-primary border border-border-primary dark:border-border-primary p-8 md:p-10 rounded-2xl">
-          <h2 data-about-item style={{ opacity: 0 }} className="text-2xl font-bold text-text-primary dark:text-text-primary mb-6">{PAGE_TEXTS.aboutTitle}</h2>
+          <h2 data-about-item style={{ opacity: 0 }} className="text-2xl font-bold text-text-primary dark:text-text-primary mb-6">
+            {t('eicPage.aboutTitle')}
+          </h2>
           <p data-about-item style={{ opacity: 0 }} className="text-text-secondary dark:text-text-secondary leading-relaxed text-lg">
-            {PAGE_TEXTS.aboutDescription}
+            {t('eicPage.aboutDescription')}
           </p>
         </section>
 
         <section ref={linksRef}>
-          <h2 data-link-card style={{ opacity: 0 }} className="text-2xl font-bold text-text-primary dark:text-text-primary mb-8">{PAGE_TEXTS.linksTitle}</h2>
+          <h2 data-link-card style={{ opacity: 0 }} className="text-2xl font-bold text-text-primary dark:text-text-primary mb-8">
+            {t('eicPage.linksTitle')}
+          </h2>
           <div className="grid md:grid-cols-3 gap-6">
             {OFFICIAL_LINKS.map((link) => {
               const Icon = link.icon;
@@ -246,24 +264,28 @@ export default function EicPage() {
                   onMouseLeave={handleLinkLeave}
                   className={`group flex flex-col items-center justify-center p-8 bg-surface-primary dark:bg-surface-primary border border-border-primary dark:border-border-primary rounded-2xl shadow-sm hover:shadow-xl transition-colors duration-300 ${link.hoverClass}`}
                 >
-                  <div className={`link-icon-container w-16 h-16 rounded-2xl mb-5 flex items-center justify-center transition-colors duration-300 ${link.bgClass} ${link.colorClass} ${link.groupHoverClass}`}>
+                  <div
+                    className={`link-icon-container w-16 h-16 rounded-2xl mb-5 flex items-center justify-center transition-colors duration-300 ${link.bgClass} ${link.colorClass} ${link.groupHoverClass}`}
+                  >
                     <Icon className="w-8 h-8" />
                   </div>
                   <span className="font-bold text-text-primary dark:text-text-primary text-lg mb-2 text-center transition-colors">
-                    {link.label}
+                    {t(link.labelKey as Parameters<typeof t>[0])}
                   </span>
                   <div className="flex items-center text-sm font-medium text-text-muted group-hover:text-text-secondary transition-colors">
-                    <span>Visitar plataforma</span>
+                    <span>{t('eicPage.visitPlatform')}</span>
                     <ExternalLink className="link-arrow w-4 h-4 ml-1" />
                   </div>
                 </a>
-              )
+              );
             })}
           </div>
         </section>
 
         <section ref={careersRef}>
-          <h2 data-career-card style={{ opacity: 0 }} className="text-2xl font-bold text-text-primary dark:text-text-primary mb-8">{PAGE_TEXTS.careersTitle}</h2>
+          <h2 data-career-card style={{ opacity: 0 }} className="text-2xl font-bold text-text-primary dark:text-text-primary mb-8">
+            {t('eicPage.careersTitle')}
+          </h2>
           <div className="grid md:grid-cols-3 gap-6">
             {CAREERS.map((career) => (
               <a
@@ -282,10 +304,10 @@ export default function EicPage() {
                 </div>
                 <div className="flex-grow flex flex-col justify-between">
                   <h3 className={`font-bold text-text-primary dark:text-text-primary leading-tight ${career.groupHoverTextClass} transition-colors mb-4`}>
-                    {career.name}
+                    {t(career.nameKey as Parameters<typeof t>[0])}
                   </h3>
                   <div className={`flex justify-between items-center text-sm font-medium ${career.textClass} transition-colors`}>
-                    <span>Ver programa</span>
+                    <span>{t('eicPage.viewProgram')}</span>
                     <ExternalLink className="career-arrow w-4 h-4" />
                   </div>
                 </div>

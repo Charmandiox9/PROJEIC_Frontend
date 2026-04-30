@@ -1,6 +1,8 @@
 import { X, TrendingUp, Calendar } from 'lucide-react';
+import { useT } from '@/hooks/useT';
 
 export default function AuthorModal({ author, onClose }: { author: any, onClose: () => void }) {
+  const { t } = useT();
   if (!author) return null;
 
   return (
@@ -11,7 +13,7 @@ export default function AuthorModal({ author, onClose }: { author: any, onClose:
             <img src={author.avatarUrl} alt="" className="w-16 h-16 rounded-full border-4 border-surface-primary shadow-sm" />
             <div>
               <h2 className="text-2xl font-bold text-text-primary">{author.name}</h2>
-              <p className="text-sm text-brand font-bold uppercase tracking-wider">Radiografía de Desarrollo</p>
+              <p className="text-sm text-brand font-bold uppercase tracking-wider">{t('github.devOverview')}</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-surface-primary rounded-full transition-colors text-text-muted hover:text-text-primary">
@@ -21,22 +23,22 @@ export default function AuthorModal({ author, onClose }: { author: any, onClose:
         
         <div className="grid grid-cols-3 gap-4 p-6 border-b border-border-primary bg-surface-primary">
           <div className="text-center p-4 rounded-xl bg-surface-secondary border border-border-secondary">
-            <p className="text-xs text-text-muted uppercase font-bold tracking-wider mb-1">Total Commits</p>
+            <p className="text-xs text-text-muted uppercase font-bold tracking-wider mb-1">{t('github.totalCommits')}</p>
             <p className="text-3xl font-black text-brand">{author.totalCommits}</p>
           </div>
           <div className="text-center p-4 rounded-xl bg-green-500/10 border border-green-500/20">
-            <p className="text-xs text-green-600 uppercase font-bold tracking-wider mb-1">Líneas Agregadas</p>
+            <p className="text-xs text-green-600 uppercase font-bold tracking-wider mb-1">{t('github.linesAdded')}</p>
             <p className="text-3xl font-black text-green-500">+{author.additions}</p>
           </div>
           <div className="text-center p-4 rounded-xl bg-red-500/10 border border-red-500/20">
-            <p className="text-xs text-red-600 uppercase font-bold tracking-wider mb-1">Líneas Borradas</p>
+            <p className="text-xs text-red-600 uppercase font-bold tracking-wider mb-1">{t('github.linesDeleted')}</p>
             <p className="text-3xl font-black text-red-500">-{author.deletions}</p>
           </div>
         </div>
 
         <div className="p-6 overflow-y-auto custom-scrollbar flex-1 bg-surface-primary">
           <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-brand" /> Historial Específico
+            <TrendingUp className="w-5 h-5 text-brand" /> {t('github.specificHistory')}
           </h3>
           <div className="space-y-3">
             {author.commits.map((c: any) => (

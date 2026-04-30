@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isSameDay, addDays, isToday, isBefore } from 'date-fns';
-import { es } from 'date-fns/locale/es';
+import { es, enUS } from 'date-fns/locale';
+import { useT } from '@/hooks/useT';
 
 interface ProjectCalendarViewProps {
   tasks: any[];
@@ -15,7 +16,9 @@ const StatusIcon = ({ status }: { status: string }) => {
 };
 
 export default function ProjectCalendarView({ tasks, onEditTask }: ProjectCalendarViewProps) {
+  const { t, locale } = useT();
   const [currentDate, setCurrentDate] = useState(new Date());
+  const dateLocale = locale === 'es' ? es : enUS;
 
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
@@ -97,18 +100,18 @@ export default function ProjectCalendarView({ tasks, onEditTask }: ProjectCalend
       <div className="flex flex-wrap items-center justify-between px-6 py-4 border-b border-border-primary bg-surface-secondary/50 gap-4">
         <h2 className="text-xl font-bold text-text-primary capitalize flex items-center gap-2">
           <CalendarIcon className="w-5 h-5 text-brand" />
-          {format(currentDate, "MMMM yyyy", { locale: es })}
+          {format(currentDate, "MMMM yyyy", { locale: dateLocale })}
         </h2>
         <div className="flex items-center gap-3">
           {/* Leyenda rápida */}
           <div className="hidden sm:flex items-center gap-3 mr-4 text-[10px] font-bold text-text-muted uppercase tracking-wider">
-            <span className="flex items-center gap-1"><Clock className="w-3 h-3 text-amber-500" /> En curso</span>
-            <span className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3 text-emerald-500" /> Completado</span>
-            <span className="flex items-center gap-1"><AlertCircle className="w-3 h-3 text-red-500" /> Atrasado</span>
+            <span className="flex items-center gap-1"><Clock className="w-3 h-3 text-amber-500" /> {t('kanban.inProgress')}</span>
+            <span className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3 text-emerald-500" /> {t('kanban.doneStatus')}</span>
+            <span className="flex items-center gap-1"><AlertCircle className="w-3 h-3 text-red-500" /> {t('kanban.overdue')}</span>
           </div>
 
           <button onClick={goToToday} className="px-3 py-1.5 text-sm font-medium text-text-secondary bg-surface-primary border border-border-secondary rounded-lg hover:text-brand hover:border-brand/30 transition-all shadow-sm">
-            Hoy
+            {t('kanban.today')}
           </button>
           <div className="flex items-center border border-border-secondary rounded-lg overflow-hidden bg-surface-primary shadow-sm">
             <button onClick={prevMonth} className="p-1.5 hover:bg-surface-tertiary text-text-secondary transition-colors"><ChevronLeft className="w-5 h-5" /></button>
@@ -120,9 +123,9 @@ export default function ProjectCalendarView({ tasks, onEditTask }: ProjectCalend
 
       {/* Días de la semana */}
       <div className="grid grid-cols-7 bg-surface-primary border-b border-border-primary shadow-sm z-10">
-        {['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'].map(dayName => (
-          <div key={dayName} className="py-3 text-center text-[11px] font-extrabold text-text-muted uppercase tracking-wider border-r border-border-secondary last:border-0">
-            {dayName}
+        {[0, 1, 2, 3, 4, 5, 6].map(dayIndex => (
+          <div key={dayIndex} className="py-3 text-center text-[11px] font-extrabold text-text-muted uppercase tracking-wider border-r border-border-secondary last:border-0">
+            {format(addDays(startOfWeek(new Date(), { weekStartsOn: 1 }), dayIndex), "EEEE", { locale: dateLocale })}
           </div>
         ))}
       </div>

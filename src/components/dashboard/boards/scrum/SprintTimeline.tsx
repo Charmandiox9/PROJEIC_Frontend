@@ -4,8 +4,11 @@ import { useState } from 'react';
 import { Calendar, CheckCircle2, Flag, Target, ChevronDown, ChevronUp, Loader2, User as UserIcon, CircleDashed } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale/es';
+import { enUS } from 'date-fns/locale/en-US';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { GET_TASKS_BY_PROJECT } from '@/graphql/tasks/operations';
+import { useT } from '@/hooks/useT';
+import { useLocale } from '@/hooks/useLocale';
 
 interface SprintTimelineProps {
   sprints: any[];
@@ -20,20 +23,24 @@ const priorityStyles: Record<string, string> = {
   URGENT: 'bg-red-100 text-red-700',
 };
 
-const priorityLabels: Record<string, string> = {
-  LOW: 'Baja', MEDIUM: 'Media', HIGH: 'Alta', URGENT: 'Urgente',
-};
-
-const statusLabels: Record<string, { text: string; color: string; icon: any }> = {
-  BACKLOG: { text: 'Backlog', color: 'bg-surface-secondary text-text-secondary', icon: CircleDashed },
-  TODO: { text: 'Por hacer', color: 'bg-slate-100 text-slate-700', icon: CircleDashed },
-  IN_PROGRESS: { text: 'En progreso', color: 'bg-blue-100 text-blue-700', icon: CircleDashed },
-  IN_REVIEW: { text: 'En revisión', color: 'bg-purple-100 text-purple-700', icon: CircleDashed },
-  DONE: { text: 'Completado', color: 'bg-green-100 text-green-700', icon: CheckCircle2 },
-  CANCELLED: { text: 'Cancelado', color: 'bg-red-100 text-red-700', icon: CircleDashed },
-};
-
 export default function SprintTimeline({ sprints, projectId, members }: SprintTimelineProps) {
+  const { t } = useT();
+  const { locale } = useLocale();
+  const dateLocale = locale === 'en' ? enUS : es;
+
+  const priorityLabels: Record<string, string> = {
+    LOW: t('kanban.priorityLow'), MEDIUM: t('kanban.priorityMedium'), HIGH: t('kanban.priorityHigh'), URGENT: t('kanban.priorityUrgent'),
+  };
+
+  const statusLabels: Record<string, { text: string; color: string; icon: any }> = {
+    BACKLOG: { text: t('kanban.backlog'), color: 'bg-surface-secondary text-text-secondary', icon: CircleDashed },
+    TODO: { text: t('kanban.todo'), color: 'bg-slate-100 text-slate-700', icon: CircleDashed },
+    IN_PROGRESS: { text: t('kanban.inProgress'), color: 'bg-blue-100 text-blue-700', icon: CircleDashed },
+    IN_REVIEW: { text: t('kanban.statusInReview'), color: 'bg-purple-100 text-purple-700', icon: CircleDashed },
+    DONE: { text: t('kanban.done'), color: 'bg-green-100 text-green-700', icon: CheckCircle2 },
+    CANCELLED: { text: t('kanban.statusCancelled'), color: 'bg-red-100 text-red-700', icon: CircleDashed },
+  };
+
   const [expandedSprintId, setExpandedSprintId] = useState<string | null>(null);
   const [tasksCache, setTasksCache] = useState<Record<string, any[]>>({});
   const [isLoadingTasks, setIsLoadingTasks] = useState<string | null>(null);
@@ -76,9 +83,9 @@ export default function SprintTimeline({ sprints, projectId, members }: SprintTi
         <div className="w-16 h-16 bg-surface-secondary rounded-full flex items-center justify-center mb-4">
           <Flag className="w-8 h-8 text-text-secondary" />
         </div>
-        <h3 className="text-lg font-bold text-text-primary dark:text-gray-200">No hay historial todavía</h3>
+        <h3 className="text-lg font-bold text-text-primary dark:text-gray-200">{t('kanban.noHistory')}</h3>
         <p className="text-sm text-text-muted mt-1 max-w-sm">
-          Los Sprints que el equipo vaya finalizando aparecerán aquí como un cronograma histórico.
+          {t('kanban.noHistoryDesc')}
         </p>
       </div>
     );
@@ -87,8 +94,8 @@ export default function SprintTimeline({ sprints, projectId, members }: SprintTi
   return (
     <div className="bg-surface-primary dark:bg-surface-primary p-6 md:p-8 rounded-xl border border-border-primary dark:border-border-primary shadow-sm animate-in fade-in">
       <div className="mb-8">
-        <h2 className="text-lg font-bold text-text-primary dark:text-text-primary">Cronograma de Sprints</h2>
-        <p className="text-sm text-text-muted">Haz clic en un Sprint para ver las tareas que se completaron durante esa iteración.</p>
+        <h2 className="text-lg font-bold text-text-primary dark:text-text-primary">{t('kanban.sprintTimeline')}</h2>
+        <p className="text-sm text-text-muted">{t('kanban.sprintTimelineDesc')}</p>
       </div>
 
       <div className="relative border-l-2 border-brand/20 ml-3 md:ml-4 space-y-8">
@@ -119,12 +126,12 @@ export default function SprintTimeline({ sprints, projectId, members }: SprintTi
                     </h3>
                     <div className="flex items-center gap-2 mt-1.5 text-xs font-medium text-text-muted">
                       <span className="flex items-center gap-1 bg-green-100 text-green-700 px-2 py-0.5 rounded-md">
-                        <CheckCircle2 className="w-3 h-3" /> Completado
+                        <CheckCircle2 className="w-3 h-3" /> {t('kanban.done')}
                       </span>
                       {endDate && (
                         <span className="flex items-center gap-1">
                           <Calendar className="w-3.5 h-3.5" />
-                          {format(new Date(endDate), "d 'de' MMMM, yyyy", { locale: es })}
+                          {format(new Date(endDate), "d 'de' MMMM, yyyy", { locale: dateLocale })}
                         </span>
                       )}
                     </div>
@@ -133,7 +140,7 @@ export default function SprintTimeline({ sprints, projectId, members }: SprintTi
                   <div className="flex items-center gap-3">
                     {index === 0 && !isExpanded && (
                       <span className="shrink-0 bg-brand/10 text-brand text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">
-                        Última entrega
+                        {t('kanban.lastDelivery')}
                       </span>
                     )}
                     <div className="p-1.5 bg-surface-secondary rounded-full text-text-muted">
@@ -149,13 +156,13 @@ export default function SprintTimeline({ sprints, projectId, members }: SprintTi
                       <div className="mb-4 p-3 bg-brand/5 border border-brand/10 rounded-lg">
                         <p className="flex items-start gap-2 text-sm text-brand-dark">
                           <Target className="w-4 h-4 mt-0.5 shrink-0" />
-                          <span><span className="font-semibold">Meta alcanzada:</span> {sprint.goal}</span>
+                          <span><span className="font-semibold">{t('kanban.goalReached')}</span> {sprint.goal}</span>
                         </p>
                       </div>
                     )}
 
                     <div className="mt-4 pt-4 border-t border-border-primary">
-                      <h4 className="text-xs font-bold text-text-muted uppercase tracking-widest mb-3">Trabajo realizado</h4>
+                      <h4 className="text-xs font-bold text-text-muted uppercase tracking-widest mb-3">{t('kanban.workDone')}</h4>
 
                       {isFetching ? (
                         <div className="flex items-center justify-center py-8">
@@ -173,7 +180,7 @@ export default function SprintTimeline({ sprints, projectId, members }: SprintTi
                                   <span className="text-sm font-semibold text-text-primary dark:text-gray-200 truncate">{task.title}</span>
                                   <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                                     <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${priorityStyles[task.priority] || priorityStyles.MEDIUM}`}>
-                                      {priorityLabels[task.priority] || 'Media'}
+                                      {priorityLabels[task.priority] || priorityLabels.MEDIUM}
                                     </span>
 
                                     <span className={`flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${statusLabels[task.status]?.color || 'bg-surface-secondary text-text-secondary'}`}>
@@ -184,7 +191,7 @@ export default function SprintTimeline({ sprints, projectId, members }: SprintTi
                                     {task.dueDate && (
                                       <span className="flex items-center gap-1 text-[10px] font-bold text-text-muted bg-surface-primary border border-border-primary px-1.5 py-0.5 rounded shadow-sm">
                                         <Calendar className="w-3 h-3 text-text-muted" />
-                                        {format(new Date(task.dueDate), "d MMM yyyy", { locale: es })}
+                                        {format(new Date(task.dueDate), "d MMM yyyy", { locale: dateLocale })}
                                       </span>
                                     )}
                                   </div>
@@ -202,7 +209,7 @@ export default function SprintTimeline({ sprints, projectId, members }: SprintTi
                                       )}
                                     </div>
                                   ) : (
-                                    <div className="w-7 h-7 rounded-full border border-dashed border-border-secondary dark:border-gray-500 flex items-center justify-center bg-surface-primary dark:bg-surface-primary" title="Sin asignar">
+                                    <div className="w-7 h-7 rounded-full border border-dashed border-border-secondary dark:border-gray-500 flex items-center justify-center bg-surface-primary dark:bg-surface-primary" title={t('kanban.unassigned')}>
                                       <UserIcon className="w-3.5 h-3.5 text-text-muted" />
                                     </div>
                                   )}
@@ -213,7 +220,7 @@ export default function SprintTimeline({ sprints, projectId, members }: SprintTi
                         </div>
                       ) : (
                         <div className="text-center py-6 text-sm text-text-muted border border-dashed border-border-primary rounded-lg">
-                          No se encontraron tareas registradas en este sprint.
+                          {t('kanban.noTasksInSprint')}
                         </div>
                       )}
                     </div>
