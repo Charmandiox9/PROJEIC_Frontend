@@ -9,6 +9,8 @@ import CreateProjectModal from '@/components/dashboard/CreateProjectModal';
 import { useAuth } from '@/context/AuthProvider';
 import { AVATAR_FALLBACK_URL } from '@/lib/constants';
 import { useT } from '@/hooks/useT';
+import { useLocale } from '@/hooks/useLocale';
+import { getLocalizedText } from '@/utils/i18n';
 
 interface Professor {
   id: string;
@@ -35,8 +37,8 @@ interface ProjectMember {
 
 interface Project {
   id: string;
-  name: string;
-  description: string | null;
+  name: { es: string; en?: string; pt?: string };
+  description: { es: string; en?: string; pt?: string } | null;
   color: string;
   status: string;
   methodology: string;
@@ -117,6 +119,7 @@ function SkeletonCard() {
 
 function ProjectCard({ project, currentUserId, tDynamic }: { project: Project; currentUserId?: string; tDynamic: (key: string) => string }) {
   const { t } = useT();
+  const { locale } = useLocale();
   const activeMembers = project.members?.filter(m => m.status === 'ACTIVE') || [];
   const myMembership = activeMembers.find(m => m.user.id === currentUserId);
   const role = project.myRole || myMembership?.role || 'STUDENT';
@@ -132,7 +135,7 @@ function ProjectCard({ project, currentUserId, tDynamic }: { project: Project; c
           <div className="flex flex-col sm:flex-row sm:justify-between items-start gap-3 w-full">
             <div className="flex flex-col gap-2 w-full">
               <h3 className="font-bold text-lg text-text-primary line-clamp-2 break-words leading-tight">
-                {project.name}
+                {getLocalizedText(project.name, locale as 'es' | 'en' | 'pt')}
               </h3>
 
               {project.isInstitutional && project.subject && (
@@ -169,7 +172,7 @@ function ProjectCard({ project, currentUserId, tDynamic }: { project: Project; c
         </div>
 
         <p className="text-xs text-text-muted line-clamp-2 flex-1 mb-4">
-          {project.description ?? t('misProyectos.noDescription')}
+          {getLocalizedText(project.description, locale as 'es' | 'en' | 'pt') || t('misProyectos.noDescription')}
         </p>
 
         <div className="mt-auto space-y-3 pt-4 border-t border-border-primary">
@@ -199,6 +202,7 @@ type ViewMode = 'grid' | 'list';
 export default function MisProyectosPage() {
   const { user } = useAuth();
   const { t, tDynamic } = useT();
+  const { locale } = useLocale();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -243,8 +247,8 @@ export default function MisProyectosPage() {
     if (!role) return false;
 
     const matchesSearch =
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (p.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
+      getLocalizedText(p.name, locale as 'es' | 'en' | 'pt').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      getLocalizedText(p.description, locale as 'es' | 'en' | 'pt').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (p.subject?.name.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
       (p.subject?.professors?.some(prof => prof.name.toLowerCase().includes(searchTerm.toLowerCase())) ?? false);
 

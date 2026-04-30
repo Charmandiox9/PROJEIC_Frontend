@@ -7,6 +7,7 @@ import MemberAvatar from '../../project-detail/MemberAvatar';
 import RoleBadge from '../../project-detail/RoleBadge';
 import { useT } from '@/hooks/useT';
 import { useLocale } from '@/hooks/useLocale';
+import { getLocalizedText } from '@/utils/i18n';
 
 interface TabResumenProps {
   project: Project;
@@ -31,7 +32,7 @@ export default function TabResumen({
 }: TabResumenProps) {
   const { t, tDynamic } = useT();
   const { locale } = useLocale();
-  const creationDate = new Date(project.createdAt).toLocaleDateString(locale === 'en' ? 'en-US' : 'es-ES', {
+  const creationDate = new Date(project.createdAt).toLocaleDateString(locale === 'en' ? 'en-US' : locale === 'pt' ? 'pt-BR' : 'es-ES', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -46,13 +47,13 @@ export default function TabResumen({
         <div className="p-6 flex flex-col md:flex-row md:items-start justify-between gap-4">
           <div className="space-y-1 min-w-0">
             <div className="flex flex-wrap items-center gap-3">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">{project.name}</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">{getLocalizedText(project.name, locale as 'es' | 'en' | 'pt')}</h2>
               <span className={`text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${STATUS_COLORS[project.status] ?? 'bg-gray-100 text-gray-600'}`}>
                 {tDynamic(`projectStatus.${project.status}`)}
               </span>
             </div>
             <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed max-w-2xl">
-              {project.description ?? t('projectDetail.noDescription')}
+              {getLocalizedText(project.description, locale as 'es' | 'en' | 'pt') || t('projectDetail.noDescription')}
             </p>
           </div>
           {isLeader && (

@@ -26,6 +26,8 @@ import {
 import { useAuth } from '@/context/AuthProvider';
 import { Project } from '@/types/project';
 import { useT } from '@/hooks/useT';
+import { useLocale } from '@/hooks/useLocale';
+import { getLocalizedText } from '@/utils/i18n';
 
 import UpdateProjectModal from '@/components/dashboard/UpdateProjectModal';
 import BoardRenderer from '@/components/dashboard/boards/BoardRenderer';
@@ -45,6 +47,7 @@ export default function ProjectDetailPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { t } = useT();
+  const { locale } = useLocale();
 
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -160,7 +163,7 @@ export default function ProjectDetailPage() {
           </Link>
           <span className="text-gray-300 text-lg/none shrink-0">|</span>
           <span className="text-text-primary font-medium truncate max-w-[140px] sm:max-w-[300px]">
-            {project.name}
+            {getLocalizedText(project.name, locale as 'es' | 'en' | 'pt')}
           </span>
           {/* Pequeña etiqueta visual del modo */}
           <span className="hidden sm:inline-flex px-2 py-0.5 ml-2 text-[10px] font-bold uppercase tracking-wider rounded-md bg-surface-secondary text-text-secondary">

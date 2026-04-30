@@ -5,6 +5,8 @@ import { fetchGraphQL } from '@/lib/graphQLClient';
 import { GET_PUBLIC_PROJECTS } from '@/graphql/misc/operations';
 import { AVATAR_FALLBACK_URL } from '@/lib/constants';
 import { useT } from '@/hooks/useT';
+import { useLocale } from '@/hooks/useLocale';
+import { getLocalizedText } from '@/utils/i18n';
 
 interface PublicUser {
   id: string;
@@ -21,9 +23,9 @@ interface ProjectMember {
 
 interface Project {
   id: string;
-  name: string;
+  name: { es: string; en?: string; pt?: string };
   status: string;
-  description: string | null;
+  description: { es: string; en?: string; pt?: string } | null;
   color: string;
   members: ProjectMember[];
 }
@@ -41,6 +43,7 @@ export default function RecentProjectsSection() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const { t, tDynamic } = useT();
+  const { locale } = useLocale();
 
   const headingRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -248,7 +251,7 @@ export default function RecentProjectsSection() {
                 <div className="p-5 flex flex-col flex-1">
                   <div className="flex justify-between items-start gap-2 mb-3 w-full">
                     <h3 className="font-bold text-base text-text-primary line-clamp-2 leading-tight flex-1">
-                      {project.name}
+                      {getLocalizedText(project.name, locale as 'es' | 'en' | 'pt')}
                     </h3>
                     <span
                       className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full whitespace-nowrap shrink-0 ${STATUS_BADGE[project.status] ?? STATUS_BADGE.STARTING}`}
@@ -258,7 +261,7 @@ export default function RecentProjectsSection() {
                   </div>
 
                   <p className="text-text-secondary text-xs sm:text-sm mb-6 line-clamp-3 flex-1">
-                    {project.description ?? t('recentProjects.noDescription')}
+                    {getLocalizedText(project.description, locale as 'es' | 'en' | 'pt') || t('recentProjects.noDescription')}
                   </p>
 
                   <div

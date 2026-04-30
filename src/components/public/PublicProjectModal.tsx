@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { GET_PROJECT_BY_ID } from '@/graphql/misc/operations';
 import { useT } from '@/hooks/useT';
+import { useLocale } from '@/hooks/useLocale';
+import { getLocalizedText } from '@/utils/i18n';
 import {
   Calendar,
   Layout,
@@ -31,6 +33,7 @@ interface PublicProjectModalProps {
 
 export default function PublicProjectModal({ isOpen, projectId, onClose }: PublicProjectModalProps) {
   const { t, tDynamic } = useT();
+  const { locale } = useLocale();
   const [project, setProject] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -93,13 +96,13 @@ export default function PublicProjectModal({ isOpen, projectId, onClose }: Publi
               <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-10">
                 <div>
                   <div className="flex items-center gap-3 mb-3">
-                    <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight break-words">{project.name}</h1>
+                    <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight break-words">{getLocalizedText(project.name, locale as 'es' | 'en' | 'pt')}</h1>
                     <span className="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-bold rounded-full uppercase tracking-wider shrink-0">
                       {project.status}
                     </span>
                   </div>
                   <p className="text-gray-600 dark:text-gray-400 text-lg leading-relaxed max-w-3xl whitespace-pre-wrap">
-                    {project.description || t('publicProjectModal.noDescription')}
+                    {getLocalizedText(project.description, locale as 'es' | 'en' | 'pt') || t('publicProjectModal.noDescription')}
                   </p>
                 </div>
               </div>

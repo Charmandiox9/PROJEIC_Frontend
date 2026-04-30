@@ -6,6 +6,8 @@ import { fetchGraphQL } from '@/lib/graphQLClient';
 import { GET_PUBLIC_PROJECTS } from '@/graphql/misc/operations';
 import { AVATAR_FALLBACK_URL } from '@/lib/constants';
 import { useT } from '@/hooks/useT';
+import { useLocale } from '@/hooks/useLocale';
+import { getLocalizedText } from '@/utils/i18n';
 import PublicProjectModal from '@/components/public/PublicProjectModal';
 
 interface Professor {
@@ -35,9 +37,9 @@ interface ProjectMember {
 
 interface Project {
   id: string;
-  name: string;
+  name: { es: string; en?: string; pt?: string };
   status: string;
-  description: string | null;
+  description: { es: string; en?: string; pt?: string } | null;
   color: string;
   methodology: string;
   isPublic: boolean;
@@ -50,6 +52,7 @@ const FILTER_OPTIONS = ['ALL', 'ACTIVE', 'STARTING', 'COMPLETED'];
 
 export default function ProyectosPage() {
   const { t, tDynamic } = useT();
+  const { locale } = useLocale();
   const getStatusLabel = (status: string) => tDynamic(`projectStatus.${status}`);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,9 +85,11 @@ export default function ProyectosPage() {
   }, []);
 
   const filteredProjects = projects.filter((project) => {
+    const projectName = getLocalizedText(project.name, locale as 'es' | 'en' | 'pt');
+    const projectDesc = getLocalizedText(project.description, locale as 'es' | 'en' | 'pt');
     const matchesSearch =
-      project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (project.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
+      projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      projectDesc.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (project.subject?.name.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
       (project.subject?.professors?.some(p => p.name.toLowerCase().includes(searchTerm.toLowerCase())) ?? false);
 
@@ -266,7 +271,7 @@ export default function ProyectosPage() {
                 >
                   <div className="flex flex-col sm:flex-row sm:justify-between items-start mb-4 gap-3 w-full">
                     <h3 className="font-bold text-lg text-text-primary line-clamp-2 decoration-brand group-hover:underline break-words w-full">
-                      {project.name}
+                      {getLocalizedText(project.name, locale as 'es' | 'en' | 'pt')}
                     </h3>
                     <span className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap shrink-0 ${project.status === 'ACTIVE' ? 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300' :
                       project.status === 'COMPLETED' ? 'bg-surface-secondary text-text-secondary' :
@@ -297,7 +302,7 @@ export default function ProyectosPage() {
                     </div>
                   )}
 
-                  <p className="text-text-secondary text-sm mb-6 line-clamp-3">{project.description || t('proyectosPage.noDescription')}</p>
+                  <p className="text-text-secondary text-sm mb-6 line-clamp-3">{getLocalizedText(project.description, locale as 'es' | 'en' | 'pt') || t('proyectosPage.noDescription')}</p>
 
                   <div className="flex items-center -space-x-2 relative z-0 mt-auto">
                     {activeMembers.slice(0, 4).map((member) => (

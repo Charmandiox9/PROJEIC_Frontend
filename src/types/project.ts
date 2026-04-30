@@ -26,10 +26,16 @@ export interface Repository {
   repoName: String;
 }
 
+export interface LocalizedString {
+  es: string;
+  en?: string;
+  pt?: string;
+}
+
 export interface Project {
   id: string;
-  name: string;
-  description: string | null;
+  name: LocalizedString;
+  description?: LocalizedString;
   color: string;
   status: string;
   methodology: string;

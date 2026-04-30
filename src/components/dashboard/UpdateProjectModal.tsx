@@ -8,6 +8,12 @@ import { GET_ALL_SUBJECTS } from '@/graphql/subjects/operations';
 import Input from '@/components/ui/Input';
 import { useT } from '@/hooks/useT';
 
+const LANG_TABS = [
+  { key: 'es' as const, flag: '🇪🇸', label: 'ES' },
+  { key: 'en' as const, flag: '🇺🇸', label: 'EN' },
+  { key: 'pt' as const, flag: '🇧🇷', label: 'PT' },
+];
+
 interface UpdateProjectModalProps {
   isOpen: boolean;
   project: any;
@@ -37,8 +43,8 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
   const [pendingRepositories, setPendingRepositories] = useState<PendingRepository[]>([]);
 
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
+    name: { es: '', en: '', pt: '' },
+    description: { es: '', en: '', pt: '' },
     color: '#2596BE',
     status: 'ACTIVE',
     methodology: 'KANBAN',
@@ -47,6 +53,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
     subjectId: '',
     mode: 'CLASSIC',
   });
+  const [activeLang, setActiveLang] = useState<'es' | 'en' | 'pt'>('es');
 
   useEffect(() => {
     if (isOpen) {
@@ -74,8 +81,16 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
 
       // 🔥 CORRECCIÓN: Uso estricto de Nullish Coalescing (??) para evitar inputs descontrolados
       setFormData({
-        name: project.name ?? '',
-        description: project.description ?? '',
+        name: {
+          es: project.name?.es ?? '',
+          en: project.name?.en ?? '',
+          pt: project.name?.pt ?? '',
+        },
+        description: {
+          es: project.description?.es ?? '',
+          en: project.description?.en ?? '',
+          pt: project.description?.pt ?? '',
+        },
         color: project.color ?? '#2596BE',
         status: project.status ?? 'ACTIVE',
         methodology: project.methodology === 'NONE' ? 'KANBAN' : (project.methodology ?? 'KANBAN'),
@@ -84,6 +99,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
         subjectId: project.subject?.id ?? project.subjectId ?? '',
         mode: project.mode ?? 'CLASSIC',
       });
+      setActiveLang('es');
 
       if (hasRepositories) {
         setPendingRepositories(
@@ -108,11 +124,16 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     const isCheckbox = type === 'checkbox';
-    
-    setFormData(prev => ({
-      ...prev,
-      [name]: isCheckbox ? (e.target as HTMLInputElement).checked : value
-    }));
+    const newValue = isCheckbox ? (e.target as HTMLInputElement).checked : value;
+
+    if (name === 'name' || name === 'description') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: { ...prev[name], [activeLang]: newValue },
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: newValue }));
+    }
   };
 
   const handleModeChange = (mode: 'CLASSIC' | 'HYBRID') => {
@@ -162,8 +183,16 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
         variables: {
           input: {
             id: project.id,
-            name: formData.name,
-            description: formData.description || undefined,
+            name: {
+              es: formData.name.es,
+              ...(formData.name.en ? { en: formData.name.en } : {}),
+              ...(formData.name.pt ? { pt: formData.name.pt } : {}),
+            },
+            description: (formData.description.es || formData.description.en || formData.description.pt) ? {
+              ...(formData.description.es ? { es: formData.description.es } : {}),
+              ...(formData.description.en ? { en: formData.description.en } : {}),
+              ...(formData.description.pt ? { pt: formData.description.pt } : {}),
+            } : undefined,
             color: formData.color,
             status: formData.status,
             methodology: formData.mode === 'HYBRID' ? 'NONE' : formData.methodology,
@@ -245,36 +274,82 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
 
           <div className="h-px w-full bg-border-primary"></div>
 
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-text-secondary mb-1">
-              {t('updateProject.projectName')} <span className="text-red-500">*</span>
-            </label>
+          {/* ── Nombre y Descripción con tabs de idioma ── */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="block text-sm font-semibold text-text-primary">
+                {t('updateProject.projectName')} <span className="text-red-500">*</span>
+              </label>
+              {/* Tabs de idioma */}
+              <div className="flex items-center gap-1 bg-surface-secondary border border-border-secondary rounded-lg p-0.5">
+                {LANG_TABS.map((lang) => {
+                  const hasValue = formData.name[lang.key].trim().length > 0;
+                  return (
+                    <button
+                      key={lang.key}
+                      type="button"
+                      onClick={() => setActiveLang(lang.key)}
+                      className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold transition-all duration-150 relative ${
+                        activeLang === lang.key
+                          ? 'bg-surface-primary shadow-sm text-brand border border-border-secondary'
+                          : 'text-text-muted hover:text-text-primary'
+                      }`}
+                    >
+                      <span>{lang.flag}</span>
+                      <span>{lang.label}</span>
+                      {hasValue && (
+                        <span className={`absolute -top-1 -right-1 w-2 h-2 rounded-full border border-surface-secondary ${
+                          lang.key === 'es' ? 'bg-brand' : 'bg-green-400'
+                        }`} />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <p className="text-[11px] text-text-muted">
+              {activeLang === 'es' && '🇪🇸 Escribiendo en español (requerido)'}
+              {activeLang === 'en' && '🇺🇸 Writing in English (optional)'}
+              {activeLang === 'pt' && '🇧🇷 Escrevendo em português (opcional)'}
+            </p>
+
             <input
               type="text"
-              id="name"
+              id={`name-${activeLang}`}
               name="name"
-              required
-              minLength={3}
+              required={activeLang === 'es'}
+              minLength={activeLang === 'es' ? 3 : 0}
               maxLength={100}
-              value={formData.name}
+              value={formData.name[activeLang]}
               onChange={handleChange}
+              placeholder={
+                activeLang === 'es' ? 'Ej: Plataforma de Trazabilidad UCN' :
+                activeLang === 'en' ? 'e.g. UCN Traceability Platform' :
+                'Ex: Plataforma de Rastreabilidade UCN'
+              }
               className="w-full px-4 py-2 border border-border-secondary rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none transition-shadow bg-surface-primary text-text-primary"
             />
-          </div>
 
-          <div>
-            <label htmlFor="description" className="block text-sm font-medium text-text-secondary mb-1">
-              {t('updateProject.description')}
-            </label>
-            <textarea
-              id="description"
-              name="description"
-              rows={3}
-              maxLength={500}
-              value={formData.description}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-border-secondary rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none transition-shadow resize-none bg-surface-primary text-text-primary"
-            />
+            <div>
+              <label htmlFor={`description-${activeLang}`} className="block text-sm font-medium text-text-secondary mb-1">
+                {t('updateProject.description')}
+              </label>
+              <textarea
+                id={`description-${activeLang}`}
+                name="description"
+                rows={3}
+                maxLength={500}
+                value={formData.description[activeLang]}
+                onChange={handleChange}
+                placeholder={
+                  activeLang === 'es' ? 'Un breve resumen de la meta del proyecto...' :
+                  activeLang === 'en' ? 'A brief summary of the project goal...' :
+                  'Um breve resumo do objetivo do projeto...'
+                }
+                className="w-full px-4 py-2 border border-border-secondary rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none transition-shadow resize-none bg-surface-primary text-text-primary"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">

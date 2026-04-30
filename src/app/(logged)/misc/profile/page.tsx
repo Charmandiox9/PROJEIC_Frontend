@@ -12,6 +12,7 @@ import { Plus, Briefcase, CheckSquare, Activity, Users, FolderKanban, Clock, Arr
 import CreateProjectModal from '@/components/dashboard/CreateProjectModal';
 import { useT } from '@/hooks/useT';
 import { useLocale } from '@/hooks/useLocale';
+import { getLocalizedText } from '@/utils/i18n';
 
 interface UserProfile {
   userId: string;
@@ -308,12 +309,12 @@ export default function ProfileDashboard() {
                             style={{ backgroundColor: proj.color ?? 'var(--color-brand)' }}
                           ></div>
                           <h3 className="font-semibold text-text-primary leading-tight group-hover:text-brand transition-colors line-clamp-1 text-sm">
-                            {proj.name}
+                            {getLocalizedText(proj.name, locale as 'es' | 'en' | 'pt')}
                           </h3>
                         </div>
                       </div>
                       <p className="text-xs text-text-muted line-clamp-2 mt-auto flex-1 mb-4">
-                        {proj.description || t('profile.noDescription')}
+                        {getLocalizedText(proj.description, locale as 'es' | 'en' | 'pt') || t('profile.noDescription')}
                       </p>
 
                       <div className="flex items-center justify-between pt-3 border-t border-border-primary mt-auto">
@@ -378,8 +379,8 @@ export default function ProfileDashboard() {
                           {formatDistanceToNow(new Date(log.createdAt), { addSuffix: true, locale: dateLocale })}
                         </span>
                         <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                        <span className="text-[11px] text-gray-400 truncate max-w-[120px]" title={log.project?.name}>
-                          {log.project?.name}
+                        <span className="text-[11px] text-gray-400 truncate max-w-[120px]" title={getLocalizedText(log.project?.name, locale as 'es' | 'en' | 'pt')}>
+                           {getLocalizedText(log.project?.name, locale as 'es' | 'en' | 'pt')}
                         </span>
                       </div>
                     </div>

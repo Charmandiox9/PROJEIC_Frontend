@@ -8,6 +8,8 @@ import { GET_PUBLIC_PROJECTS } from '@/graphql/misc/operations';
 import { AVATAR_FALLBACK_URL } from '@/lib/constants';
 import { useAuth } from '@/context/AuthProvider';
 import { useT } from '@/hooks/useT';
+import { useLocale } from '@/hooks/useLocale';
+import { getLocalizedText } from '@/utils/i18n';
 
 interface Professor {
   id: string;
@@ -36,9 +38,9 @@ interface ProjectMember {
 
 interface Project {
   id: string;
-  name: string;
+  name: { es: string; en?: string; pt?: string };
   status: string;
-  description: string | null;
+  description: { es: string; en?: string; pt?: string } | null;
   color: string;
   methodology: string;
   isPublic: boolean;
@@ -53,6 +55,7 @@ export default function ProyectosPublicosLogeadoPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { t, tDynamic } = useT();
+  const { locale } = useLocale();
   const getStatusLabel = (status: string) => tDynamic(`projectStatus.${status}`);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -80,9 +83,11 @@ export default function ProyectosPublicosLogeadoPage() {
   }, []);
 
   const filteredProjects = projects.filter((project) => {
+    const projectName = getLocalizedText(project.name, locale);
+    const projectDesc = getLocalizedText(project.description, locale);
     const matchesSearch =
-      project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (project.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
+      projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      projectDesc.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (project.subject?.name.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
       (project.subject?.professors?.some(p => p.name.toLowerCase().includes(searchTerm.toLowerCase())) ?? false);
 
@@ -163,7 +168,7 @@ export default function ProyectosPublicosLogeadoPage() {
                   <div className="flex flex-col mb-4 gap-3 pr-2">
                     <div className="flex flex-col sm:flex-row sm:justify-between items-start gap-3 w-full">
                       <div className="flex flex-col gap-2 w-full">
-                        <h3 className="font-bold text-lg text-text-primary line-clamp-2 break-words leading-tight">{project.name}</h3>
+                        <h3 className="font-bold text-lg text-text-primary line-clamp-2 break-words leading-tight">{getLocalizedText(project.name, locale)}</h3>
 
                         {project.isInstitutional && project.subject && (
                           <div className="flex flex-col gap-1.5 mt-1 bg-surface-secondary p-2.5 rounded-lg border border-border-secondary w-full min-w-0">
@@ -196,7 +201,7 @@ export default function ProyectosPublicosLogeadoPage() {
                     </div>
                   </div>
 
-                  <p className="text-text-muted text-sm mb-6 line-clamp-3 flex-1">{project.description || t('publicProjectsLogeado.noDescription')}</p>
+                  <p className="text-text-muted text-sm mb-6 line-clamp-3 flex-1">{getLocalizedText(project.description, locale) || t('publicProjectsLogeado.noDescription')}</p>
 
                   <div className="flex items-center justify-between pt-4 border-t border-border-primary mt-auto">
                     <div className="flex items-center -space-x-2 relative z-0">

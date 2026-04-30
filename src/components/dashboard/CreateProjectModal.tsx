@@ -96,6 +96,7 @@ export default function CreateProjectModal({
   >([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [isLoadingSubjects, setIsLoadingSubjects] = useState(false);
+  const [activeLang, setActiveLang] = useState<'es' | 'en' | 'pt'>('es');
 
   useEffect(() => {
     if (isOpen) {
@@ -212,8 +213,8 @@ export default function CreateProjectModal({
         query: CREATE_PROJECT,
         variables: {
           input: {
-            name: formData.name,
-            description: formData.description || undefined,
+            name: { es: formData.name },
+            description: formData.description ? { es: formData.description } : undefined,
             color: formData.color,
             status: formData.status,
             methodology: formData.methodology,

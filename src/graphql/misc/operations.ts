@@ -41,8 +41,16 @@ export const GET_PROJECT_BY_ID = `
   query FindOne($id: String!) {
     findOne(id: $id) {
       id
-      name
-      description
+      name {
+        es
+        en
+        pt
+      }
+      description {
+        es
+        en
+        pt
+      }
       color
       status
       methodology
@@ -89,8 +97,16 @@ export const GET_PUBLIC_PROJECTS = `
       total
       items {
         id
-        name
-        description
+        name {
+          es
+          en
+          pt
+        }
+        description {
+          es
+          en
+          pt
+        }
         color
         status
         methodology
@@ -125,8 +141,16 @@ export const UPDATE_PROJECT = `
   mutation UpdateProject($input: UpdateProjectInput!) {
     updateProject(input: $input) {
       id
-      name
-      description
+      name {
+        es
+        en
+        pt
+      }
+      description {
+        es
+        en
+        pt
+      }
       isInstitutional
       subjectId
       mode
@@ -138,8 +162,16 @@ export const CREATE_PROJECT = `
   mutation CreateProject($input: CreateProjectInput!) {
     createProject(input: $input) {
       id
-      name
-      description
+      name {
+        es
+        en
+        pt
+      }
+      description {
+        es
+        en
+        pt
+      }
       mode
     }
   }
@@ -161,8 +193,16 @@ export const GET_MY_PROJECTS = `
       total
       items {
         id
-        name
-        description
+        name {
+          es
+          en
+          pt
+        }
+        description {
+          es
+          en
+          pt
+        }
         color
         status
         methodology
@@ -314,7 +354,11 @@ export const GET_DASHBOARD_ACTIVITY = `
         avatarUrl
       }
       project {
-        name
+        name {
+          es
+          en
+          pt
+        }
       }
     }
   }
