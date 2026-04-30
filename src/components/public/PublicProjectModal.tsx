@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { GET_PROJECT_BY_ID } from '@/graphql/misc/operations';
+import { useT } from '@/hooks/useT';
 import {
   Calendar,
   Layout,
@@ -29,6 +30,7 @@ interface PublicProjectModalProps {
 }
 
 export default function PublicProjectModal({ isOpen, projectId, onClose }: PublicProjectModalProps) {
+  const { t, tDynamic } = useT();
   const [project, setProject] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,10 +48,10 @@ export default function PublicProjectModal({ isOpen, projectId, onClose }: Publi
           if (data?.findOne) {
             setProject(data.findOne);
           } else {
-            setError('Proyecto no encontrado.');
+            setError(t('publicProjectModal.notFound'));
           }
         } catch (err: any) {
-          setError('Error al cargar la información del proyecto.');
+          setError(t('publicProjectModal.errorLoad'));
         } finally {
           setIsLoading(false);
         }
@@ -80,7 +82,7 @@ export default function PublicProjectModal({ isOpen, projectId, onClose }: Publi
           </div>
         ) : error || !project ? (
           <div className="flex-1 min-h-[50vh] flex flex-col items-center justify-center space-y-4">
-            <p className="text-gray-500 font-medium">{error || 'Proyecto no disponible'}</p>
+            <p className="text-gray-500 font-medium">{error || t('publicProjectModal.notAvailable')}</p>
           </div>
         ) : (
           <div className="flex-1 overflow-y-auto w-full custom-scrollbar">
@@ -97,7 +99,7 @@ export default function PublicProjectModal({ isOpen, projectId, onClose }: Publi
                     </span>
                   </div>
                   <p className="text-gray-600 dark:text-gray-400 text-lg leading-relaxed max-w-3xl whitespace-pre-wrap">
-                    {project.description || 'Este proyecto no cuenta con una descripción pública detallada en este momento. Forma parte del ecosistema de desarrollo de PROJEIC.'}
+                    {project.description || t('publicProjectModal.noDescription')}
                   </p>
                 </div>
               </div>
@@ -106,14 +108,14 @@ export default function PublicProjectModal({ isOpen, projectId, onClose }: Publi
                 {/* Lado Izquierdo: Ficha Técnica */}
                 <div className="md:col-span-1 space-y-8">
                   <div>
-                    <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">Ficha Técnica</h2>
+                    <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">{t('publicProjectModal.fichaTecnica')}</h2>
                     <ul className="space-y-4">
                       <li className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-brand/10 flex items-center justify-center text-brand shrink-0">
                           <Calendar className="w-4 h-4" />
                         </div>
                         <div>
-                          <p className="text-xs text-gray-500">Iniciado el</p>
+                          <p className="text-xs text-gray-500">{t('publicProjectModal.startedOn')}</p>
                           <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                             {new Date(project.createdAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
                           </p>
@@ -124,8 +126,8 @@ export default function PublicProjectModal({ isOpen, projectId, onClose }: Publi
                           <Layout className="w-4 h-4" />
                         </div>
                         <div>
-                          <p className="text-xs text-gray-500">Metodología</p>
-                          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 capitalize">{project.mode === 'HYBRID' ? 'Projeic Native' : project.methodology.toLowerCase()}</p>
+                          <p className="text-xs text-gray-500">{t('publicProjectModal.methodology')}</p>
+                          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 capitalize">{project.mode === 'HYBRID' ? t('publicProjectModal.methodologyNative') : project.methodology.toLowerCase()}</p>
                         </div>
                       </li>
 
@@ -137,11 +139,11 @@ export default function PublicProjectModal({ isOpen, projectId, onClose }: Publi
                               <BookOpen className="w-4 h-4" />
                             </div>
                             <div className="min-w-0">
-                              <p className="text-xs text-gray-500">Asignatura</p>
+                              <p className="text-xs text-gray-500">{t('publicProjectModal.subject')}</p>
                               <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
                                 {project.subject.name}
                               </p>
-                              <p className="text-[10px] text-gray-400 font-medium uppercase tracking-tighter">Periodo: {project.subject.period}</p>
+                              <p className="text-[10px] text-gray-400 font-medium uppercase tracking-tighter">{t('publicProjectModal.period')} {project.subject.period}</p>
                             </div>
                           </li>
 
@@ -151,7 +153,7 @@ export default function PublicProjectModal({ isOpen, projectId, onClose }: Publi
                                 <GraduationCap className="w-4 h-4" />
                               </div>
                               <div>
-                                <p className="text-xs text-gray-500">Profesor guía</p>
+                                <p className="text-xs text-gray-500">{t('publicProjectModal.professorGuide')}</p>
                                 <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-1">
                                   {project.subject.professors.map((p: any) => p.name).join(', ')}
                                 </p>
@@ -166,9 +168,9 @@ export default function PublicProjectModal({ isOpen, projectId, onClose }: Publi
                           {project.isPublic ? <Globe className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
                         </div>
                         <div>
-                          <p className="text-xs text-gray-500">Acceso</p>
+                          <p className="text-xs text-gray-500">{t('publicProjectModal.access')}</p>
                           <p className={`text-sm font-semibold ${project.isPublic ? 'text-green-600' : 'text-gray-700'}`}>
-                            {project.isPublic ? 'Público Abierto' : 'Privado Restringido'}
+                            {project.isPublic ? t('publicProjectModal.publicOpen') : t('publicProjectModal.privateRestricted')}
                           </p>
                         </div>
                       </li>
@@ -178,7 +180,7 @@ export default function PublicProjectModal({ isOpen, projectId, onClose }: Publi
 
                 {/* Lado Derecho: Participantes */}
                 <div className="md:col-span-2 space-y-6">
-                  <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">Participantes del Proyecto</h2>
+                  <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">{t('publicProjectModal.participants')}</h2>
 
                   {project.members && project.members.filter((m: any) => m.status === 'ACTIVE').length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -195,7 +197,7 @@ export default function PublicProjectModal({ isOpen, projectId, onClose }: Publi
                             <div className="min-w-0 flex-1">
                               <p className="text-sm font-bold text-gray-900 dark:text-gray-100 truncate" title={member.user.name}>{member.user.name}</p>
                               <span className={`inline-block mt-0.5 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md ${ROLE_COLORS[member.role] || 'bg-gray-100 text-gray-600 dark:bg-gray-500/20 dark:text-gray-300'}`}>
-                                {member.role}
+                                {tDynamic(`projectRole.${member.role}`)}
                               </span>
                             </div>
                           </div>
@@ -205,7 +207,7 @@ export default function PublicProjectModal({ isOpen, projectId, onClose }: Publi
                   ) : (
                     <div className="text-center py-12 bg-gray-50 rounded-2xl border border-gray-100 border-dashed">
                       <User className="w-8 h-8 text-gray-300 mx-auto mb-3" />
-                      <p className="text-sm text-gray-500">Aún no hay participantes públicos registrados.</p>
+                      <p className="text-sm text-gray-500">{t('publicProjectModal.noParticipants')}</p>
                     </div>
                   )}
                 </div>

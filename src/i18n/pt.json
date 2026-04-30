@@ -759,5 +759,23 @@
   },
   "global": {
     "loginWithGoogle": "Entrar com o Google"
+  },
+  "publicProjectModal": {
+    "notFound": "Projeto não encontrado.",
+    "errorLoad": "Erro ao carregar as informações do projeto.",
+    "notAvailable": "Projeto não disponível",
+    "fichaTecnica": "Ficha Técnica",
+    "startedOn": "Iniciado em",
+    "methodology": "Metodologia",
+    "methodologyNative": "Projeic Native",
+    "subject": "Disciplina",
+    "period": "Período:",
+    "professorGuide": "Professor orientador",
+    "access": "Acesso",
+    "publicOpen": "Público Aberto",
+    "privateRestricted": "Privado Restrito",
+    "participants": "Participantes do Projeto",
+    "noParticipants": "Ainda não há participantes públicos registrados.",
+    "noDescription": "Este projeto não possui uma descrição pública detalhada no momento. Faz parte do ecossistema de desenvolvimento do PROJEIC."
   }
 }
