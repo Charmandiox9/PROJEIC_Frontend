@@ -14,22 +14,22 @@
     "html-to-image": "^1.11.13",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.577.0",
-    "next": "16.2.0",
+    "next": "15.3.1",
     "next-intl": "^4.11.0",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
     "recharts": "^3.8.1",
     "sonner": "^2.0.7"
-  },
-  "devDependencies": {
+},
+"devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/animejs": "^3.1.13",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.2.0",
+    "eslint-config-next": "15.3.1",
     "tailwindcss": "^4",
     "typescript": "^5"
-  }
+}
 }
