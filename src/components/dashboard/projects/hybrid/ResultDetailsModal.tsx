@@ -3,10 +3,12 @@
 import { useState } from 'react';
 import { X, Target, ListTodo, ShieldCheck, History, ExternalLink, Download, Plus, AlertCircle, Trash2, Loader2, Image as ImageIcon } from 'lucide-react';
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale/es';
+import { es, enUS, pt } from 'date-fns/locale';
 import { useAuth } from '@/context/AuthProvider';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { CREATE_TASK, UPDATE_TASK, REMOVE_TASK } from '@/graphql/tasks/operations';
+import { useT } from '@/hooks/useT';
+import { useLocale } from '@/hooks/useLocale';
 
 interface ResultDetailsModalProps {
   isOpen: boolean;
@@ -19,7 +21,11 @@ type TabType = 'tasks' | 'evidences' | 'history';
 
 export default function ResultDetailsModal({ isOpen, result, onClose, onRefresh }: ResultDetailsModalProps) {
   const { user } = useAuth();
+  const { t } = useT();
+  const { locale } = useLocale();
   const [activeTab, setActiveTab] = useState<TabType>('tasks');
+  
+  const dateLocale = locale === 'en' ? enUS : locale === 'pt' ? pt : es;
   
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [isAddingTask, setIsAddingTask] = useState(false);
@@ -77,7 +83,7 @@ export default function ResultDetailsModal({ isOpen, result, onClose, onRefresh 
   };
 
   const handleDeleteTask = async (taskId: string) => {
-    if (!confirm('¿Eliminar esta tarea definitivamente?')) return;
+    if (!confirm(t('resultDetails.confirmDelete'))) return;
     
     setLoadingTasks(prev => ({ ...prev, [taskId]: true }));
     try {
@@ -94,12 +100,12 @@ export default function ResultDetailsModal({ isOpen, result, onClose, onRefresh 
 
   const safeFormatDate = (dateSource: any, formatStr: string) => {
     try {
-      if (!dateSource) return 'Fecha no disponible';
+      if (!dateSource) return t('resultDetails.dateUnavailable');
       const date = new Date(dateSource);
-      if (isNaN(date.getTime())) return 'Fecha inválida';
-      return format(date, formatStr, { locale: es });
+      if (isNaN(date.getTime())) return t('resultDetails.dateInvalid');
+      return format(date, formatStr, { locale: dateLocale });
     } catch (error) {
-      return 'Error en fecha';
+      return t('resultDetails.dateError');
     }
   };
 
@@ -132,8 +138,8 @@ export default function ResultDetailsModal({ isOpen, result, onClose, onRefresh 
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Target className="w-5 h-5 text-brand" />
-                  <span className="text-xs font-bold uppercase tracking-wider text-brand bg-brand/10 px-2 py-0.5 rounded-md">
-                    Resultado Esperado
+                  <span className="text-xs font-bold uppercase tracking-wider bg-brand/10 px-2 py-0.5 rounded-md text-brand">
+                    {t('resultDetails.expectedResult')}
                   </span>
                   <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-gray-200 text-text-secondary">
                     {result.status}
@@ -151,13 +157,13 @@ export default function ResultDetailsModal({ isOpen, result, onClose, onRefresh 
           {/* TABS NAVEGACIÓN */}
           <div className="flex border-b border-border-primary px-6 shrink-0">
             <button onClick={() => setActiveTab('tasks')} className={`flex items-center gap-2 py-3 px-4 text-sm font-medium border-b-2 transition-colors ${activeTab === 'tasks' ? 'border-brand text-brand' : 'border-transparent text-text-muted hover:text-text-primary'}`}>
-              <ListTodo className="w-4 h-4" /> Tareas ({result.tasks?.length || 0})
+              <ListTodo className="w-4 h-4" /> {t('resultDetails.tabTasks')} ({result.tasks?.length || 0})
             </button>
             <button onClick={() => setActiveTab('evidences')} className={`flex items-center gap-2 py-3 px-4 text-sm font-medium border-b-2 transition-colors ${activeTab === 'evidences' ? 'border-brand text-brand' : 'border-transparent text-text-muted hover:text-text-primary'}`}>
-              <ShieldCheck className="w-4 h-4" /> Evidencias ({result.evidences?.length || 0})
+              <ShieldCheck className="w-4 h-4" /> {t('resultDetails.tabEvidences')} ({result.evidences?.length || 0})
             </button>
             <button onClick={() => setActiveTab('history')} className={`flex items-center gap-2 py-3 px-4 text-sm font-medium border-b-2 transition-colors ${activeTab === 'history' ? 'border-brand text-brand' : 'border-transparent text-text-muted hover:text-text-primary'}`}>
-              <History className="w-4 h-4" /> Historial de Cambios
+              <History className="w-4 h-4" /> {t('resultDetails.tabHistory')}
             </button>
           </div>
 
@@ -170,7 +176,7 @@ export default function ResultDetailsModal({ isOpen, result, onClose, onRefresh 
                 <form onSubmit={handleCreateTask} className="flex gap-2">
                   <input
                     type="text"
-                    placeholder="¿Qué tarea necesitas hacer para lograr este resultado?"
+                    placeholder={t('resultDetails.taskPlaceholder')}
                     value={newTaskTitle}
                     onChange={(e) => setNewTaskTitle(e.target.value)}
                     disabled={isAddingTask}
@@ -188,7 +194,7 @@ export default function ResultDetailsModal({ isOpen, result, onClose, onRefresh 
                 {!result.tasks || result.tasks.length === 0 ? (
                   <div className="text-center py-10 bg-surface-primary border border-dashed border-border-primary rounded-xl">
                     <ListTodo className="w-8 h-8 text-text-secondary mx-auto mb-2" />
-                    <p className="text-sm text-text-muted font-medium">Aún no hay subtareas.</p>
+                    <p className="text-sm text-text-muted font-medium">{t('resultDetails.noTasks')}</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -241,7 +247,7 @@ export default function ResultDetailsModal({ isOpen, result, onClose, onRefresh 
                 {!result.evidences || result.evidences.length === 0 ? (
                   <div className="text-center py-10 bg-surface-primary border border-dashed border-border-primary rounded-xl">
                     <ShieldCheck className="w-8 h-8 text-text-secondary mx-auto mb-2" />
-                    <p className="text-sm text-text-muted font-medium">Aún no se han subido evidencias.</p>
+                    <p className="text-sm text-text-muted font-medium">{t('resultDetails.noEvidences')}</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -249,7 +255,7 @@ export default function ResultDetailsModal({ isOpen, result, onClose, onRefresh 
                       <div key={ev.id} className="p-4 bg-surface-primary border border-border-primary rounded-xl flex flex-col gap-3 hover:shadow-md transition-shadow">
                         <div className="flex items-center justify-between">
                           <span className="text-[10px] font-bold uppercase tracking-wider bg-brand/10 text-brand px-2 py-1 rounded">
-                            {ev.type === 'URL' ? 'Enlace Web' : 'Archivo Adjunto'}
+                            {ev.type === 'URL' ? t('resultDetails.evidenceLink') : t('resultDetails.evidenceFile')}
                           </span>
                           <span className="text-xs text-text-muted">
                             {safeFormatDate(ev.createdAt, "d MMM yyyy")}
@@ -287,7 +293,7 @@ export default function ResultDetailsModal({ isOpen, result, onClose, onRefresh 
                             rel="noopener noreferrer"
                             className="flex items-center justify-center gap-2 text-sm font-medium text-text-secondary hover:text-brand bg-surface-secondary p-3 rounded-lg border border-border-primary hover:border-brand/30 transition-colors mt-2"
                           >
-                            <Download className="w-4 h-4 shrink-0" /> Ver / Descargar Archivo
+                            <Download className="w-4 h-4 shrink-0" /> {t('resultDetails.downloadFile')}
                           </a>
                         )}
                       </div>
@@ -303,7 +309,7 @@ export default function ResultDetailsModal({ isOpen, result, onClose, onRefresh 
                 {!result.history || result.history.length === 0 ? (
                   <div className="text-center py-10 bg-surface-primary border border-dashed border-border-primary rounded-xl">
                     <History className="w-8 h-8 text-text-secondary mx-auto mb-2" />
-                    <p className="text-sm text-text-muted font-medium">No hay registros de cambios aún.</p>
+                    <p className="text-sm text-text-muted font-medium">{t('resultDetails.noHistory')}</p>
                   </div>
                 ) : (
                   <div className="relative border-l-2 border-border-primary ml-3 space-y-6 pb-4 mt-2">
@@ -314,7 +320,7 @@ export default function ResultDetailsModal({ isOpen, result, onClose, onRefresh 
                         <div className="bg-surface-primary p-4 border border-border-primary rounded-xl shadow-sm hover:border-brand/30 transition-colors">
                           <div className="flex justify-between items-start mb-2">
                             <p className="text-sm text-text-primary font-medium">
-                              Cambió de <span className="font-bold text-text-muted">{log.previousStatus}</span> a <span className="font-bold text-brand">{log.newStatus}</span>
+                              {t('resultDetails.changedFrom')} <span className="font-bold text-text-muted">{log.previousStatus}</span> {t('resultDetails.changedTo')} <span className="font-bold text-brand">{log.newStatus}</span>
                             </p>
                             <span className="text-xs text-text-muted whitespace-nowrap ml-4">
                               {safeFormatDate(log.createdAt, "d MMM, HH:mm")}

@@ -5,6 +5,7 @@ import { Github, Info } from 'lucide-react';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { GET_GITHUB_DATA, DISPATCH_WORKFLOW } from '@/graphql/misc/operations';
 import Input from '@/components/ui/Input';
+import { useT } from '@/hooks/useT';
 
 import TeamRanking from '../../github/TeamRanking';
 import PullRequests from '../../github/PullRequests';
@@ -16,10 +17,9 @@ import CommitTimeline from '../../github/CommitTimeline';
 import AuthorModal from '../../github/AuthorModal';
 
 export default function GithubIntegration({ project }: { project: any }) {
-  // 🔥 NUEVO: Verificación de repositorios
+  const { t } = useT();
   const hasRepositories = project?.repositories && project.repositories.length > 0;
   
-  // 🔥 NUEVO: Estado para el repositorio activo (por defecto el primero)
   const [activeRepoId, setActiveRepoId] = useState<string>(
     hasRepositories ? project.repositories[0].id : ''
   );
@@ -62,7 +62,7 @@ export default function GithubIntegration({ project }: { project: any }) {
 
   const handleDispatch = async () => {
     if (!activeRepo) return;
-    if (!confirm(`¿Deseas disparar manualmente el flujo "${workflowFile}" en la rama "${branch}" de ${activeRepo.name}?`)) return;
+    if (!confirm(t('github.confirmDispatch').replace('{file}', workflowFile).replace('{branch}', branch).replace('{repo}', activeRepo.name))) return;
     setDispatching(true);
     try {
       const result = await fetchGraphQL({
@@ -76,10 +76,10 @@ export default function GithubIntegration({ project }: { project: any }) {
         }
       });
       if (result.dispatchWorkflow?.success) {
-        alert("¡Éxito! El workflow se ha solicitado.");
+        alert(t('github.dispatchSuccess'));
         setTimeout(syncData, 3000);
       }
-    } catch (err: any) { alert("Error: " + err.message); } 
+    } catch (err: any) { alert(t('github.dispatchError').replace('{msg}', err.message)); } 
     finally { setDispatching(false); }
   };
 
@@ -109,7 +109,7 @@ export default function GithubIntegration({ project }: { project: any }) {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
-      if (!res.ok) throw new Error('Falló la descarga');
+      if (!res.ok) throw new Error('download_failed');
 
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
@@ -121,8 +121,8 @@ export default function GithubIntegration({ project }: { project: any }) {
       a.click();
       window.URL.revokeObjectURL(url);
       a.remove();
-    } catch (err) { 
-      alert("Error al descargar el artefacto."); 
+    } catch (err) {
+      alert(t('github.downloadFailed'));
       console.error(err);
     } finally { 
       setDownloadingId(null); 
@@ -133,7 +133,7 @@ export default function GithubIntegration({ project }: { project: any }) {
     return (
       <div className="p-12 text-center border-2 border-dashed border-border-primary rounded-xl">
         <Github className="w-12 h-12 mx-auto mb-4 opacity-20" />
-        <p className="text-text-muted">Vincula uno o más repositorios en los ajustes del proyecto.</p>
+        <p className="text-text-muted">{t('github.noRepos')}</p>
       </div>
     );
   }
@@ -147,7 +147,7 @@ export default function GithubIntegration({ project }: { project: any }) {
         {/* 🔥 NUEVO: Selector de Repositorios Múltiples */}
         {project.repositories.length > 1 && (
           <div className="flex items-center gap-3 p-3 bg-surface-secondary border border-border-secondary rounded-lg mb-4">
-            <label className="text-sm font-medium text-text-secondary">Repositorio Activo:</label>
+            <label className="text-sm font-medium text-text-secondary">{t('github.activeRepo')}</label>
             <select
               value={activeRepoId}
               onChange={(e) => setActiveRepoId(e.target.value)}
@@ -176,7 +176,7 @@ export default function GithubIntegration({ project }: { project: any }) {
           </div>
           {data && (
             <span className="px-3 py-1 bg-green-500/10 text-green-500 text-[10px] font-bold rounded-full uppercase tracking-wider flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Sincronizado
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> {t('github.synced')}
             </span>
           )}
         </div>
@@ -185,8 +185,8 @@ export default function GithubIntegration({ project }: { project: any }) {
         <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg flex items-start gap-3">
           <Info className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
           <div className="text-sm text-text-primary">
-            <p className="font-bold mb-1 text-blue-600 dark:text-blue-400">Requisitos de Conexión</p>
-            <p className="text-text-muted text-xs mb-2">Para acceder a los datos privados y ejecutar despliegues, necesitas un <strong>Personal Access Token (Classic)</strong> de GitHub con los siguientes permisos (scopes) activados:</p>
+            <p className="font-bold mb-1 text-blue-600 dark:text-blue-400">{t('github.requirementsTitle')}</p>
+            <p className="text-text-muted text-xs mb-2">{t('github.requirementsDesc')}</p>
             <ul className="flex flex-wrap gap-2 text-[10px] font-mono">
               <li className="bg-surface-secondary border border-border-secondary px-2 py-1 rounded">
                 <span className="text-brand font-bold">repo</span> (Commits y Pull Requests)
@@ -203,13 +203,13 @@ export default function GithubIntegration({ project }: { project: any }) {
         
         <div className="flex flex-col md:flex-row gap-4 items-end pt-4 border-t border-border-primary">
           <div className="flex-[2]">
-            <Input label="GitHub Personal Access Token" type="password" placeholder="ghp_xxxxxxxxxxxx" value={token} onChange={(e) => setToken(e.target.value)} />
+                        <Input label={t('github.tokenLabel')} type="password" placeholder="ghp_xxxxxxxxxxxx" value={token} onChange={(e) => setToken(e.target.value)} />
           </div>
           <div className="flex-1">
-            <Input label="Rama (Branch)" type="text" placeholder="Ej: main, develop..." value={branch} onChange={(e) => setBranch(e.target.value)} />
+            <Input label={t('github.branch')} type="text" placeholder={t('github.branchPlaceholder')} value={branch} onChange={(e) => setBranch(e.target.value)} />
           </div>
           <button onClick={syncData} disabled={!token || !branch.trim() || loading} className="w-full md:w-auto px-6 py-[10px] bg-brand text-white rounded-lg font-bold hover:bg-brand-hover disabled:opacity-50 transition-colors shrink-0">
-            {loading ? 'Sincronizando...' : 'Actualizar Datos'}
+            {loading ? t('github.syncing') : t('github.syncBtn')}
           </button>
         </div>
       </div>

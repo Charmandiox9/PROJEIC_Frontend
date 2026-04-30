@@ -1,7 +1,9 @@
 import { useMemo } from 'react';
 import { Users } from 'lucide-react';
+import { useT } from '@/hooks/useT';
 
 export default function TeamRanking({ data, onSelectAuthor }: { data: any, onSelectAuthor: (author: any) => void }) {
+  const { t } = useT();
   const authorsStats = useMemo(() => {
     if (!data?.getGithubCommits?.commits) return [];
     const stats: Record<string, any> = {};
@@ -21,7 +23,7 @@ export default function TeamRanking({ data, onSelectAuthor }: { data: any, onSel
   return (
     <div className="bg-surface-primary border border-border-primary rounded-xl p-5 h-full">
       <h4 className="font-bold flex items-center gap-2 mb-4 text-lg">
-        <Users className="w-5 h-5 text-brand" /> Ranking del Equipo
+        <Users className="w-5 h-5 text-brand" /> {t('github.teamRanking')}
       </h4>
       <div className="grid gap-3">
         {authorsStats.map((author: any, index: number) => (
@@ -39,7 +41,7 @@ export default function TeamRanking({ data, onSelectAuthor }: { data: any, onSel
               </div>
               <div>
                 <p className="font-bold text-sm text-text-primary group-hover:text-brand transition-colors">{author.name}</p>
-                <p className="text-[10px] text-text-muted font-mono">{author.totalCommits} commits en la rama</p>
+                <p className="text-[10px] text-text-muted font-mono">{t('github.commitsInBranch').replace('{n}', author.totalCommits)}</p>
               </div>
             </div>
             <div className="flex flex-col items-end gap-1 text-[10px] font-mono">
@@ -50,7 +52,7 @@ export default function TeamRanking({ data, onSelectAuthor }: { data: any, onSel
         ))}
         {authorsStats.length === 0 && (
           <div className="p-4 text-center text-sm text-text-muted border border-dashed border-border-secondary rounded-lg">
-            No hay commits registrados.
+            {t('github.noCommits')}
           </div>
         )}
       </div>

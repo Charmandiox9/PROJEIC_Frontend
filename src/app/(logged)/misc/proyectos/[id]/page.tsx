@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthProvider';
 import { Project } from '@/types/project';
+import { useT } from '@/hooks/useT';
 
 import UpdateProjectModal from '@/components/dashboard/UpdateProjectModal';
 import BoardRenderer from '@/components/dashboard/boards/BoardRenderer';
@@ -43,6 +44,7 @@ export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { user } = useAuth();
+  const { t } = useT();
 
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -64,10 +66,10 @@ export default function ProjectDetailPage() {
       if (data?.findOne) {
         setProject(data.findOne as Project);
       } else {
-        setError('Proyecto no encontrado.');
+        setError(t('projectDetail.notFound'));
       }
     } catch {
-      setError('Error al cargar el proyecto.');
+      setError(t('projectDetail.loadError'));
     } finally {
       setIsLoading(false);
     }
@@ -78,13 +80,13 @@ export default function ProjectDetailPage() {
   }, [projectId, loadProject]);
 
   const handleDelete = async () => {
-    if (!confirm('¿Eliminar este proyecto permanentemente? Esta acción no se puede deshacer.')) return;
+    if (!confirm(t('projectDetail.confirmDelete'))) return;
     setIsDeleting(true);
     try {
       await fetchGraphQL({ query: DELETE_PROJECT, variables: { id: projectId } });
       router.push('/misc/proyectos');
     } catch {
-      alert('Error al eliminar el proyecto.');
+      alert(t('projectDetail.errorDelete'));
       setIsDeleting(false);
     }
   };
@@ -99,23 +101,23 @@ export default function ProjectDetailPage() {
       });
       loadProject();
     } catch {
-      alert('Error al actualizar el rol.');
+      alert(t('projectDetail.errorUpdateRole'));
     }
   };
 
   const handleRemoveMember = async (memberId: string) => {
-    if (!confirm('¿Expulsar a este integrante del equipo?')) return;
+    if (!confirm(t('projectDetail.confirmRemove'))) return;
     try {
       await fetchGraphQL({ query: REMOVE_PROJECT_MEMBER, variables: { memberId } });
       loadProject();
     } catch {
-      alert('Error al eliminar al integrante.');
+      alert(t('projectDetail.errorRemove'));
     }
   };
 
   if (isLoading && !project) return <div className="min-h-[60vh] flex items-center justify-center"><Loader2 className="w-8 h-8 text-brand animate-spin" /></div>;
   
-  if (error && !project) return <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-4"><p>{error}</p><Link href="/misc/proyectos">Volver</Link></div>;
+  if (error && !project) return <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-4"><p>{error}</p><Link href="/misc/proyectos">{t('projectDetail.back')}</Link></div>;
 
   if (!project) return null;
 
@@ -124,24 +126,24 @@ export default function ProjectDetailPage() {
   const isLeader = currentUserRole === 'LEADER';
 
   const currentTabs: { id: TabId; label: string; icon: React.ElementType }[] = [
-    { id: 'resumen', label: 'Resumen', icon: Layout },
+    { id: 'resumen', label: t('projectDetail.tabResumen'), icon: Layout },
     project.mode === 'HYBRID'
-      ? { id: 'resultados', label: 'Resultados', icon: Target }
-      : { id: 'tablero', label: 'Tablero', icon: Columns },
+      ? { id: 'resultados', label: t('projectDetail.tabResultados'), icon: Target }
+      : { id: 'tablero', label: t('projectDetail.tabTablero'), icon: Columns },
   ];
 
   if (project.mode === 'CLASSIC' && (project.methodology === 'SCRUM' || project.methodology === 'SCRUMBAN')) {
-    currentTabs.push({ id: 'cronograma', label: 'Cronograma', icon: CalendarIcon });
+    currentTabs.push({ id: 'cronograma', label: t('projectDetail.tabCronograma'), icon: CalendarIcon });
   }
 
   currentTabs.push(
-    { id: 'actividad', label: 'Actividad', icon: Activity },
-    { id: 'metricas', label: 'Métricas', icon: BarChart2 },
-    { id: 'miembros', label: 'Miembros', icon: Users },
+    { id: 'actividad', label: t('projectDetail.tabActividad'), icon: Activity },
+    { id: 'metricas', label: t('projectDetail.tabMetricas'), icon: BarChart2 },
+    { id: 'miembros', label: t('projectDetail.tabMiembros'), icon: Users },
   );
 
-  if(project.repositories && project.repositories.length > 0) {
-    currentTabs.push({ id: 'github', label: 'Integración de GitHub', icon: Code });
+  if (project.repositories && project.repositories.length > 0) {
+    currentTabs.push({ id: 'github', label: t('projectDetail.tabGithub'), icon: Code });
   }
 
   return (
@@ -153,8 +155,8 @@ export default function ProjectDetailPage() {
             className="flex items-center gap-1.5 hover:text-brand transition-colors font-medium shrink-0"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Mis proyectos</span>
-            <span className="sm:hidden">Volver</span>
+            <span className="hidden sm:inline">{t('projectDetail.backFull')}</span>
+            <span className="sm:hidden">{t('projectDetail.back')}</span>
           </Link>
           <span className="text-gray-300 text-lg/none shrink-0">|</span>
           <span className="text-text-primary font-medium truncate max-w-[140px] sm:max-w-[300px]">
@@ -162,23 +164,23 @@ export default function ProjectDetailPage() {
           </span>
           {/* Pequeña etiqueta visual del modo */}
           <span className="hidden sm:inline-flex px-2 py-0.5 ml-2 text-[10px] font-bold uppercase tracking-wider rounded-md bg-surface-secondary text-text-secondary">
-            {project.mode === 'HYBRID' ? 'Híbrido EIC' : 'Clásico'}
+            {project.mode === 'HYBRID' ? t('projectDetail.modeHybrid') : t('projectDetail.modeClassic')}
           </span>
         </nav>
         <div className="flex items-center gap-2 flex-wrap">
           <button
             disabled
-            title="Próximamente"
+            title={t('projectDetail.comingSoon')}
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-text-muted border border-border-primary rounded-lg cursor-not-allowed opacity-50"
           >
-            <FileDown className="w-3.5 h-3.5" /> Exportar PDF
+            <FileDown className="w-3.5 h-3.5" /> {t('projectDetail.exportPdf')}
           </button>
           <button
             disabled
-            title="Próximamente"
+            title={t('projectDetail.comingSoon')}
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-text-muted border border-border-primary rounded-lg cursor-not-allowed opacity-50"
           >
-            <FileDown className="w-3.5 h-3.5" /> Exportar CSV
+            <FileDown className="w-3.5 h-3.5" /> {t('projectDetail.exportCsv')}
           </button>
         </div>
       </div>
@@ -200,7 +202,6 @@ export default function ProjectDetailPage() {
         </div>
       </div>
 
-      {/* RENDERIZADO CONDICIONAL DE TABS DESACOPLADAS */}
       <div>
         {activeTab === 'resumen' && (
           <TabResumen

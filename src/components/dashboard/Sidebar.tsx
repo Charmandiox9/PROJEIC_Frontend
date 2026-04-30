@@ -8,6 +8,8 @@ import { LayoutDashboard, FolderKanban, Globe, Bell, Settings, ArrowLeft, LogOut
 import { useAuth } from '@/context/AuthProvider';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { useTheme } from '@/hooks/useTheme';
+import { useLocale } from '@/hooks/useLocale';
+import { useT } from '@/hooks/useT';
 import { GET_MY_NOTIFICATIONS } from '@/graphql/misc/operations';
 import logoTexto from '../../../public/Logo__Texto.png';
 import logoIcon from '../../../public/logo.png';
@@ -23,6 +25,8 @@ export default function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { isDark, toggle } = useTheme();
+  const { locale, toggle: toggleLocale } = useLocale();
+  const { t } = useT();
   
   const [mounted, setMounted] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
@@ -61,11 +65,11 @@ export default function Sidebar() {
   useEffect(() => setMounted(true), []);
 
   const navItems: NavItem[] = [
-    { name: 'Dashboard', href: '/misc/profile', icon: LayoutDashboard },
-    { name: 'Mis proyectos', href: '/misc/proyectos', icon: FolderKanban },
-    { name: 'Proyectos públicos', href: '/misc/proyectos-publicos', icon: Globe },
-    { name: 'Notificaciones', href: '/misc/notificaciones', icon: Bell, badge: unreadCount },
-    { name: 'Configuración', href: '/misc/configuracion', icon: Settings },
+    { name: t('sidebar.dashboard'), href: '/misc/profile', icon: LayoutDashboard },
+    { name: t('sidebar.myProjects'), href: '/misc/proyectos', icon: FolderKanban },
+    { name: t('sidebar.publicProjects'), href: '/misc/proyectos-publicos', icon: Globe },
+    { name: t('sidebar.notifications'), href: '/misc/notificaciones', icon: Bell, badge: unreadCount },
+    { name: t('sidebar.settings'), href: '/misc/configuracion', icon: Settings },
   ];
 
   const getInitials = (name?: string) => {
@@ -78,10 +82,10 @@ export default function Sidebar() {
   };
 
   const getUserRoleLabel = (email?: string) => {
-    if (!email) return 'Cargando...';
-    if (email.endsWith('@alumnos.ucn.cl')) return 'Estudiante';
-    if (email.endsWith('@ucn.cl') || email.endsWith('@ce.ucn.cl')) return 'Personal UCN';
-    return 'Externo';
+    if (!email) return t('sidebar.loading');
+    if (email.endsWith('@alumnos.ucn.cl')) return t('userRole.student');
+    if (email.endsWith('@ucn.cl') || email.endsWith('@ce.ucn.cl')) return t('userRole.ucnStaff');
+    return t('userRole.external');
   };
 
   useEffect(() => {
@@ -233,7 +237,7 @@ export default function Sidebar() {
 
             <Link href="/" className="flex items-center gap-2 w-fit px-6 mb-6 text-white/50 hover:text-white text-sm font-medium transition-colors">
               <ArrowLeft className="w-4 h-4 shrink-0" />
-              <span>Volver al inicio</span>
+              <span>{t('sidebar.backToHome')}</span>
             </Link>
 
             <nav className="flex-1 px-3 space-y-1">
@@ -271,7 +275,7 @@ export default function Sidebar() {
                 className="flex items-center gap-3 text-white/70 hover:text-white text-sm font-medium transition-colors"
               >
                 <LogOut className="w-5 h-5 shrink-0" />
-                <span>Cerrar sesión</span>
+                <span>{t('sidebar.logout')}</span>
               </button>
               <button
                 data-mobile-item
@@ -280,7 +284,19 @@ export default function Sidebar() {
                 className="flex items-center gap-3 text-white/70 hover:text-white text-sm font-medium transition-colors"
               >
                 {isDark ? <Sun className="w-5 h-5 shrink-0" /> : <Moon className="w-5 h-5 shrink-0" />}
-                <span>{isDark ? 'Modo claro' : 'Modo oscuro'}</span>
+                <span>{isDark ? t('sidebar.lightMode') : t('sidebar.darkMode')}</span>
+              </button>
+              <button
+                data-mobile-item
+                style={{ opacity: 0 }}
+                onClick={toggleLocale}
+                aria-label={locale === 'es' ? 'Switch to English' : locale === 'en' ? 'Mudar para português' : 'Cambiar a Español'}
+                className="flex items-center gap-3 text-white/70 hover:text-white text-sm font-medium transition-colors"
+              >
+                <span className="w-5 h-5 shrink-0 flex items-center justify-center text-xs font-bold">
+                  {locale === 'es' ? 'EN' : locale === 'en' ? 'PT' : 'ES'}
+                </span>
+                <span>{locale === 'es' ? 'English' : locale === 'en' ? 'Português' : 'Español'}</span>
               </button>
               <div data-mobile-item style={{ opacity: 0 }} className="flex items-center gap-3 pt-4 border-t border-white/10 mt-2">
                 <div className="w-9 h-9 rounded-full bg-surface-primary/20 flex items-center justify-center text-sm overflow-hidden shrink-0">
@@ -315,7 +331,7 @@ export default function Sidebar() {
             ref={collapseBtnRef}
             onClick={handleCollapseToggle}
             className="text-white/50 hover:text-white transition-colors shrink-0"
-            title={collapsed ? "Expandir" : "Colapsar"}
+            title={collapsed ? t('sidebar.expand') : t('sidebar.collapse')}
           >
             {collapsed ? <PanelLeftOpen className="w-5 h-5 ml-[-20px]" /> : <PanelLeftClose className="w-5 h-5" />}
           </button>
@@ -328,12 +344,12 @@ export default function Sidebar() {
           onMouseEnter={handleItemEnter}
           onMouseLeave={handleItemLeave}
           className={`flex items-center text-white/50 hover:text-white transition-colors text-sm font-medium ${collapsed ? 'justify-center mx-auto mb-6' : 'gap-2 w-fit px-6 mb-6'}`}
-          title={collapsed ? "Volver al inicio" : undefined}
+          title={collapsed ? t('sidebar.backToHome') : undefined}
         >
           <div className="nav-icon origin-center flex items-center justify-center">
             <ArrowLeft className="w-4 h-4 shrink-0" />
           </div>
-          {!collapsed && <span className="nav-text">Volver al inicio</span>}
+          {!collapsed && <span className="nav-text">{t('sidebar.backToHome')}</span>}
         </Link>
 
         <nav className="flex-1 px-3 space-y-1.5 overflow-y-auto nice-scrollbar">
@@ -382,13 +398,13 @@ export default function Sidebar() {
             onClick={logout}
             onMouseEnter={handleItemEnter}
             onMouseLeave={handleItemLeave}
-            title={collapsed ? "Cerrar sesión" : undefined}
+            title={collapsed ? t('sidebar.logout') : undefined}
             className={`flex items-center text-white/70 hover:text-white transition-colors text-sm font-medium w-full ${collapsed ? 'justify-center' : 'gap-3'}`}
           >
             <div className="nav-icon origin-center flex items-center justify-center">
               <LogOut className="w-5 h-5 shrink-0" />
             </div>
-            {!collapsed && <span className="nav-text">Cerrar sesión</span>}
+            {!collapsed && <span className="nav-text">{t('sidebar.logout')}</span>}
           </button>
 
           <button
@@ -397,14 +413,30 @@ export default function Sidebar() {
             onClick={handleThemeToggle}
             onMouseEnter={handleItemEnter}
             onMouseLeave={handleItemLeave}
-            aria-label={isDark ? 'Activar modo claro' : 'Activar modo oscuro'}
-            title={collapsed ? (isDark ? 'Modo claro' : 'Modo oscuro') : undefined}
+            aria-label={isDark ? t('sidebar.lightMode') : t('sidebar.darkMode')}
+            title={collapsed ? (isDark ? t('sidebar.lightMode') : t('sidebar.darkMode')) : undefined}
             className={`flex items-center text-white/70 hover:text-white transition-colors text-sm font-medium w-full ${collapsed ? 'justify-center' : 'gap-3'}`}
           >
             <div className="nav-icon origin-center flex items-center justify-center">
               {isDark ? <Sun className="w-5 h-5 shrink-0" /> : <Moon className="w-5 h-5 shrink-0" />}
             </div>
-            {!collapsed && <span className="nav-text">{isDark ? 'Modo claro' : 'Modo oscuro'}</span>}
+            {!collapsed && <span className="nav-text">{isDark ? t('sidebar.lightMode') : t('sidebar.darkMode')}</span>}
+          </button>
+
+          <button
+            data-sidebar-item
+            style={{ opacity: 0 }}
+            onClick={toggleLocale}
+            onMouseEnter={handleItemEnter}
+            onMouseLeave={handleItemLeave}
+            aria-label={locale === 'es' ? 'Switch to English' : locale === 'en' ? 'Mudar para português' : 'Cambiar a Español'}
+            title={collapsed ? (locale === 'es' ? 'English' : locale === 'en' ? 'Português' : 'Español') : undefined}
+            className={`flex items-center text-white/70 hover:text-white transition-colors text-sm font-medium w-full ${collapsed ? 'justify-center' : 'gap-3'}`}
+          >
+            <div className="nav-icon origin-center flex items-center justify-center text-xs font-bold w-5 h-5 shrink-0">
+              {locale === 'es' ? 'EN' : locale === 'en' ? 'PT' : 'ES'}
+            </div>
+            {!collapsed && <span className="nav-text">{locale === 'es' ? 'English' : locale === 'en' ? 'Português' : 'Español'}</span>}
           </button>
 
           <div data-sidebar-item style={{ opacity: 0 }} className={`flex items-center mt-2 ${collapsed ? 'justify-center' : 'gap-3'}`}>

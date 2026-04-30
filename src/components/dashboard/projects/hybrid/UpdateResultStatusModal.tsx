@@ -7,6 +7,7 @@ import { UPDATE_RESULT_STATUS } from '@/graphql/hybrid/operations';
 import { GET_UPLOAD_PRESIGNED_URL } from '@/graphql/hybrid/operations';
 import Select from '@/components/ui/Select';
 import Input from '@/components/ui/Input';
+import { useT } from '@/hooks/useT';
 
 interface UpdateResultStatusModalProps {
   isOpen: boolean;
@@ -15,25 +16,22 @@ interface UpdateResultStatusModalProps {
   onSuccess: () => void;
 }
 
-const STATUS_OPTIONS = [
-  { value: 'NOT_STARTED', label: 'Iniciado (Sin avance)' },
-  { value: 'STARTED', label: 'En Progreso (10%)' },
-  { value: 'IN_REVIEW', label: 'En Revisión (50%)' },
-  { value: 'VALIDATED', label: 'Testeado (80%)' },
-  { value: 'COMPLETED', label: 'Completado Real (100%)' },
-];
-
-const REQUIRES_EVIDENCE = ['IN_REVIEW', 'VALIDATED', 'COMPLETED'];
-
-const STATUS_WEIGHT: Record<string, number> = {
-  NOT_STARTED: 0,
-  STARTED: 1,
-  IN_REVIEW: 2,
-  VALIDATED: 3,
-  COMPLETED: 4,
-};
-
 export default function UpdateResultStatusModal({ isOpen, result, onClose, onSuccess }: UpdateResultStatusModalProps) {
+  const { t } = useT();
+
+  const STATUS_OPTIONS = [
+    { value: 'NOT_STARTED', label: t('updateResultStatus.statusNotStarted') },
+    { value: 'STARTED', label: t('updateResultStatus.statusStarted') },
+    { value: 'IN_REVIEW', label: t('updateResultStatus.statusInReview') },
+    { value: 'VALIDATED', label: t('updateResultStatus.statusValidated') },
+    { value: 'COMPLETED', label: t('updateResultStatus.statusCompleted') },
+  ];
+  const REQUIRES_EVIDENCE = ['IN_REVIEW', 'VALIDATED', 'COMPLETED'];
+
+  const STATUS_WEIGHT: Record<string, number> = {
+    NOT_STARTED: 0, STARTED: 1, IN_REVIEW: 2, VALIDATED: 3, COMPLETED: 4,
+  };
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -72,7 +70,7 @@ export default function UpdateResultStatusModal({ isOpen, result, onClose, onSuc
 
     if (presignRes.errors || !presignRes.getUploadPresignedUrl) {
       console.error(presignRes.errors);
-      throw new Error("Error al obtener credenciales de subida del servidor.");
+      throw new Error(t('updateResultStatus.errorUpload'));
     }
 
     const { uploadUrl, fileKey } = presignRes.getUploadPresignedUrl;
@@ -86,7 +84,7 @@ export default function UpdateResultStatusModal({ isOpen, result, onClose, onSuc
     });
 
     if (!uploadRes.ok) {
-      throw new Error('Error al enviar el archivo a la nube (R2/MinIO).');
+      throw new Error(t('updateResultStatus.errorUploadCloud'));
     }
 
     // PASO 3: Retornar la llave para guardarla en la BD de PROJEIC
@@ -99,25 +97,22 @@ export default function UpdateResultStatusModal({ isOpen, result, onClose, onSuc
     setError(null);
 
     if (isEvidenceRequired && evidenceType === 'NONE') {
-      setError('Debes adjuntar una nueva evidencia (Link o Archivo) para poder avanzar a este estado.');
+      setError(t('updateResultStatus.errorEvidenceRequired'));
       setIsSubmitting(false);
       return;
     }
-
     if (isRegressing && !reason.trim()) {
-      setError('Debes explicar el motivo por el cual retrocedes el estado.');
+      setError(t('updateResultStatus.errorJustificationRequired'));
       setIsSubmitting(false);
       return;
     }
-
     if (evidenceType === 'URL' && !evidenceUrl) {
-      setError('Debes ingresar una URL válida.');
+      setError(t('updateResultStatus.errorUrlRequired'));
       setIsSubmitting(false);
       return;
     }
-
     if (evidenceType === 'FILE' && !evidenceFile) {
-      setError('Debes seleccionar un archivo de tu computadora.');
+      setError(t('updateResultStatus.errorFileRequired'));
       setIsSubmitting(false);
       return;
     }
@@ -147,8 +142,8 @@ export default function UpdateResultStatusModal({ isOpen, result, onClose, onSuc
 
       onSuccess();
       onClose();
-    } catch (err: any) {
-      setError(err.message || 'Error al actualizar el estado.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : t('updateResultStatus.errorUpdate'));
     } finally {
       setIsSubmitting(false);
     }
@@ -160,7 +155,7 @@ export default function UpdateResultStatusModal({ isOpen, result, onClose, onSuc
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-primary dark:border-border-primary shrink-0">
           <div className="flex items-center gap-2">
             <FileCheck className="w-5 h-5 text-brand" />
-            <h2 className="text-xl font-bold text-text-primary dark:text-text-primary">Actualizar Progreso</h2>
+            <h2 className="text-xl font-bold text-text-primary dark:text-text-primary">{t('updateResultStatus.title')}</h2>
           </div>
           <button onClick={onClose} className="p-2 text-text-muted hover:text-text-secondary dark:hover:text-gray-200 hover:bg-surface-secondary dark:hover:bg-surface-secondary rounded-full transition-colors">
             <X className="w-5 h-5" />
@@ -169,7 +164,7 @@ export default function UpdateResultStatusModal({ isOpen, result, onClose, onSuc
 
         <form onSubmit={handleSubmit} className="p-6 space-y-5 overflow-y-auto custom-scrollbar">
           <div className="bg-surface-secondary dark:bg-surface-secondary p-3 rounded-lg border border-border-primary dark:border-border-secondary">
-            <p className="text-xs text-text-muted dark:text-text-muted uppercase font-bold tracking-wider mb-1">Resultado Seleccionado</p>
+            <p className="text-xs text-text-muted dark:text-text-muted uppercase font-bold tracking-wider mb-1">{t('updateResultStatus.selectedResult')}</p>
             <p className="font-medium text-text-primary dark:text-text-primary line-clamp-2">{result.title}</p>
           </div>
 
@@ -183,7 +178,7 @@ export default function UpdateResultStatusModal({ isOpen, result, onClose, onSuc
           <div>
             <Select
               id="status"
-              label="Nuevo Estado"
+              label={t('updateResultStatus.newStatus')}
               name="status"
               value={status}
               onChange={(e) => {
@@ -202,9 +197,9 @@ export default function UpdateResultStatusModal({ isOpen, result, onClose, onSuc
             <div className="p-4 bg-orange-50 border border-orange-200 rounded-xl space-y-3 animate-in slide-in-from-top-1">
               <div className="flex gap-2 text-orange-700">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                <p className="text-sm font-bold leading-snug">Se requiere justificación</p>
+                <p className="text-sm font-bold leading-snug">{t('updateResultStatus.justificationRequired')}</p>
               </div>
-              <p className="text-xs text-orange-600/80 mb-2">Por favor, explica por qué este resultado retrocede de estado.</p>
+              <p className="text-xs text-orange-600/80 mb-2">{t('updateResultStatus.justificationDesc')}</p>
               <textarea
                 required
                 placeholder="Ej: El profesor solicitó correcciones en la arquitectura o los tests fallaron..."
@@ -223,16 +218,16 @@ export default function UpdateResultStatusModal({ isOpen, result, onClose, onSuc
                 <>
                   <AlertCircle className="w-4 h-4 text-brand mt-0.5 shrink-0" />
                   <p className="text-sm text-brand-dark font-medium leading-snug">
-                    <strong className="uppercase text-[10px] tracking-wider bg-brand text-white px-1.5 py-0.5 rounded mr-1">Obligatorio</strong><br />
-                    Este avance es un hito clave. Debes respaldarlo adjuntando una evidencia.
+                    <strong className="uppercase text-[10px] tracking-wider bg-brand text-white px-1.5 py-0.5 rounded mr-1">{t('updateResultStatus.evidenceObligatory')}</strong><br />
+                    {t('updateResultStatus.evidenceRequired')}
                   </p>
                 </>
               ) : (
                 <>
                   <UploadCloud className="w-4 h-4 text-text-muted mt-0.5 shrink-0" />
                   <p className="text-sm text-text-secondary dark:text-text-secondary font-medium leading-snug">
-                    <strong className="uppercase text-[10px] tracking-wider bg-gray-200 text-text-secondary px-1.5 py-0.5 rounded mr-1">Opcional</strong><br />
-                    ¿Quieres adjuntar algún respaldo a tu estado actual?
+                    <strong className="uppercase text-[10px] tracking-wider bg-gray-200 text-text-secondary px-1.5 py-0.5 rounded mr-1">{t('updateResultStatus.evidenceOptionalLabel')}</strong><br />
+                    {t('updateResultStatus.evidenceOptional')}
                   </p>
                 </>
               )}
@@ -248,7 +243,7 @@ export default function UpdateResultStatusModal({ isOpen, result, onClose, onSuc
                 className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-colors ${evidenceType === 'NONE' ? 'border-brand bg-surface-primary dark:bg-surface-primary text-brand' : 'border-border-primary dark:border-border-secondary bg-surface-primary dark:bg-surface-secondary text-text-muted dark:text-text-muted hover:border-border-secondary'}`}
               >
                 <X className="w-5 h-5 mb-1" />
-                <span className="text-xs font-bold">Ninguna</span>
+                <span className="text-xs font-bold">{t('updateResultStatus.evidenceNone')}</span>
               </button>
               <button
                 type="button"
@@ -259,7 +254,7 @@ export default function UpdateResultStatusModal({ isOpen, result, onClose, onSuc
                 className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-colors ${evidenceType === 'URL' ? 'border-brand bg-surface-primary dark:bg-surface-primary text-brand' : 'border-border-primary dark:border-border-secondary bg-surface-primary dark:bg-surface-secondary text-text-muted dark:text-text-muted hover:border-border-secondary'}`}
               >
                 <LinkIcon className="w-5 h-5 mb-1" />
-                <span className="text-xs font-bold">Link (URL)</span>
+                <span className="text-xs font-bold">{t('updateResultStatus.evidenceLink')}</span>
               </button>
               <button
                 type="button"
@@ -270,7 +265,7 @@ export default function UpdateResultStatusModal({ isOpen, result, onClose, onSuc
                 className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-colors ${evidenceType === 'FILE' ? 'border-brand bg-surface-primary dark:bg-surface-primary text-brand' : 'border-border-primary dark:border-border-secondary bg-surface-primary dark:bg-surface-secondary text-text-muted dark:text-text-muted hover:border-border-secondary'}`}
               >
                 <UploadCloud className="w-5 h-5 mb-1" />
-                <span className="text-xs font-bold">Archivo</span>
+                <span className="text-xs font-bold">{t('updateResultStatus.evidenceFile')}</span>
               </button>
             </div>
 
@@ -297,14 +292,14 @@ export default function UpdateResultStatusModal({ isOpen, result, onClose, onSuc
                   className="block w-full text-sm text-text-muted dark:text-text-muted file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brand/10 file:text-brand hover:file:bg-brand/20 cursor-pointer border border-border-secondary dark:border-border-secondary rounded-lg p-2 bg-surface-primary dark:bg-surface-secondary transition-colors"
                   required
                 />
-                {evidenceFile && <p className="text-xs text-green-600 mt-2 font-medium">✓ Archivo listo: {evidenceFile.name}</p>}
+                {evidenceFile && <p className="text-xs text-green-600 mt-2 font-medium">{t('updateResultStatus.fileReady')} {evidenceFile.name}</p>}
               </div>
             )}
           </div>
 
           <div className="pt-4 border-t border-border-primary dark:border-border-primary flex justify-end gap-3 shrink-0">
             <button type="button" onClick={onClose} disabled={isSubmitting} className="px-4 py-2 text-sm font-medium text-text-secondary dark:text-text-secondary bg-surface-primary dark:bg-surface-secondary border border-border-secondary dark:border-border-secondary rounded-lg hover:bg-surface-secondary dark:hover:bg-gray-600 transition-colors">
-              Cancelar
+            {t('modal.cancel')}
             </button>
             <button
               type="submit"
@@ -312,11 +307,11 @@ export default function UpdateResultStatusModal({ isOpen, result, onClose, onSuc
               className="px-6 py-2 text-sm font-medium text-white bg-brand rounded-lg hover:bg-brand-hover flex items-center gap-2 transition-colors disabled:opacity-50"
             >
               {isSubmitting ? (
-                <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</>
+                <><Loader2 className="w-4 h-4 animate-spin" /> {t('modal.saving')}</>
               ) : isRegressing ? (
-                'Confirmar Retroceso'
+                t('updateResultStatus.confirmRegress')
               ) : (
-                'Confirmar Avance'
+                t('updateResultStatus.confirmAdvance')
               )}
             </button>
           </div>

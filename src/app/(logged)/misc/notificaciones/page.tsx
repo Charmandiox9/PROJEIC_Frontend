@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Bell, UserPlus, Check, X, Loader2 } from 'lucide-react';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { GET_MY_NOTIFICATIONS, MARK_ALL_READ, MARK_NOTIFICATION_READ, RESPOND_TO_INVITATION } from '@/graphql/misc/operations';
+import { useT } from '@/hooks/useT';
 
 interface NotificationItem {
   id: string;
@@ -15,19 +16,20 @@ interface NotificationItem {
   entityId?: string;
 }
 
-function formatTimeAgo(isoDate: string): string {
+function formatTimeAgo(isoDate: string, t: any): string {
   const diff = Date.now() - new Date(isoDate).getTime();
   const minutes = Math.max(0, Math.floor(diff / 60000));
-  if (minutes < 1) return 'hace un momento';
-  if (minutes < 60) return `hace ${minutes} min`;
+  if (minutes < 1) return t('notificationsPage.justNow');
+  if (minutes < 60) return t('notificationsPage.minutesAgo').replace('{m}', String(minutes));
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `hace ${hours} h`;
+  if (hours < 24) return t('notificationsPage.hoursAgo').replace('{h}', String(hours));
   const days = Math.floor(hours / 24);
-  return `hace ${days} d`;
+  return t('notificationsPage.daysAgo').replace('{d}', String(days));
 }
 
 export default function NotificacionesPage() {
   const router = useRouter();
+  const { t } = useT();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<'ALL' | 'UNREAD'>('ALL');
@@ -123,7 +125,7 @@ export default function NotificacionesPage() {
         <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
           <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
             <Bell className="w-6 h-6 text-brand" />
-            Notificaciones
+            {t('notificationsPage.heading')}
           </h1>
           <button
             onClick={handleMarkAllRead}
@@ -131,7 +133,7 @@ export default function NotificacionesPage() {
             className="text-sm font-medium text-brand hover:text-brand-dark transition-colors disabled:opacity-50 flex items-center gap-2"
           >
             {isMarkingAll ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-            Marcar todas como leídas
+            {t('notificationsPage.markAllRead')}
           </button>
         </div>
         <div className="flex items-center gap-4 mt-6">
@@ -140,14 +142,14 @@ export default function NotificacionesPage() {
             className={`text-sm font-medium pb-2 border-b-2 transition-colors ${filter === 'ALL' ? 'border-brand text-brand' : 'border-transparent text-text-muted hover:text-text-secondary'
               }`}
           >
-            Todas
+            {t('notificationsPage.filterAll')}
           </button>
           <button
             onClick={() => setFilter('UNREAD')}
             className={`text-sm font-medium pb-2 border-b-2 transition-colors ${filter === 'UNREAD' ? 'border-brand text-brand' : 'border-transparent text-text-muted hover:text-text-secondary'
               }`}
           >
-            No leídas
+            {t('notificationsPage.filterUnread')}
           </button>
         </div>
       </div>
@@ -170,7 +172,7 @@ export default function NotificacionesPage() {
             <div className="w-16 h-16 bg-surface-secondary rounded-full flex items-center justify-center mx-auto mb-4">
               <Bell className="w-8 h-8 text-text-secondary" />
             </div>
-            <p className="text-text-muted">No tienes notificaciones pendientes.</p>
+            <p className="text-text-muted">{t('notificationsPage.noNotifications')}</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -204,7 +206,7 @@ export default function NotificacionesPage() {
                       {notif.message}
                     </p>
                     <p className="text-xs text-text-muted mt-1">
-                      {formatTimeAgo(notif.createdAt)}
+                      {formatTimeAgo(notif.createdAt, t)}
                     </p>
 
                     {isInvitation && (
@@ -214,14 +216,14 @@ export default function NotificacionesPage() {
                           disabled={isProcessing}
                           className="px-4 py-1.5 text-xs font-bold text-white bg-brand hover:bg-brand-dark rounded-md transition-colors disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
                         >
-                          <Check className="w-3.5 h-3.5" /> Aceptar
+                          <Check className="w-3.5 h-3.5" /> {t('notificationsPage.accept')}
                         </button>
                         <button
                           onClick={(e) => handleRespondInvitation(notif, false, e)}
                           disabled={isProcessing}
                           className="px-4 py-1.5 text-xs font-bold text-text-secondary bg-gray-200 hover:bg-gray-300 rounded-md transition-colors disabled:opacity-50 flex items-center gap-1.5"
                         >
-                          <X className="w-3.5 h-3.5" /> Rechazar
+                          <X className="w-3.5 h-3.5" /> {t('notificationsPage.decline')}
                         </button>
                       </div>
                     )}

@@ -1,7 +1,9 @@
 import { ArrowUpDown, Edit2, Trash2, Calendar, User as UserIcon } from 'lucide-react';
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale/es';
+import { es, enUS, pt } from 'date-fns/locale';
 import { PriorityBadge } from './KanbanTaskCard';
+import { useT } from '@/hooks/useT';
+import { useLocale } from '@/hooks/useLocale';
 
 interface KanbanListViewProps {
   tasks: any[];
@@ -14,33 +16,36 @@ interface KanbanListViewProps {
 }
 
 export default function KanbanListView({ tasks, members, activeBoards, canManageTasks, onSort, onEdit, onDelete }: KanbanListViewProps) {
+  const { t } = useT();
+  const { locale } = useLocale();
+  const dateLocale = locale === 'en' ? enUS : locale === 'pt' ? pt : es;
   return (
     <div className="bg-surface-primary rounded-xl border border-border-primary overflow-x-auto shadow-sm">
       <table className="w-full text-left text-sm whitespace-nowrap">
         <thead className="bg-surface-secondary border-b border-border-primary text-text-secondary select-none">
           <tr>
             <th className="px-4 py-3 font-semibold cursor-pointer hover:bg-surface-tertiary transition-colors" onClick={() => onSort('title')}>
-              <div className="flex items-center gap-2">Título <ArrowUpDown className="w-3 h-3 text-text-muted" /></div>
+              <div className="flex items-center gap-2">{t('kanban.titleHeader')} <ArrowUpDown className="w-3 h-3 text-text-muted" /></div>
             </th>
             <th className="px-4 py-3 font-semibold cursor-pointer hover:bg-surface-tertiary transition-colors" onClick={() => onSort('status')}>
-              <div className="flex items-center gap-2">Columna / Estado <ArrowUpDown className="w-3 h-3 text-text-muted" /></div>
+              <div className="flex items-center gap-2">{t('kanban.columnStatus')} <ArrowUpDown className="w-3 h-3 text-text-muted" /></div>
             </th>
             <th className="px-4 py-3 font-semibold cursor-pointer hover:bg-surface-tertiary transition-colors" onClick={() => onSort('priority')}>
-              <div className="flex items-center gap-2">Prioridad <ArrowUpDown className="w-3 h-3 text-text-muted" /></div>
+              <div className="flex items-center gap-2">{t('kanban.priority')} <ArrowUpDown className="w-3 h-3 text-text-muted" /></div>
             </th>
             <th className="px-4 py-3 font-semibold cursor-pointer hover:bg-surface-tertiary transition-colors" onClick={() => onSort('assignee')}>
-              <div className="flex items-center gap-2">Asignado <ArrowUpDown className="w-3 h-3 text-text-muted" /></div>
+              <div className="flex items-center gap-2">{t('kanban.assignee')} <ArrowUpDown className="w-3 h-3 text-text-muted" /></div>
             </th>
             <th className="px-4 py-3 font-semibold cursor-pointer hover:bg-surface-tertiary transition-colors" onClick={() => onSort('dueDate')}>
-              <div className="flex items-center gap-2">Vencimiento <ArrowUpDown className="w-3 h-3 text-text-muted" /></div>
+              <div className="flex items-center gap-2">{t('kanban.dueDate')} <ArrowUpDown className="w-3 h-3 text-text-muted" /></div>
             </th>
-            <th className="px-4 py-3 font-semibold text-right">Acciones</th>
+            <th className="px-4 py-3 font-semibold text-right">{t('kanban.actions')}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border-secondary">
           {tasks.length === 0 ? (
             <tr>
-              <td colSpan={6} className="px-4 py-8 text-center text-text-muted">No se encontraron tareas.</td>
+              <td colSpan={6} className="px-4 py-8 text-center text-text-muted">{t('kanban.noTasksFound')}</td>
             </tr>
           ) : (
             tasks.map(task => {
@@ -68,7 +73,7 @@ export default function KanbanListView({ tasks, members, activeBoards, canManage
                   <td className="px-4 py-3"><PriorityBadge priority={task.priority} /></td>
                   <td className="px-4 py-3">
                     {assigneeMember ? (
-                      <div className="flex items-center gap-2" title={`Asignado a: ${assigneeMember.user.name}`}>
+                      <div className="flex items-center gap-2" title={`${t('kanban.assignedTo')} ${assigneeMember.user.name}`}>
                         {assigneeMember.user.avatarUrl ? (
                           <img src={assigneeMember.user.avatarUrl} alt="" className="w-6 h-6 rounded-full object-cover ring-2 ring-surface-primary shadow-sm shrink-0" />
                         ) : (
@@ -79,24 +84,24 @@ export default function KanbanListView({ tasks, members, activeBoards, canManage
                         <span className="text-text-secondary truncate max-w-[150px]">{assigneeMember.user.name}</span>
                       </div>
                     ) : (
-                      <span className="text-text-muted italic flex items-center gap-1.5"><UserIcon className="w-3.5 h-3.5" /> Sin asignar</span>
+                      <span className="text-text-muted italic flex items-center gap-1.5"><UserIcon className="w-3.5 h-3.5" /> {t('kanban.unassigned')}</span>
                     )}
                   </td>
                   <td className="px-4 py-3">
                     {task.dueDate ? (
                       <span className="text-text-secondary font-medium flex items-center gap-1.5">
                         <Calendar className="w-4 h-4 text-text-muted" />
-                        {format(new Date(task.dueDate), "d 'de' MMM, yyyy", { locale: es })}
+                        {format(new Date(task.dueDate), locale === 'en' ? "MMM d, yyyy" : "d 'de' MMM, yyyy", { locale: dateLocale })}
                       </span>
                     ) : <span className="text-text-muted">-</span>}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-1">
-                      <button onClick={() => onEdit(matchedBoard?.id, task)} className="p-1.5 text-text-muted hover:text-brand hover:bg-surface-tertiary rounded-md transition-colors" title="Editar">
+                      <button onClick={() => onEdit(matchedBoard?.id, task)} className="p-1.5 text-text-muted hover:text-brand hover:bg-surface-tertiary rounded-md transition-colors" title={t('kanban.edit')}>
                         <Edit2 className="w-4 h-4" />
                       </button>
                       {canManageTasks && (
-                        <button onClick={() => onDelete(task.id)} className="p-1.5 text-text-muted hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-md transition-colors" title="Eliminar">
+                        <button onClick={() => onDelete(task.id)} className="p-1.5 text-text-muted hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-md transition-colors" title={t('kanban.delete')}>
                           <Trash2 className="w-4 h-4" />
                         </button>
                       )}

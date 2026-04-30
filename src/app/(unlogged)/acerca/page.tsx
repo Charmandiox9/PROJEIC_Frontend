@@ -1,38 +1,11 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useRef } from 'react';
 import { Eye, History, Users, Github, Linkedin } from 'lucide-react';
 
-const PAGE_TEXTS = {
-  heroTitle: 'Acerca de PROJEIC',
-  heroSubtitle: 'Transparencia y trazabilidad para los proyectos académicos.',
-  aboutTitle: '¿Qué es PROJEIC?',
-  aboutDescription: 'PROJEIC es una plataforma de gestión de proyectos académicos desarrollada para la Escuela de Ingeniería Coquimbo de la Universidad Católica del Norte. Su objetivo principal es centralizar el seguimiento, proporcionar visibilidad pública y asegurar la trazabilidad completa del ciclo de vida de los proyectos estudiantiles, conectando a estudiantes, docentes supervisores y la comunidad universitaria en un solo entorno colaborativo.',
-  proposalTitle: 'Nuestra propuesta',
-  technologyTitle: 'Tecnología',
-  developersTitle: 'Desarrolladores'
-};
+import { useT } from '@/hooks/useT';
 
-const PROPOSALS = [
-  {
-    id: 1,
-    title: 'Transparencia',
-    description: 'Generación de un portafolio público o semipúblico donde la comunidad pueda visualizar las iniciativas creadas en la Escuela.',
-    icon: Eye,
-  },
-  {
-    id: 2,
-    title: 'Trazabilidad',
-    description: 'Historial completo de la actividad, tareas y decisiones tomadas durante el semestre por los miembros del proyecto.',
-    icon: History,
-  },
-  {
-    id: 3,
-    title: 'Colaboración',
-    description: 'Roles diferenciados y herramientas unificadas que permiten a equipos multidisciplinarios operar con mayor sinergia.',
-    icon: Users,
-  }
-];
+
 
 const TECHNOLOGIES = [
   { id: 1, name: 'Next.js', role: 'Frontend React Framework', url: 'https://nextjs.org/docs', iconUrl: 'https://cdn.simpleicons.org/nextdotjs/000000' },
@@ -44,33 +17,57 @@ const TECHNOLOGIES = [
   { id: 7, name: 'Nginx', role: 'Web Server / Reverse Proxy', url: 'https://nginx.org/en/docs/', iconUrl: 'https://cdn.simpleicons.org/nginx/009639' },
 ];
 
-const DEVELOPERS = [
-  {
-    id: 1,
-    name: 'Martín Castillo',
-    role: 'Estudiante de Ingeniería en Tecnologías de Información',
-    minor: 'Minor: Seguridad Digital y Ciberinteligencia',
-    minorUrl: 'https://drive.google.com/file/d/1KHAZv6aHp_feKtrPbhZXxPHSqn6xOuzL/view',
-    github: 'https://github.com/Marton1123',
-    linkedin: 'https://www.linkedin.com/in/martin-castillo-t'
-  },
-  {
-    id: 2,
-    name: 'Daniel Durán',
-    role: 'Estudiante de Ingeniería en Tecnologías de Información',
-    minor: 'Minor: Desarrollo y Arquitectura de Software',
-    minorUrl: 'https://drive.google.com/file/d/1vQu27z8fN4BSLSRP-6g9lumdkTk4bzx0/view',
-    github: 'https://github.com/Charmandiox9',
-    linkedin: 'https://www.linkedin.com/in/daniel-durí¡n-garcí­a/'
-  }
-];
+
 
 export default function AcercaPage() {
+  const { t } = useT();
   const heroRef = useRef<HTMLElement>(null);
   const aboutRef = useRef<HTMLElement>(null);
   const proposalsRef = useRef<HTMLElement>(null);
   const techRef = useRef<HTMLElement>(null);
   const devsRef = useRef<HTMLElement>(null);
+
+  const PROPOSALS = [
+    {
+      id: 1,
+      title: t('aboutPage.transparencyTitle'),
+      description: t('aboutPage.transparencyDesc'),
+      icon: Eye,
+    },
+    {
+      id: 2,
+      title: t('aboutPage.traceabilityTitle'),
+      description: t('aboutPage.traceabilityDesc'),
+      icon: History,
+    },
+    {
+      id: 3,
+      title: t('aboutPage.collaborationTitle'),
+      description: t('aboutPage.collaborationDesc'),
+      icon: Users,
+    }
+  ];
+
+  const DEVELOPERS = [
+    {
+      id: 1,
+      name: 'Martín Castillo',
+      role: t('aboutPage.roles.martin'),
+      minor: t('aboutPage.roles.martinMinor'),
+      minorUrl: 'https://drive.google.com/file/d/1KHAZv6aHp_feKtrPbhZXxPHSqn6xOuzL/view',
+      github: 'https://github.com/Marton1123',
+      linkedin: 'https://www.linkedin.com/in/martin-castillo-t'
+    },
+    {
+      id: 2,
+      name: 'Daniel Durán',
+      role: t('aboutPage.roles.daniel'),
+      minor: t('aboutPage.roles.danielMinor'),
+      minorUrl: 'https://drive.google.com/file/d/1vQu27z8fN4BSLSRP-6g9lumdkTk4bzx0/view',
+      github: 'https://github.com/Charmandiox9',
+      linkedin: 'https://www.linkedin.com/in/daniel-durí¡n-garcí­a/'
+    }
+  ];
 
   /* ── Animación Inicial (Hero) ── */
   useEffect(() => {
@@ -194,23 +191,23 @@ export default function AcercaPage() {
       
       <section ref={heroRef} className="bg-surface-primary dark:bg-brand-dark bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-light/30 via-transparent to-transparent text-ui-dark dark:text-text-primary py-16 px-6 border-b border-border-primary dark:border-border-primary">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 data-hero-item style={{ opacity: 0 }} className="text-3xl md:text-5xl font-bold mb-4">{PAGE_TEXTS.heroTitle}</h1>
-          <p data-hero-item style={{ opacity: 0 }} className="text-text-muted dark:text-text-muted text-lg md:text-xl font-medium">{PAGE_TEXTS.heroSubtitle}</p>
+          <h1 data-hero-item style={{ opacity: 0 }} className="text-3xl md:text-5xl font-bold mb-4">{t('aboutPage.heroTitle')}</h1>
+          <p data-hero-item style={{ opacity: 0 }} className="text-text-muted dark:text-text-muted text-lg md:text-xl font-medium">{t('aboutPage.heroSubtitle')}</p>
         </div>
       </section>
 
       <main className="flex-grow max-w-5xl mx-auto w-full px-6 py-16 space-y-20">
         
         <section ref={aboutRef} className="text-center max-w-3xl mx-auto">
-          <h2 data-about-item style={{ opacity: 0 }} className="text-2xl font-bold text-text-primary dark:text-text-primary mb-6">{PAGE_TEXTS.aboutTitle}</h2>
+          <h2 data-about-item style={{ opacity: 0 }} className="text-2xl font-bold text-text-primary dark:text-text-primary mb-6">{t('aboutPage.aboutTitle')}</h2>
           <p data-about-item style={{ opacity: 0 }} className="text-text-secondary dark:text-text-muted leading-relaxed text-lg">
-            {PAGE_TEXTS.aboutDescription}
+            {t('aboutPage.aboutDescription')}
           </p>
         </section>
 
         <section ref={proposalsRef}>
           <div className="text-center mb-10">
-            <h2 data-proposal-card style={{ opacity: 0 }} className="text-2xl font-bold text-text-primary dark:text-text-primary">{PAGE_TEXTS.proposalTitle}</h2>
+            <h2 data-proposal-card style={{ opacity: 0 }} className="text-2xl font-bold text-text-primary dark:text-text-primary">{t('aboutPage.proposalTitle')}</h2>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {PROPOSALS.map((item) => {
@@ -239,7 +236,7 @@ export default function AcercaPage() {
 
         <section ref={techRef} className="border-t border-border-primary dark:border-border-primary pt-20">
           <div className="text-center mb-10">
-            <h2 data-tech-card style={{ opacity: 0 }} className="text-2xl font-bold text-text-primary dark:text-text-primary">{PAGE_TEXTS.technologyTitle}</h2>
+            <h2 data-tech-card style={{ opacity: 0 }} className="text-2xl font-bold text-text-primary dark:text-text-primary">{t('aboutPage.technologyTitle')}</h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             {TECHNOLOGIES.map((tech) => (
@@ -264,7 +261,7 @@ export default function AcercaPage() {
 
         <section ref={devsRef} className="border-t border-border-primary dark:border-border-primary pt-20">
           <div className="text-center mb-10">
-            <h2 data-dev-card style={{ opacity: 0 }} className="text-2xl font-bold text-text-primary dark:text-text-primary">{PAGE_TEXTS.developersTitle}</h2>
+            <h2 data-dev-card style={{ opacity: 0 }} className="text-2xl font-bold text-text-primary dark:text-text-primary">{t('aboutPage.developersTitle')}</h2>
           </div>
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {DEVELOPERS.map((dev) => {

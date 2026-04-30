@@ -6,12 +6,16 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale/es';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { GET_PROJECT_METRICS } from '@/graphql/misc/operations';
+import { useT } from '@/hooks/useT';
+import { enUS } from 'date-fns/locale/en-US';
 
 interface TabMetricasProps {
   projectId: string;
 }
 
 export default function TabMetricas({ projectId }: TabMetricasProps) {
+  const { t, locale } = useT();
+  const dateLocale = locale === 'en' ? enUS : es;
   const [metrics, setMetrics] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -51,13 +55,13 @@ export default function TabMetricas({ projectId }: TabMetricasProps) {
   const hasOverdue = metrics.overdueTasksCount > 0;
   const healthColor = hasOverdue ? '#ef4444' : '#22c55e';
   const healthBgColor = hasOverdue ? 'bg-red-500' : 'bg-green-500';
-  const healthText = hasOverdue ? `${metrics.overdueTasksCount} tareas atrasadas` : 'Sin tareas vencidas';
+  const healthText = hasOverdue ? `${metrics.overdueTasksCount} ${metrics.overdueTasksCount === 1 ? t('tabMetricas.overdueTaskSingle') : t('tabMetricas.overdueTaskPlural')}` : t('tabMetricas.noOverdueTasks');
 
   const metricCards = [
-    { label: 'Tareas totales', value: metrics.totalTasks },
-    { label: 'Tareas vencidas', value: metrics.overdueTasksCount },
-    { label: 'En revisión', value: metrics.inReviewTasks },
-    { label: 'Actividad (7 días)', value: metrics.activityLast7Days },
+    { label: t('tabMetricas.totalTasks'), value: metrics.totalTasks },
+    { label: t('tabMetricas.overdueTasksLabel'), value: metrics.overdueTasksCount },
+    { label: t('tabMetricas.inReview'), value: metrics.inReviewTasks },
+    { label: t('tabMetricas.activity7Days'), value: metrics.activityLast7Days },
   ];
 
   return (
@@ -83,14 +87,14 @@ export default function TabMetricas({ projectId }: TabMetricasProps) {
           </div>
         </div>
         <div>
-          <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Salud del proyecto</p>
+          <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{t('tabMetricas.projectHealth')}</p>
           <div className="flex items-center gap-1.5 mt-1">
             <div className={`w-2 h-2 rounded-full ${healthBgColor} animate-pulse`} />
             <span className={`text-xs font-medium ${hasOverdue ? 'text-red-600' : 'text-gray-500'}`}>
               {healthText}
             </span>
           </div>
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{metrics.completedTasks} de {metrics.totalTasks} completadas</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{metrics.completedTasks} {t('tabMetricas.totalTasks').toLowerCase()} ({metrics.totalTasks})</p>
         </div>
       </div>
 
@@ -109,10 +113,10 @@ export default function TabMetricas({ projectId }: TabMetricasProps) {
 
         {/* AVANCE POR COLUMNA */}
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6 shadow-sm">
-          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-6">Distribución del tablero</h3>
+          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-6">{t('tabMetricas.boardDistribution')}</h3>
           {metrics.tasksByColumn.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-sm text-gray-400">No hay columnas configuradas.</p>
+              <p className="text-sm text-gray-400">{t('tabMetricas.noColumns')}</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -122,7 +126,7 @@ export default function TabMetricas({ projectId }: TabMetricasProps) {
                   <div key={col.boardId}>
                     <div className="flex justify-between text-xs mb-1">
                       <span className="font-medium text-gray-700 dark:text-gray-300">{col.name}</span>
-                      <span className="text-gray-500 dark:text-gray-400">{col.count} tareas ({percentage}%)</span>
+                      <span className="text-gray-500 dark:text-gray-400">{col.count} {t('tabMetricas.tasksCount')} ({percentage}%)</span>
                     </div>
                     <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2">
                       <div
@@ -140,7 +144,7 @@ export default function TabMetricas({ projectId }: TabMetricasProps) {
         {/* LISTA DE TAREAS VENCIDAS */}
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6 shadow-sm">
           <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-            Tareas vencidas {hasOverdue && <span className="bg-red-100 text-red-600 text-[10px] px-2 py-0.5 rounded-full">{metrics.overdueTasksList.length}</span>}
+            {t('tabMetricas.overdueList')} {hasOverdue && <span className="bg-red-100 text-red-600 text-[10px] px-2 py-0.5 rounded-full">{metrics.overdueTasksList.length}</span>}
           </h3>
 
           {metrics.overdueTasksList.length === 0 ? (
@@ -148,8 +152,8 @@ export default function TabMetricas({ projectId }: TabMetricasProps) {
               <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center mb-3">
                 <Calendar className="w-6 h-6 text-green-500" />
               </div>
-              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">¡Todo al día!</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">No hay tareas atrasadas en el proyecto.</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{t('tabMetricas.allClear')}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('tabMetricas.noOverdueDesc')}</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -159,7 +163,7 @@ export default function TabMetricas({ projectId }: TabMetricasProps) {
                     <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-1">{task.title}</p>
                     <div className="flex items-center gap-1.5 mt-1 text-xs text-red-600 font-medium">
                       <AlertCircle className="w-3.5 h-3.5" />
-                      Venció el {format(new Date(task.dueDate), "d MMM yyyy", { locale: es })}
+                      {t('tabMetricas.overdueSince')} {format(new Date(task.dueDate), "d MMM yyyy", { locale: dateLocale })}
                     </div>
                   </div>
                   <span className="text-[10px] font-bold uppercase tracking-wider bg-white dark:bg-gray-700 px-2 py-1 rounded text-gray-500 dark:text-gray-300 border border-gray-200 dark:border-gray-600">

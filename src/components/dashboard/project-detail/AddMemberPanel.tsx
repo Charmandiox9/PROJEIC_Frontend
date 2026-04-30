@@ -6,6 +6,7 @@ import Select from '@/components/ui/Select';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { ADD_PROJECT_MEMBER } from '@/graphql/misc/operations';
 import { Project, ROLE_OPTIONS, UCN_DOMAINS, isValidUcnEmail } from './types';
+import { useT } from '@/hooks/useT';
 
 interface AddMemberPanelProps {
   project: Project;
@@ -26,24 +27,25 @@ export default function AddMemberPanel({
   const [error, setError] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
+  const { t } = useT();
 
   const handleInvite = async () => {
     setError(null);
     setSuccess(null);
     const trimmed = email.trim().toLowerCase();
     if (!trimmed) {
-      setError('Ingresa un correo.');
+      setError(t('inviteMember.errorEmailEmpty'));
       return;
     }
 
     if (!isExternal && !isValidUcnEmail(trimmed)) {
-      setError(`El correo debe pertenecer a: ${UCN_DOMAINS.join(', ')}`);
+      setError(`${t('inviteMember.errorEmailDomain')} ${UCN_DOMAINS.join(', ')}`);
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(trimmed)) {
-      setError('Correo inválido.');
+      setError(t('inviteMember.errorEmailInvalid'));
       return;
     }
 
@@ -60,21 +62,28 @@ export default function AddMemberPanel({
         },
       });
       setEmail('');
-      setSuccess('Invitación enviada correctamente.');
+      setSuccess(t('inviteMember.inviteSuccess'));
       onRefresh();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error al enviar la invitación.');
+      setError(err instanceof Error ? err.message : t('inviteMember.errorSendInvite'));
     } finally {
       setIsSending(false);
     }
   };
 
   const ROLE_DESCRIPTIONS = [
-    { role: 'Líder', desc: 'Gestiona el proyecto, invita miembros y tiene control total.' },
-    { role: 'Supervisor', desc: 'Supervisa el avance del equipo.' },
-    { role: 'Estudiante', desc: 'Participa activamente en las tareas del proyecto.' },
-    { role: 'Externo', desc: 'Colaborador con acceso limitado.' },
+    { key: 'leader', desc: t('inviteMember.roleLeaderDesc') },
+    { key: 'supervisor', desc: t('inviteMember.roleSupervisorDesc') },
+    { key: 'student', desc: t('inviteMember.roleStudentDesc') },
+    { key: 'external', desc: t('inviteMember.roleExternalDesc') },
   ];
+
+  const roleNames: Record<string, string> = {
+    leader: t('projectRole.LEADER'),
+    supervisor: t('projectRole.SUPERVISOR'),
+    student: t('projectRole.STUDENT'),
+    external: t('projectRole.EXTERNAL'),
+  };
 
   const handleInviteAnother = () => {
     setSuccess(null);
@@ -87,7 +96,7 @@ export default function AddMemberPanel({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-surface-primary rounded-2xl shadow-xl w-full min-w-[320px] max-w-[400px] p-6 space-y-4 animate-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-bold text-text-primary">Agregar al equipo</h3>
+          <h3 className="text-base font-bold text-text-primary">{t('inviteMember.title')}</h3>
           <button
             onClick={onClose}
             className="p-1.5 text-text-muted hover:text-text-secondary rounded-full hover:bg-surface-secondary transition-colors"
@@ -104,9 +113,9 @@ export default function AddMemberPanel({
               </svg>
             </div>
             <div>
-              <h3 className="text-xl font-bold text-text-primary">¡Invitación enviada!</h3>
+              <h3 className="text-xl font-bold text-text-primary">{t('inviteMember.successTitle')}</h3>
               <p className="text-sm text-text-muted mt-2">
-                El usuario ha sido invitado al proyecto exitosamente.
+                {t('inviteMember.successMessage')}
               </p>
             </div>
             <div className="pt-4 flex justify-center gap-3">
@@ -115,14 +124,14 @@ export default function AddMemberPanel({
                 onClick={onClose}
                 className="px-4 py-2 text-sm font-medium text-text-secondary bg-surface-primary border border-border-secondary rounded-lg hover:bg-surface-secondary transition-colors"
               >
-                Cerrar ventana
+                {t('modal.close')}
               </button>
               <button
                 type="button"
                 onClick={handleInviteAnother}
                 className="px-4 py-2 text-sm font-medium text-white bg-brand rounded-lg hover:bg-brand-hover transition-colors shadow-sm"
               >
-                Invitar a otro
+                {t('inviteMember.inviteAnother')}
               </button>
             </div>
           </div>
@@ -135,7 +144,7 @@ export default function AddMemberPanel({
               onChange={(e) => { setIsExternal(e.target.checked); setError(null); }}
               className="w-3.5 h-3.5 text-brand border-border-secondary rounded focus:ring-brand"
             />
-            Colaborador externo
+            {t('inviteMember.externalCollaborator')}
           </label>
 
           <input
@@ -171,17 +180,17 @@ export default function AddMemberPanel({
             disabled={isSending}
             className="w-full py-2 text-sm font-medium text-white bg-brand rounded-lg hover:bg-brand-dark transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
           >
-            {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
-              {isSending ? 'Enviando...' : 'Enviar invitación'}
+              {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+                {isSending ? t('inviteMember.sending') : t('inviteMember.sendInvitation')}
             </button>
           </div>
         )}
 
         <div className="pt-4 border-t border-border-primary space-y-3 overflow-y-auto max-h-48 pr-2">
-          <h3 className="text-sm font-bold text-text-muted uppercase tracking-widest">Roles disponibles</h3>
+          <h3 className="text-sm font-bold text-text-muted uppercase tracking-widest">{t('inviteMember.availableRoles')}</h3>
           {ROLE_DESCRIPTIONS.map((r) => (
-            <div key={r.role}>
-              <p className="text-xs font-bold text-text-secondary">{r.role}</p>
+            <div key={r.key}>
+              <p className="text-xs font-bold text-text-secondary">{roleNames[r.key]}</p>
               <p className="text-xs text-text-muted leading-relaxed">{r.desc}</p>
             </div>
           ))}

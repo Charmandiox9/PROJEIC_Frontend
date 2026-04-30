@@ -8,8 +8,10 @@ import KanbanBoard from '../kanban/KanbanBoard';
 import SprintTimeline from './SprintTimeline';
 import BurndownChart from './BurndownChart';
 import { Loader2, Layout, History, LineChart } from 'lucide-react';
+import { useT } from '@/hooks/useT';
 
 export default function ScrumBoard({ projectId, members, userRole }: any) {
+  const { t } = useT();
   const [allSprints, setAllSprints] = useState<any[]>([]);
   const [activeSprint, setActiveSprint] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -41,7 +43,7 @@ export default function ScrumBoard({ projectId, members, userRole }: any) {
   useEffect(() => { loadSprints(); }, [projectId]);
 
   const handleCompleteSprint = async () => {
-    if (!confirm('¿Estás seguro de finalizar este Sprint?')) return;
+    if (!confirm(t('kanban.confirmFinishSprint'))) return;
     try {
       await fetchGraphQL({ query: COMPLETE_SPRINT, variables: { id: activeSprint.id } });
       loadSprints();
@@ -71,7 +73,7 @@ export default function ScrumBoard({ projectId, members, userRole }: any) {
             }`}
         >
           <Layout className="w-4 h-4 shrink-0" />
-          <span className="truncate">{activeSprint ? 'Sprint Activo' : 'Planificación'}</span>
+          <span className="truncate">{activeSprint ? t('kanban.activeSprint') : t('kanban.planning')}</span>
         </button>
         <button
           onClick={() => setCurrentView('timeline')}
@@ -81,7 +83,7 @@ export default function ScrumBoard({ projectId, members, userRole }: any) {
             }`}
         >
           <History className="w-4 h-4 shrink-0" />
-          <span className="truncate">Cronograma / Historial</span>
+          <span className="truncate">{t('kanban.timelineHistory')}</span>
         </button>
         <button
           onClick={() => setCurrentView('burndown')}
@@ -91,7 +93,7 @@ export default function ScrumBoard({ projectId, members, userRole }: any) {
             }`}
         >
           <LineChart className="w-4 h-4 shrink-0" />
-          <span className="truncate">Burndown</span>
+          <span className="truncate">{t('kanban.burndown')}</span>
         </button>
       </div>
 
@@ -109,7 +111,7 @@ export default function ScrumBoard({ projectId, members, userRole }: any) {
           </div>
         ) : (
           <div className="p-8 text-center text-gray-500">
-            No hay sprint activo para mostrar el burndown.
+            {t('kanban.noActiveSprint')}
           </div>
         )
       ) : activeSprint ? (
@@ -120,13 +122,13 @@ export default function ScrumBoard({ projectId, members, userRole }: any) {
                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                 {activeSprint.name}
               </h2>
-              <p className="text-xs text-gray-500 mt-0.5">{activeSprint.goal || 'Sin meta definida'}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{activeSprint.goal || t('kanban.noGoal')}</p>
             </div>
             <button
               onClick={handleCompleteSprint}
               className="text-xs font-bold text-red-600 bg-white dark:bg-gray-800 border border-red-200 dark:border-red-700 px-4 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950 hover:border-red-300 transition-all shadow-sm shrink-0 sm:w-auto w-full"
             >
-              Finalizar Sprint
+              {t('kanban.finishSprint')}
             </button>
           </div>
 

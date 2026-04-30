@@ -1,13 +1,15 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import StatsSection from './StatsSection';
 import { useAuth } from '@/context/AuthProvider';
+import { useT } from '@/hooks/useT';
 
 export default function HeroSection() {
   const { user } = useAuth();
+  const { t } = useT();
   const [mounted, setMounted] = useState(false);
   
   const badgeRef = useRef<HTMLDivElement>(null);
@@ -98,7 +100,7 @@ export default function HeroSection() {
           style={{ opacity: 0 }}
           className="inline-block px-4 py-1 mb-6 text-xs font-semibold tracking-wider text-ui-dark dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-full border border-gray-200 dark:border-gray-600 shadow-sm"
         >
-          Plataforma de proyectos para la EIC
+          {t('hero.badge')}
         </div>
 
         {/* Heading */}
@@ -107,7 +109,7 @@ export default function HeroSection() {
           style={{ opacity: 0 }}
           className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6 leading-tight text-text-primary"
         >
-          Gestión de proyectos académicos, <span className="text-brand">en un solo lugar</span>
+          {t('hero.heading')} <span className="text-brand">{t('hero.headingHighlight')}</span>
         </h1>
 
         {/* Subtitle */}
@@ -116,7 +118,7 @@ export default function HeroSection() {
           style={{ opacity: 0 }}
           className="text-sm sm:text-base md:text-lg text-text-muted mb-10 max-w-2xl mx-auto"
         >
-          PROJEIC centraliza el seguimiento, la trazabilidad y la visibilidad de los proyectos de la Escuela de Ingeniería Coquimbo.
+          {t('hero.subtitle')}
         </p>
 
         {/* CTAs */}
@@ -131,7 +133,7 @@ export default function HeroSection() {
             onMouseLeave={(e) => handlePrimaryHover(e, false)}
             className="w-full sm:w-auto px-8 py-3 text-sm font-semibold text-white bg-brand hover:bg-brand-hover border border-transparent rounded-lg shadow-sm transition-colors"
           >
-            {!mounted ? 'Comenzar ahora' : user ? 'Ir al panel' : 'Comenzar ahora'}
+            {!mounted ? t('hero.ctaPrimary') : user ? t('hero.ctaPrimaryDashboard') : t('hero.ctaPrimary')}
           </Link>
 
           <Link
@@ -140,7 +142,7 @@ export default function HeroSection() {
             onMouseLeave={(e) => handleSecondaryHover(e, false)}
             className="w-full sm:w-auto flex items-center justify-center px-8 py-3 text-sm font-semibold text-ui-dark dark:text-white bg-white dark:bg-white/10 border border-gray-300 dark:border-white/30 rounded-lg hover:bg-gray-50 dark:hover:bg-white/20 transition-colors shadow-sm"
           >
-            Ver proyectos públicos
+            {t('hero.ctaSecondary')}
             <ArrowRight className="w-4 h-4 ml-2" />
           </Link>
         </div>

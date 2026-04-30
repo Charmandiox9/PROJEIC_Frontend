@@ -1,7 +1,7 @@
 'use client';
 
 import { Project } from '@/types/project';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Loader2, Terminal } from 'lucide-react';
 import { format } from 'date-fns';
 import { fetchGraphQL } from '@/lib/graphQLClient';
@@ -134,6 +134,7 @@ const renderActionDetails = (action: string, entity: string, meta: any) => {
 export default function ActivityFeed({ project }: { project: Project }) {
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const loadLogs = async () => {
@@ -151,6 +152,12 @@ export default function ActivityFeed({ project }: { project: Project }) {
     };
     loadLogs();
   }, [project.id]);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
+  }, [logs]);
 
   if (loading) {
     return (
@@ -185,7 +192,7 @@ export default function ActivityFeed({ project }: { project: Project }) {
         </div>
 
         {/* CUERPO DEL LOG */}
-        <div className="p-3 sm:p-6 overflow-x-auto nice-scrollbar">
+        <div ref={containerRef} className="p-3 sm:p-6 overflow-y-auto overflow-x-auto nice-scrollbar max-h-[500px] flex flex-col">
           <ul className="flex flex-col gap-2 sm:gap-3 w-full">
             {logs.map((log) => {
               let parsedMeta = null;

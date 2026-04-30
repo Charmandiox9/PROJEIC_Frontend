@@ -9,7 +9,9 @@ import { useAuth } from '@/context/AuthProvider';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { CREATE_TASK, UPDATE_TASK, ADD_COMMENT_TO_TASK } from '@/graphql/tasks/operations';
 import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale/es';
+import { es, enUS, pt } from 'date-fns/locale';
+import { useLocale } from '@/hooks/useLocale';
+import { useT } from '@/hooks/useT';
 
 interface ProjectMember {
   id: string;
@@ -42,12 +44,7 @@ interface CreateTaskModalProps {
   userRole?: string | null;
 }
 
-const PRIORITIES = [
-  { value: 'LOW', label: 'Baja' },
-  { value: 'MEDIUM', label: 'Media' },
-  { value: 'HIGH', label: 'Alta' },
-  { value: 'URGENT', label: 'Urgente' },
-];
+const PRIORITY_VALUES = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'] as const;
 
 const getStatusFromBoardName = (boardName: string): string => {
   const name = boardName.toLowerCase();
@@ -63,6 +60,17 @@ export default function CreateTaskModal({
   isOpen, onClose, defaultBoardId, taskToEdit, members, boards, projectId, sprintId, userRole
 }: CreateTaskModalProps) {
   const { user } = useAuth();
+  const { locale } = useLocale();
+  const { t } = useT();
+
+  const dateLocale = locale === 'en' ? enUS : locale === 'pt' ? pt : es;
+
+  const PRIORITIES = [
+    { value: 'LOW', label: t('createTask.priorityLow') },
+    { value: 'MEDIUM', label: t('createTask.priorityMedium') },
+    { value: 'HIGH', label: t('createTask.priorityHigh') },
+    { value: 'URGENT', label: t('createTask.priorityUrgent') },
+  ];
   
   const isLeader = userRole === 'LEADER';
   const isSupervisor = userRole === 'SUPERVISOR';
@@ -76,7 +84,7 @@ export default function CreateTaskModal({
   
   const canChangeStatus = isLeader || isSupervisor || (!isEditing && isStudent) || (isStudent && isMyTask);
   
-  const canChangeAssignee = isLeader;
+  const canChangeAssignee = isLeader || (!isEditing && isStudent) || (isStudent && isMyTask);
 
   const isCompletelyReadOnly = !canEditDetails && !canChangeStatus;
 
@@ -197,9 +205,8 @@ export default function CreateTaskModal({
         }
       }
       onClose();
-    } catch (err: any) {
-      console.error("Error guardando tarea:", err);
-      setError(err.message || 'Ocurrió un error guardando la tarea.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : t('createTask.errorSaving'));
     } finally {
       setIsSubmitting(false);
     }
@@ -239,7 +246,7 @@ export default function CreateTaskModal({
     setFormData(prev => ({ ...prev, tags: prev.tags?.filter(t => t !== tagToRemove) }));
   };
 
-  const modalTitle = isCompletelyReadOnly ? 'Detalles de la tarea' : (isEditing ? 'Editar tarea' : 'Nueva tarea');
+  const modalTitle = isCompletelyReadOnly ? t('createTask.titleReadOnly') : (isEditing ? t('createTask.titleEdit') : t('createTask.titleNew'));
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
@@ -256,35 +263,35 @@ export default function CreateTaskModal({
         <form onSubmit={isCompletelyReadOnly ? (e) => e.preventDefault() : handleSubmit} className="p-6 space-y-4">
           {error && <div className="p-3 text-sm text-red-600 bg-red-50 border rounded-lg">{error}</div>}
 
-          <Input id="task-title" label="Título *" name="title" required value={formData.title} onChange={handleChange} disabled={!canEditDetails} />
-          <Textarea id="task-description" label="Descripción" name="description" rows={3} value={formData.description} onChange={handleChange} disabled={!canEditDetails} />
+          <Input id="task-title" label={t('createTask.fieldTitle')} name="title" required value={formData.title} onChange={handleChange} disabled={!canEditDetails} />
+          <Textarea id="task-description" label={t('createTask.fieldDescription')} name="description" rows={3} value={formData.description} onChange={handleChange} disabled={!canEditDetails} />
 
           <div className="grid grid-cols-2 gap-4">
-            <Select id="task-board" label="Columna *" name="boardId" value={formData.boardId} onChange={handleChange} disabled={!canChangeStatus} required>
-              <option value="" disabled>Selecciona una columna</option>
+            <Select id="task-board" label={t('createTask.fieldColumn')} name="boardId" value={formData.boardId} onChange={handleChange} disabled={!canChangeStatus} required>
+              <option value="" disabled>{t('createTask.selectColumn')}</option>
               {boards.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
             </Select>
-            <Select id="task-priority" label="Prioridad *" name="priority" value={formData.priority} onChange={handleChange} disabled={!canEditDetails} required>
+            <Select id="task-priority" label={t('createTask.fieldPriority')} name="priority" value={formData.priority} onChange={handleChange} disabled={!canEditDetails} required>
               {PRIORITIES.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
             </Select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <Select id="task-assigned" label="Asignado a" name="assigneeId" value={formData.assigneeId} onChange={handleChange} disabled={!canChangeAssignee}>
-              <option value="">Sin asignar</option>
-              {members.filter(m => m.status === 'ACTIVE').map((m) => (
+            <Select id="task-assigned" label={t('createTask.fieldAssignee')} name="assigneeId" value={formData.assigneeId} onChange={handleChange} disabled={!canChangeAssignee}>
+              <option value="">{t('createTask.noAssignee')}</option>
+              {members.map((m) => (
                 <option key={m.id} value={m.user.id}>{m.user.name}</option>
               ))}
             </Select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <Input id="task-start-date" label="Fecha de Inicio" name="startDate" type="date" value={formData.startDate} onChange={handleChange} disabled={!canEditDetails} max={formData.dueDate || undefined} />
-            <Input id="task-due-date" label="Fecha de Término" name="dueDate" type="date" value={formData.dueDate} onChange={handleChange} disabled={!canEditDetails} min={formData.startDate || undefined} />
+            <Input id="task-start-date" label={t('createTask.fieldStartDate')} name="startDate" type="date" value={formData.startDate} onChange={handleChange} disabled={!canEditDetails} max={formData.dueDate || undefined} />
+            <Input id="task-due-date" label={t('createTask.fieldDueDate')} name="dueDate" type="date" value={formData.dueDate} onChange={handleChange} disabled={!canEditDetails} min={formData.startDate || undefined} />
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-semibold text-text-secondary">Etiquetas</label>
+            <label className="block text-sm font-semibold text-text-secondary">{t('createTask.fieldTags')}</label>
             <div className={`flex flex-wrap gap-2 p-2 border border-border-secondary rounded-lg min-h-[42px] bg-surface-primary ${!canEditDetails ? 'opacity-70 bg-surface-secondary/30' : 'focus-within:ring-2 focus-within:ring-brand'}`}>
               {formData.tags?.map(tag => (
                 <span key={tag} className="flex items-center gap-1 px-2 py-1 bg-brand/10 text-brand text-xs font-bold rounded-md">
@@ -308,10 +315,10 @@ export default function CreateTaskModal({
 
           {isEditing && (
             <div className="pt-6 mt-4 border-t border-border-secondary">
-              <h3 className="text-sm font-bold text-text-primary mb-4">Comentarios</h3>
+              <h3 className="text-sm font-bold text-text-primary mb-4">{t('createTask.comments')}</h3>
               <div className="space-y-4 mb-4 max-h-[250px] overflow-y-auto custom-scrollbar pr-2">
                 {localComments.length === 0 ? (
-                  <p className="text-xs text-text-muted italic text-center py-4">No hay comentarios aún.</p>
+                  <p className="text-xs text-text-muted italic text-center py-4">{t('createTask.noComments')}</p>
                 ) : (
                   localComments.map((comment: any) => (
                     <div key={comment.id} className="flex gap-3 bg-surface-secondary/30 p-3 rounded-lg border border-border-secondary/50">
@@ -324,7 +331,7 @@ export default function CreateTaskModal({
                         <div className="flex items-baseline justify-between gap-2 mb-1">
                           <span className="text-sm font-bold text-text-primary truncate">{comment.author.name}</span>
                           <span className="text-[10px] text-text-muted shrink-0">
-                            {comment.createdAt ? formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true, locale: es }) : ''}
+                            {comment.createdAt ? formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true, locale: dateLocale }) : ''}
                           </span>
                         </div>
                         <p className="text-sm text-text-secondary whitespace-pre-wrap break-words">{comment.content}</p>
@@ -360,13 +367,13 @@ export default function CreateTaskModal({
           <div className="pt-4 border-t border-border-primary flex justify-end gap-3">
             {isCompletelyReadOnly ? (
               <button type="button" onClick={onClose} className="px-6 py-2 text-sm font-medium text-white bg-brand rounded-lg hover:bg-brand-dark">
-                Cerrar
+                {t('modal.close')}
               </button>
             ) : (
               <>
-                <button type="button" onClick={onClose} disabled={isSubmitting} className="px-4 py-2 text-sm font-medium text-text-primary border border-border-secondary rounded-lg hover:bg-surface-tertiary bg-surface-primary">Cancelar</button>
+                <button type="button" onClick={onClose} disabled={isSubmitting} className="px-4 py-2 text-sm font-medium text-text-primary border border-border-secondary rounded-lg hover:bg-surface-tertiary bg-surface-primary">{t('modal.cancel')}</button>
                 <button type="submit" disabled={isSubmitting} className="px-6 py-2 text-sm font-medium text-white bg-brand rounded-lg hover:bg-brand-dark flex items-center gap-2">
-                  {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</> : isEditing ? 'Guardar cambios' : 'Crear tarea'}
+                  {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" /> {t('modal.saving')}</> : isEditing ? t('createTask.saveChanges') : t('createTask.createTask')}
                 </button>
               </>
             )}

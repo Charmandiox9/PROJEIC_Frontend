@@ -1,13 +1,15 @@
 'use client';
 
 import { Project } from './types';
+import { useT } from '@/hooks/useT';
 
 export default function TabMetricas({ project }: { project: Project }) {
+  const { t } = useT();
   const metricCards = [
-    { label: 'Tareas totales', value: 0 },
-    { label: 'Tareas vencidas', value: 0 },
-    { label: 'En revisión', value: 0 },
-    { label: 'Actividad (7 días)', value: '-' },
+    { label: t('tabMetricas.totalTasks'), value: 0 },
+    { label: t('tabMetricas.overdueTasksLabel'), value: 0 },
+    { label: t('tabMetricas.inReview'), value: 0 },
+    { label: t('tabMetricas.activity7Days'), value: '-' },
   ];
 
   return (
@@ -30,10 +32,10 @@ export default function TabMetricas({ project }: { project: Project }) {
           </div>
         </div>
         <div>
-          <p className="text-sm font-bold text-text-primary">Salud del proyecto</p>
+          <p className="text-sm font-bold text-text-primary">{t('tabMetricas.projectHealth')}</p>
           <div className="flex items-center gap-1.5 mt-1">
             <div className="w-2 h-2 rounded-full bg-green-500" />
-            <span className="text-xs text-gray-500">Sin tareas vencidas</span>
+            <span className="text-xs text-gray-500">{t('tabMetricas.noOverdue')}</span>
           </div>
           <p className="text-xs text-gray-400 mt-1">0% de avance completado</p>
         </div>
@@ -49,16 +51,16 @@ export default function TabMetricas({ project }: { project: Project }) {
       </div>
 
       <div className="bg-surface-primary rounded-xl border border-border-primary p-6">
-        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">Avance por columna</h3>
+        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">{t('tabMetricas.boardDistribution')}</h3>
         <div className="text-center py-8">
-          <p className="text-sm text-gray-400">No hay columnas configuradas en el tablero.</p>
+          <p className="text-sm text-gray-400">{t('tabMetricas.noColumns')}</p>
         </div>
       </div>
 
       <div className="bg-surface-primary rounded-xl border border-border-primary p-6">
-        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">Tareas vencidas</h3>
+        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">{t('tabMetricas.overdueList')}</h3>
         <div className="text-center py-8">
-          <p className="text-sm text-gray-400">No hay tareas vencidas.</p>
+          <p className="text-sm text-gray-400">{t('tabMetricas.noOverdueDesc')}</p>
         </div>
       </div>
     </div>

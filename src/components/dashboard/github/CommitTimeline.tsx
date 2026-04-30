@@ -8,14 +8,17 @@ interface Props {
   onToggle: () => void;
 }
 
+import { useT } from '@/hooks/useT';
+
 export default function CommitTimeline({ commits, totalCommits, branch, show, onToggle }: Props) {
+  const { t } = useT();
   return (
     <div className="mt-8 bg-surface-primary border border-border-primary rounded-xl overflow-hidden transition-all shadow-sm">
       <button onClick={onToggle} className="w-full flex items-center justify-between p-6 bg-surface-primary hover:bg-surface-secondary transition-colors">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <GitCommit className="w-5 h-5 text-brand" />
-            <h4 className="font-bold text-lg text-text-primary">Historial Completo</h4>
+            <h4 className="font-bold text-lg text-text-primary">{t('github.fullHistory')}</h4>
           </div>
           <span className="text-xs font-bold bg-brand/10 text-brand px-3 py-1 rounded-full font-mono">{branch} • {totalCommits} commits</span>
         </div>

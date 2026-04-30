@@ -4,9 +4,11 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthProvider';
+import { useT } from '@/hooks/useT';
 
 export default function CtaSection() {
   const { user } = useAuth();
+  const { t } = useT();
   const [mounted, setMounted] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const animatedRef = useRef(false);
@@ -109,10 +111,10 @@ export default function CtaSection() {
 
         <div className="text-white">
           <h2 data-cta-text style={{ opacity: 0 }} className="text-xl sm:text-2xl md:text-3xl font-bold mb-2">
-            ¿Tienes un proyecto en la EIC?
+            {t('cta.heading')}
           </h2>
           <p data-cta-text style={{ opacity: 0 }} className="text-blue-200 text-sm sm:text-base">
-            Crea tu espacio en menos de 2 minutos, sin instalaciones.
+            {t('cta.subheading')}
           </p>
         </div>
 
@@ -124,7 +126,7 @@ export default function CtaSection() {
           onMouseEnter={handleButtonEnter}
           onMouseLeave={handleButtonLeave}
         >
-          {!mounted ? 'Crear proyecto' : user ? 'Ir a mis proyectos' : 'Crear proyecto'}
+          {!mounted ? t('cta.createProject') : user ? t('cta.myProjects') : t('cta.createProject')}
           <ArrowRight className="w-4 h-4 ml-2" />
         </Link>
       </div>
