@@ -5,8 +5,13 @@ import { Loader2, AlertCircle, Calendar, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale/es';
 import { enUS } from 'date-fns/locale/en-US';
-import Link from 'next/link';
-import { PieChart, Pie, Cell, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts'; 
+
+// 🔥 Importaciones de Recharts con alias para el Tooltip
+import { 
+  PieChart, Pie, Cell, Tooltip as RechartsTooltip, Legend, ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, 
+  AreaChart, Area
+} from 'recharts'; 
 
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { GET_PROJECT_METRICS } from '@/graphql/misc/operations';
@@ -66,10 +71,9 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
     { label: t('tabMetricas.totalTasks'), value: metrics.totalTasks },
     { label: t('tabMetricas.overdueTasksLabel'), value: metrics.overdueTasksCount },
     { label: t('tabMetricas.inReview'), value: metrics.inReviewTasks },
-    { label: t('tabMetricas.activity7Days'), value: metrics.activityLast7Days },
   ];
 
-  const chartData = metrics.tasksByColumn.map((col: any) => ({
+  const pieChartData = metrics.tasksByColumn.map((col: any) => ({
     name: col.name,
     value: col.count,
     color: col.color || '#3B82F6'
@@ -78,10 +82,11 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
 
+      {/* TARJETA DE SALUD DEL PROYECTO */}
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6 flex items-center gap-6 shadow-sm">
         <div className="relative w-20 h-20 shrink-0">
           <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-            <circle cx="18" cy="18" r="15.9" fill="none" stroke="#f3f4f6" strokeWidth="3.5" />
+            <circle cx="18" cy="18" r="15.9" fill="none" stroke="#f3f4f6" strokeWidth="3.5" className="dark:stroke-gray-700" />
             <circle
               cx="18" cy="18" r="15.9"
               fill="none"
@@ -100,7 +105,7 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
           <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{t('tabMetricas.projectHealth')}</p>
           <div className="flex items-center gap-1.5 mt-1">
             <div className={`w-2 h-2 rounded-full ${healthBgColor} animate-pulse`} />
-            <span className={`text-xs font-medium ${hasOverdue ? 'text-red-600' : 'text-gray-500'}`}>
+            <span className={`text-xs font-medium ${hasOverdue ? 'text-red-600' : 'text-gray-500 dark:text-gray-400'}`}>
               {healthText}
             </span>
           </div>
@@ -108,6 +113,7 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
         </div>
       </div>
 
+      {/* MÉTRICAS RÁPIDAS & TENDENCIA DE ACTIVIDAD */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {metricCards.map((card) => (
           <div key={card.label} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-5 shadow-sm hover:border-brand/30 transition-colors">
@@ -115,9 +121,46 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
             <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">{card.value}</p>
           </div>
         ))}
+
+        {/* TARJETA ESPECIAL: GRÁFICA DE ÁREA DE ACTIVIDAD */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-5 shadow-sm relative overflow-hidden group hover:border-brand/30 transition-colors">
+          <div className="relative z-10 pointer-events-none">
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t('tabMetricas.activity7Days') || 'Actividad (7 días)'}</p>
+            <p className="text-2xl font-bold text-brand mt-1">{metrics.activityLast7Days}</p>
+          </div>
+          
+          {metrics.activityTrend && metrics.activityTrend.length > 0 && (
+            <div className="absolute bottom-0 left-0 right-0 h-16 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={metrics.activityTrend}>
+                  <defs>
+                    <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <Area 
+                    type="monotone" 
+                    dataKey="count" 
+                    stroke="#3B82F6" 
+                    strokeWidth={2}
+                    fillOpacity={1} 
+                    fill="url(#colorCount)" 
+                  />
+                  <RechartsTooltip 
+                    cursor={false}
+                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                    labelFormatter={(label) => format(new Date(label), "d MMM", { locale: dateLocale })}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* GRÁFICO CIRCULAR: DISTRIBUCIÓN POR COLUMNA */}
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6 shadow-sm flex flex-col">
           <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-2">{t('tabMetricas.boardDistribution')}</h3>
           
@@ -130,7 +173,7 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={chartData}
+                    data={pieChartData}
                     cx="50%"
                     cy="50%"
                     innerRadius={60}
@@ -138,12 +181,12 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
                     paddingAngle={3}
                     dataKey="value"
                   >
-                    {chartData.map((entry: any, index: number) => (
+                    {pieChartData.map((entry: any, index: number) => (
                       <Cell key={`cell-${index}`} fill={entry.color} stroke="transparent" />
                     ))}
                   </Pie>
-                  <Tooltip 
-                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  <RechartsTooltip 
+                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', backgroundColor: 'var(--bg-surface-primary, #ffffff)' }}
                     formatter={(value) => [`${value} tareas`, 'Total']}
                   />
                   <Legend verticalAlign="bottom" height={36} iconType="circle" />
@@ -153,6 +196,7 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
           )}
         </div>
 
+        {/* LISTA ACCIONABLE: TAREAS VENCIDAS */}
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6 shadow-sm flex flex-col">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
@@ -172,20 +216,20 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
           ) : (
             <div className="space-y-3 overflow-y-auto max-h-[250px] pr-2 custom-scrollbar">
               {metrics.overdueTasksList.map((task: any) => (
-                <button
+                <button 
                   onClick={() => onTaskClick(task.id)}
                   key={task.id} 
-                  className="w-full text-left flex items-center justify-between p-3 bg-red-50/50 hover:bg-red-50 border border-red-100 hover:border-red-200 transition-colors rounded-lg group"
+                  className="w-full text-left flex items-center justify-between p-3 bg-red-50/50 hover:bg-red-50 dark:bg-red-950/20 dark:hover:bg-red-900/30 border border-red-100 dark:border-red-900/50 hover:border-red-200 transition-colors rounded-lg group"
                 >
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900 group-hover:text-red-700 line-clamp-1 transition-colors">{task.title}</p>
-                    <div className="flex items-center gap-1.5 mt-1 text-xs text-red-600 font-medium">
+                  <div className="flex-1 min-w-0 pr-3">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 group-hover:text-red-700 dark:group-hover:text-red-400 truncate transition-colors">{task.title}</p>
+                    <div className="flex items-center gap-1.5 mt-1 text-xs text-red-600 dark:text-red-400 font-medium">
                       <AlertCircle className="w-3.5 h-3.5" />
                       {t('tabMetricas.overdueSince')} {format(new Date(task.dueDate), "d MMM yyyy", { locale: dateLocale })}
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-[10px] font-bold uppercase tracking-wider bg-white px-2 py-1 rounded text-gray-500 border border-gray-200">
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="text-[10px] font-bold uppercase tracking-wider bg-white dark:bg-gray-800 px-2 py-1 rounded text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700">
                       {task.status}
                     </span>
                     <ArrowRight className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -196,6 +240,8 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
           )}
         </div>
       </div>
+
+      {/* GRÁFICO DE BARRAS APILADAS: MAPA DE CARGA DE TRABAJO (WORKLOAD) */}
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6 shadow-sm mt-6">
         <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-6">
           {t('tabMetricas.workload') || 'Carga de Trabajo por Miembro'}
@@ -208,7 +254,7 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
                 data={metrics.workload}
                 margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
               >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" className="dark:stroke-gray-700" />
                 <XAxis 
                   dataKey="memberName" 
                   axisLine={false} 
@@ -232,7 +278,6 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
                 />
                 <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
                 
-                {/* Barras Apiladas (Stacked) */}
                 <Bar dataKey="todo" name={t('kanban.todo') || 'Por Hacer'} stackId="a" fill="#9CA3AF" radius={[0, 0, 4, 4]} />
                 <Bar dataKey="inProgress" name={t('kanban.inProgress') || 'En Progreso'} stackId="a" fill="#3B82F6" />
                 <Bar dataKey="inReview" name={t('kanban.statusInReview') || 'En Revisión'} stackId="a" fill="#F59E0B" />
@@ -242,10 +287,11 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
           </div>
         ) : (
           <div className="text-center py-8 flex flex-col justify-center h-[300px]">
-            <p className="text-sm text-gray-400">{t('tabMetricas.noWorkload') || 'No hay datos de carga de trabajo disponibles.'}</p>
+            <p className="text-sm text-gray-400">No hay datos de carga de trabajo disponibles.</p>
           </div>
         )}
       </div>
+
     </div>
   );
 }

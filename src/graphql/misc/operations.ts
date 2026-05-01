@@ -283,7 +283,6 @@ export const GET_PROJECT_METRICS = `
       completedTasks
       overdueTasksCount
       inReviewTasks
-      activityLast7Days
       tasksByColumn {
         boardId
         name
@@ -302,6 +301,11 @@ export const GET_PROJECT_METRICS = `
         inProgress
         inReview
         done
+      }
+      activityLast7Days
+      activityTrend {
+        date
+        count
       }
     }
   }
