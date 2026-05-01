@@ -225,7 +225,7 @@ export default function KanbanBoard({ projectId, members, userRole, sprintId, on
     <div className="space-y-6 animate-in fade-in w-full min-w-0">
       <div className="flex justify-end">
          <button 
-           onClick={() => onExport(tasks, "Nombre_Proyecto")}
+           onClick={() => onExport?.(tasks, "Nombre_Proyecto")}
            title={t('projectDetail.comingSoon')}
            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-text-primary border border-border-primary rounded-lg hover:bg-surface-secondary transition-colors"
          >
