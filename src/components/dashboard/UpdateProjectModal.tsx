@@ -50,6 +50,7 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
 
   useEffect(() => {
     if (isOpen) {
+      document.body.style.overflow = 'hidden';
       const loadSubjects = async () => {
         setIsLoadingSubjects(true);
         try {
@@ -64,7 +65,12 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
         }
       };
       loadSubjects();
+    } else {
+      document.body.style.overflow = 'unset';
     }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
   }, [isOpen]);
 
   useEffect(() => {
@@ -186,8 +192,11 @@ export default function UpdateProjectModal({ isOpen, project, onClose, onSuccess
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-surface-primary rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+    <div 
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
+    >
+      <div className="bg-surface-primary rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh] cursor-default">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-primary shrink-0">
           <h2 className="text-xl font-bold text-text-primary">{t('updateProject.title')}</h2>
           <button

@@ -26,16 +26,24 @@ export default function ProjectGanttView({ tasks, onEditTask }: ProjectGanttView
       const contentWidth = container.scrollWidth;
       const contentHeight = container.scrollHeight;
 
+      const isDark = document.documentElement.classList.contains('dark');
+      const bgColor = isDark ? '#09090b' : '#ffffff';
+      
       const dataUrl = await toPng(container, {
         width: contentWidth,
         height: contentHeight,
         quality: 1,
-        backgroundColor: document.documentElement.classList.contains('dark') ? '#09090b' : '#ffffff',
-        cacheBust: true,
+        backgroundColor: bgColor,
         style: {
           overflow: 'visible',
           width: `${contentWidth}px`,
           height: `${contentHeight}px`,
+          backgroundColor: bgColor,
+        },
+        filter: (node: any) => {
+          // Avoid exporting buttons or scrollbars if possible
+          if (node.tagName === 'BUTTON' && node.innerText === t('kanban.exportImage')) return false;
+          return true;
         }
       });
       
@@ -131,28 +139,28 @@ export default function ProjectGanttView({ tasks, onEditTask }: ProjectGanttView
       <div className="overflow-x-auto custom-scrollbar relative" ref={scrollRef}>
         
         {/* Cabecera del Gantt (Meses y Días) */}
-        <div className="flex flex-col border-b border-border-primary bg-surface-secondary/80 sticky top-0 z-20" style={{ width: `${totalDays * DAY_WIDTH + 250}px` }}>
+        <div className="flex flex-col border-b border-border-primary bg-surface-secondary/80 sticky top-0 z-20" style={{ width: `${totalDays * DAY_WIDTH + (typeof window !== 'undefined' && window.innerWidth < 640 ? 150 : 250)}px` }}>
           <div className="flex">
-            <div className="w-[250px] shrink-0 p-3 font-bold text-text-secondary text-sm border-r border-b border-border-primary sticky left-0 bg-surface-secondary shadow-[2px_0_5px_rgba(0,0,0,0.05)] flex items-center">
+            <div className="w-[150px] sm:w-[250px] shrink-0 p-3 font-bold text-text-secondary text-xs sm:text-sm border-r border-b border-border-primary sticky left-0 bg-surface-secondary shadow-[2px_0_5px_rgba(0,0,0,0.05)] flex items-center">
               {t('kanban.taskLabel')}
             </div>
             <div className="flex border-b border-border-primary w-full">
               {months.map(m => (
-                <div key={m.key} className="flex items-center justify-center border-r border-border-primary/50 text-xs font-bold text-text-secondary capitalize tracking-wider bg-surface-secondary/50 py-1.5" style={{ width: `${m.days * DAY_WIDTH}px` }}>
+                <div key={m.key} className="flex items-center justify-center border-r border-border-primary/50 text-[10px] sm:text-xs font-bold text-text-secondary capitalize tracking-wider bg-surface-secondary/50 py-1.5" style={{ width: `${m.days * DAY_WIDTH}px` }}>
                   {m.label}
                 </div>
               ))}
             </div>
           </div>
           <div className="flex">
-            <div className="w-[250px] shrink-0 border-r border-border-primary sticky left-0 bg-surface-secondary shadow-[2px_0_5px_rgba(0,0,0,0.05)]">
+            <div className="w-[150px] sm:w-[250px] shrink-0 border-r border-border-primary sticky left-0 bg-surface-secondary shadow-[2px_0_5px_rgba(0,0,0,0.05)]">
             </div>
             <div className="flex">
               {dayColumns.map(date => {
                 const isToday = date.toDateString() === new Date().toDateString();
                 return (
                   <div key={date.toISOString()} className={`flex flex-col items-center justify-center border-r shrink-0 py-1 transition-colors ${isToday ? 'bg-brand/10 border-brand/30' : 'border-border-secondary/50'}`} style={{ width: `${DAY_WIDTH}px` }}>
-                    <span className={`text-[10px] capitalize ${isToday ? 'text-brand font-bold' : 'text-text-muted font-medium'}`}>{format(date, "EE", { locale: dateLocale })}</span>
+                    <span className={`text-[9px] sm:text-[10px] capitalize ${isToday ? 'text-brand font-bold' : 'text-text-muted font-medium'}`}>{format(date, "EE", { locale: dateLocale })}</span>
                     <span className={`text-xs font-bold ${isToday ? 'text-brand' : 'text-text-primary'}`}>{format(date, "d")}</span>
                   </div>
                 );
@@ -162,9 +170,9 @@ export default function ProjectGanttView({ tasks, onEditTask }: ProjectGanttView
         </div>
 
         {/* Filas de Tareas */}
-        <div className="flex flex-col relative pb-8" style={{ width: `${totalDays * DAY_WIDTH + 250}px` }}>
+        <div className="flex flex-col relative pb-8" style={{ width: `${totalDays * DAY_WIDTH + (typeof window !== 'undefined' && window.innerWidth < 640 ? 150 : 250)}px` }}>
           {/* Líneas de fondo para la cuadrícula */}
-          <div className="absolute top-0 bottom-0 left-[250px] flex pointer-events-none">
+          <div className="absolute top-0 bottom-0 left-[150px] sm:left-[250px] flex pointer-events-none">
             {dayColumns.map((date, i) => {
               const isToday = date.toDateString() === new Date().toDateString();
               return (
@@ -185,7 +193,7 @@ export default function ProjectGanttView({ tasks, onEditTask }: ProjectGanttView
               <div key={task.id} className="flex group hover:bg-surface-secondary/30 transition-colors border-b border-border-secondary/30">
                 {/* Nombre de la tarea (Columna Fija) */}
                 <div 
-                  className="w-[250px] shrink-0 p-3 text-sm font-medium text-text-primary border-r border-border-primary truncate cursor-pointer hover:text-brand sticky left-0 bg-surface-primary group-hover:bg-surface-secondary/50 z-10"
+                  className="w-[150px] sm:w-[250px] shrink-0 p-3 text-xs sm:text-sm font-medium text-text-primary border-r border-border-primary truncate cursor-pointer hover:text-brand sticky left-0 bg-surface-primary group-hover:bg-surface-secondary/50 z-10"
                   onClick={() => onEditTask(task.boardId, task)}
                   title={task.title}
                 >

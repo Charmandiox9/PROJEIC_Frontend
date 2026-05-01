@@ -8,7 +8,8 @@ import { useAuth } from '@/context/AuthProvider';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { GET_PROFILE, GET_MY_PROJECTS, GET_DASHBOARD_ACTIVITY } from '@/graphql/misc/operations';
 import { GET_PENDING_TASKS_BY_USER } from '@/graphql/tasks/operations';
-import { Plus, Briefcase, CheckSquare, Activity, Users, FolderKanban, Clock, ArrowRight } from 'lucide-react';
+import { Plus, Briefcase, CheckSquare, Activity, Users, FolderKanban, Clock, ArrowRight, BookOpen, GraduationCap } from 'lucide-react';
+import { AVATAR_FALLBACK_URL } from '@/lib/constants';
 import CreateProjectModal from '@/components/dashboard/CreateProjectModal';
 import { useT } from '@/hooks/useT';
 import { useLocale } from '@/hooks/useLocale';
@@ -39,10 +40,60 @@ interface DashboardMetrics {
   collaborators: number | null;
 }
 
+const STATUS_COLORS: Record<string, string> = {
+  ACTIVE: 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300',
+  STARTING: 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300',
+  COMPLETED: 'bg-surface-secondary text-text-secondary',
+  ON_HOLD: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300',
+  CANCELLED: 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300',
+};
+
+const ROLE_COLORS: Record<string, string> = {
+  LEADER: 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300',
+  STUDENT: 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300',
+  SUPERVISOR: 'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300',
+  EXTERNAL: 'bg-surface-secondary text-text-secondary',
+};
+
+function getInitials(name: string): string {
+  if (!name) return '??';
+  const parts = name.trim().split(' ');
+  if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+  return name.substring(0, 2).toUpperCase();
+}
+
+function MemberAvatars({ members }: { members: any[] }) {
+  const visible = members.slice(0, 3);
+  const remaining = members.length - visible.length;
+
+  return (
+    <div className="flex items-center -space-x-2">
+      {visible.map((m) => (
+        <div
+          key={m.id}
+          title={m.user.name}
+          className="w-7 h-7 rounded-full border-2 border-white shrink-0 overflow-hidden bg-brand/10 text-brand flex items-center justify-center text-[10px] font-bold ring-2 ring-surface-primary shadow-sm"
+        >
+          {m.user.avatarUrl ? (
+            <img src={m.user.avatarUrl} alt={m.user.name} className="w-full h-full object-cover" />
+          ) : (
+            <span>{getInitials(m.user.name)}</span>
+          )}
+        </div>
+      ))}
+      {remaining > 0 && (
+        <div className="w-7 h-7 rounded-full border-2 border-white bg-surface-secondary text-text-secondary flex items-center justify-center text-[10px] font-bold z-10 ring-2 ring-surface-primary">
+          +{remaining}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ProfileDashboard() {
   const [mounted, setMounted] = useState(false);
   const { user } = useAuth();
-  const { t } = useT();
+  const { t, tDynamic } = useT();
   const { locale } = useLocale();
   const dateLocale = locale === 'en' ? enUS : locale === 'pt' ? pt : es;
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -294,37 +345,86 @@ export default function ProfileDashboard() {
                   <p className="text-sm text-text-muted mt-1 max-w-sm">{t('profile.emptyProjectsDesc')}</p>
                 </div>
               ) : (
-                <div className="grid sm:grid-cols-2 gap-4">
-                  {projects.map((proj) => (
-                    <Link
-                      key={proj.id}
-                      href={`/misc/proyectos/${proj.id}`}
-                      className="block group bg-surface-primary rounded-2xl border border-border-primary p-5 hover:shadow-lg transition-all duration-300 relative overflow-hidden"
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-3 h-3 rounded-full flex-shrink-0"
-                            style={{ backgroundColor: proj.color ?? 'var(--color-brand)' }}
-                          ></div>
-                          <h3 className="font-semibold text-text-primary leading-tight group-hover:text-brand transition-colors line-clamp-1 text-sm">
-                            {proj.name}
-                          </h3>
-                        </div>
-                      </div>
-                      <p className="text-xs text-text-muted line-clamp-2 mt-auto flex-1 mb-4">
-                        {proj.description || t('profile.noDescription')}
-                      </p>
+                <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 md:grid md:grid-cols-2 md:gap-4 md:overflow-visible nice-scrollbar">
+                  {projects.map((proj) => {
+                    const activeMembers = proj.members?.filter((m: any) => m.status === 'ACTIVE') || [];
+                    const myMembership = activeMembers.find((m: any) => m.user.id === user?.userId);
+                    const role = proj.myRole || myMembership?.role || 'STUDENT';
 
-                      <div className="flex items-center justify-between pt-3 border-t border-border-primary mt-auto">
-                        <span className="text-[10px] font-medium px-2 py-1 bg-surface-secondary text-text-secondary rounded-full uppercase tracking-wider">
-                          {proj.status}
-                        </span>
-                        <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-brand transition-colors" />
-                      </div>
-                    </Link>
-                  ))}
+                    return (
+                      <Link
+                        key={proj.id}
+                        href={`/misc/proyectos/${proj.id}`}
+                        className="group w-full shrink-0 snap-center md:w-auto md:shrink md:snap-align-none bg-surface-primary rounded-xl border border-border-primary overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col relative text-left"
+                      >
+                        <div className="h-1.5 w-full shrink-0" style={{ backgroundColor: proj.color ?? 'var(--color-brand)' }} />
+                        <div className="p-6 flex flex-col flex-1">
+                          <div className="flex flex-col gap-4 w-full mb-6">
+                            <div className="flex flex-col sm:flex-row sm:justify-between items-start gap-4 w-full min-w-0">
+                              <div className="flex flex-col gap-2.5 min-w-0 flex-1 w-full">
+                                <h3 className="font-bold text-lg text-text-primary line-clamp-2 break-words leading-tight group-hover:text-brand transition-colors">
+                                  {proj.name}
+                                </h3>
+
+                                {proj.isInstitutional && proj.subject && (
+                                  <div className="flex flex-col gap-2 mt-1 bg-surface-secondary p-3 rounded-xl border border-border-secondary w-full min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      <BookOpen className="w-4 h-4 text-brand shrink-0" />
+                                      <p className="text-xs font-semibold text-brand truncate">
+                                        {proj.subject.name} <span className="font-normal text-text-muted ml-1">• {proj.subject.period}</span>
+                                      </p>
+                                    </div>
+
+                                    {proj.subject.professors && proj.subject.professors.length > 0 && (
+                                      <div className="flex items-start gap-2 pl-0.5">
+                                        <GraduationCap className="w-4 h-4 text-text-muted shrink-0 mt-0.5" />
+                                        <p className="text-[11px] text-text-secondary line-clamp-1">
+                                          {proj.subject.professors.map((p: any) => p.name).join(', ')}
+                                        </p>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2.5 shrink-0 flex-wrap">
+                                <span className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md whitespace-nowrap shrink-0 shadow-sm ${STATUS_COLORS[proj.status] ?? 'bg-surface-secondary text-text-secondary'}`}>
+                                  {tDynamic(`projectStatus.${proj.status}`)}
+                                </span>
+                                <span className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md whitespace-nowrap shrink-0 shadow-sm ${ROLE_COLORS[role] ?? 'bg-surface-secondary text-text-secondary'}`}>
+                                  {tDynamic(`projectRole.${role}`)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <p className="text-xs text-text-muted line-clamp-2 flex-1 mb-6 leading-relaxed">
+                            {proj.description || t('profile.noDescription')}
+                          </p>
+
+                          <div className="mt-auto space-y-4 pt-5 border-t border-border-primary">
+                            <div>
+                              <div className="flex justify-between text-[10px] text-text-muted mb-1.5 font-medium">
+                                <span>{t('misProyectos.progress')}</span>
+                                <span>0%</span>
+                              </div>
+                              <div className="h-1.5 bg-surface-secondary rounded-full overflow-hidden shadow-inner">
+                                <div className="h-full rounded-full transition-all duration-1000" style={{ backgroundColor: proj.color ?? 'var(--color-brand)', width: '0%' }} />
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <MemberAvatars members={activeMembers} />
+                              <span className="text-[10px] text-text-muted font-bold uppercase tracking-widest bg-surface-secondary px-2 py-0.5 rounded">
+                                {proj.mode === 'HYBRID' ? 'Projeic Native' : (proj.methodology || 'Project')}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })}
                 </div>
+
               )}
             </div>
           </div>

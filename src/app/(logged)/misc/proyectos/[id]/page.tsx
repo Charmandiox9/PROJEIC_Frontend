@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { fetchGraphQL } from '@/lib/graphQLClient';
@@ -57,6 +57,13 @@ export default function ProjectDetailPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
+  const exportCSVRef = useRef<(() => void) | null>(null);
+  const [, forceUpdate] = useState({}); // To show/hide CSV button when registered
+
+  const handleSetExportTrigger = useCallback((fn: () => void) => {
+    exportCSVRef.current = fn;
+    forceUpdate({});
+  }, []);
 
   const projectId = Array.isArray(id) ? id[0] : id;
 
@@ -161,31 +168,42 @@ export default function ProjectDetailPage() {
 
   return (
     <div className="p-4 sm:p-6 md:p-8 max-w-6xl mx-auto space-y-6 pb-12 min-w-0">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <nav className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+        <nav className="flex flex-wrap items-center gap-3 text-sm min-w-0">
           <Link
             href="/misc/proyectos"
-            className="flex items-center gap-1.5 hover:text-brand transition-colors font-medium shrink-0"
+            className="flex items-center gap-2 text-text-muted hover:text-brand transition-all font-semibold shrink-0 group"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
             <span className="hidden sm:inline">{t('projectDetail.backFull')}</span>
             <span className="sm:hidden">{t('projectDetail.back')}</span>
           </Link>
-          <span className="text-gray-300 text-lg/none shrink-0">|</span>
-          <span className="text-text-primary font-medium truncate max-w-[140px] sm:max-w-[300px]">
-            {project.name}
-          </span>
-          {/* Pequeña etiqueta visual del modo */}
-          <span className="hidden sm:inline-flex px-2 py-0.5 ml-2 text-[10px] font-bold uppercase tracking-wider rounded-md bg-surface-secondary text-text-secondary">
-            {project.mode === 'HYBRID' ? t('projectDetail.modeHybrid') : t('projectDetail.modeClassic')}
-          </span>
+          <span className="text-border-secondary text-xl/none font-light shrink-0">/</span>
+          <div className="flex items-center gap-3 min-w-0">
+            <span className="text-text-primary font-bold truncate text-base">
+              {project.name}
+            </span>
+            <span className="hidden sm:inline-flex px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-widest rounded-md bg-brand/10 text-brand border border-brand/20">
+              {project.mode === 'HYBRID' ? t('projectDetail.modeHybrid') : t('projectDetail.modeClassic')}
+            </span>
+          </div>
         </nav>
-        <div className="flex items-center gap-2 flex-wrap">
+        
+        <div className="flex items-center gap-3 shrink-0 ml-auto md:ml-0">
+          {activeTab === 'tablero' && (
+            <button
+              onClick={() => exportCSVRef.current?.()}
+              className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold transition-all shadow-sm whitespace-nowrap active:scale-95 rounded-xl border ${exportCSVRef.current ? 'text-brand bg-brand/5 border-brand/20 hover:bg-brand/10' : 'text-text-muted bg-surface-secondary border-border-primary opacity-50 cursor-not-allowed'}`}
+              disabled={!exportCSVRef.current}
+            >
+              <FileDown className="w-4 h-4" /> {t('projectDetail.exportCsv')}
+            </button>
+          )}
           <button
             onClick={() => window.open(`/projeic/misc/proyectos/${id}/reports`, '_blank')}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-text-primary border border-border-primary rounded-lg hover:bg-surface-secondary transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-text-primary bg-surface-primary border border-border-primary rounded-xl hover:bg-surface-secondary transition-all shadow-sm whitespace-nowrap active:scale-95"
           >
-            <FileDown className="w-3.5 h-3.5" /> {t('projectDetail.exportPdf')}
+            <FileDown className="w-4 h-4" /> {t('projectDetail.exportPdf')}
           </button>
         </div>
       </div>
@@ -227,6 +245,8 @@ export default function ProjectDetailPage() {
             projectId={project.id}
             members={project.members}
             userRole={currentUserRole}
+            projectName={project.name}
+            setExportTrigger={handleSetExportTrigger}
           />
         )}
         {/* Renderizamos Resultados SOLO si es híbrido */}

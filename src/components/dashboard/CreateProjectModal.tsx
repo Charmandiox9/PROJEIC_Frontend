@@ -99,6 +99,7 @@ export default function CreateProjectModal({
 
   useEffect(() => {
     if (isOpen) {
+      document.body.style.overflow = "hidden";
       setIsLoadingSubjects(true);
       fetchGraphQL({ query: GET_SUBJECTS })
         .then((res) => {
@@ -107,10 +108,14 @@ export default function CreateProjectModal({
         .catch(console.error)
         .finally(() => setIsLoadingSubjects(false));
     } else {
+      document.body.style.overflow = "unset";
       setFormData(INITIAL_FORM);
       setPendingMembers([]);
       setPendingRepositories([]);
     }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -268,8 +273,11 @@ export default function CreateProjectModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-surface-primary rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
+    <div 
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
+    >
+      <div className="bg-surface-primary rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-200 cursor-default">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-primary bg-surface-primary shrink-0">
           <h2 className="text-xl font-bold text-text-primary">
             {t("createProject.title")}

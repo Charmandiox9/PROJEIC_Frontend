@@ -127,64 +127,64 @@ function ProjectCard({ project, currentUserId, tDynamic }: { project: Project; c
       className="group w-[85vw] shrink-0 snap-center md:w-auto md:shrink md:snap-align-none bg-surface-primary rounded-xl border border-border-primary overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col relative"
     >
       <div className="h-1.5 w-full shrink-0" style={{ backgroundColor: project.color }} />
-      <div className="p-5 flex flex-col flex-1">
-        <div className="flex flex-col mb-4 gap-3 pr-2">
-          <div className="flex flex-col sm:flex-row sm:justify-between items-start gap-3 w-full">
-            <div className="flex flex-col gap-2 w-full">
-              <h3 className="font-bold text-lg text-text-primary line-clamp-2 break-words leading-tight">
-                {project.name}
-              </h3>
+      <div className="p-6 flex flex-col flex-1">
+          <div className="flex flex-col gap-4 w-full mb-6">
+            <div className="flex flex-col sm:flex-row sm:justify-between items-start gap-4 w-full min-w-0">
+              <div className="flex flex-col gap-2.5 min-w-0 flex-1 w-full">
+                <h3 className="font-bold text-lg text-text-primary line-clamp-2 break-words leading-tight group-hover:text-brand transition-colors">
+                  {project.name}
+                </h3>
 
-              {project.isInstitutional && project.subject && (
-                <div className="flex flex-col gap-1.5 mt-1 bg-surface-secondary p-2.5 rounded-lg border border-border-secondary w-full min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <BookOpen className="w-3.5 h-3.5 text-brand shrink-0" />
-                    <p className="text-xs font-semibold text-brand truncate">
-                      {project.subject.name} <span className="font-normal text-text-muted ml-1">• {project.subject.period}</span>
-                    </p>
-                  </div>
-
-                  {project.subject.professors && project.subject.professors.length > 0 && (
-                    <div className="flex items-start gap-1.5 pl-0.5">
-                      <GraduationCap className="w-3.5 h-3.5 text-text-muted shrink-0 mt-0.5" />
-                      <p className="text-[11px] text-text-secondary line-clamp-1">
-                        <span className="font-medium text-text-muted mr-1">Prof:</span>
-                        {project.subject.professors.map(p => p.name).join(', ')}
+                {project.isInstitutional && project.subject && (
+                  <div className="flex flex-col gap-2 mt-1 bg-surface-secondary p-3 rounded-xl border border-border-secondary w-full min-w-0">
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="w-4 h-4 text-brand shrink-0" />
+                      <p className="text-xs font-semibold text-brand truncate">
+                        {project.subject.name} <span className="font-normal text-text-muted ml-1">• {project.subject.period}</span>
                       </p>
                     </div>
-                  )}
-                </div>
-              )}
-            </div>
 
-            <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2 shrink-0 mt-1 sm:mt-0">
-              <span className={`px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md whitespace-nowrap ${STATUS_COLORS[project.status] ?? 'bg-surface-secondary text-text-secondary'}`}>
-                {tDynamic(`projectStatus.${project.status}`)}
-              </span>
-              <span className={`px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md whitespace-nowrap ${ROLE_COLORS[role] ?? 'bg-surface-secondary text-text-secondary'}`}>
-                {tDynamic(`projectRole.${role}`)}
-              </span>
+                    {project.subject.professors && project.subject.professors.length > 0 && (
+                      <div className="flex items-start gap-2 pl-0.5">
+                        <GraduationCap className="w-4 h-4 text-text-muted shrink-0 mt-0.5" />
+                        <p className="text-[11px] text-text-secondary line-clamp-1">
+                          <span className="font-medium text-text-muted mr-1">Prof:</span>
+                          {project.subject.professors.map(p => p.name).join(', ')}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2.5 shrink-0 flex-wrap">
+                <span className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md whitespace-nowrap shrink-0 shadow-sm ${STATUS_COLORS[project.status] ?? 'bg-surface-secondary text-text-secondary'}`}>
+                  {tDynamic(`projectStatus.${project.status}`)}
+                </span>
+                <span className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md whitespace-nowrap shrink-0 shadow-sm ${ROLE_COLORS[role] ?? 'bg-surface-secondary text-text-secondary'}`}>
+                  {tDynamic(`projectRole.${role}`)}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <p className="text-xs text-text-muted line-clamp-2 flex-1 mb-4">
+        <p className="text-xs text-text-muted line-clamp-2 flex-1 mb-6 leading-relaxed">
           {project.description ?? t('misProyectos.noDescription')}
         </p>
 
-        <div className="mt-auto space-y-3 pt-4 border-t border-border-primary">
+        <div className="mt-auto space-y-4 pt-5 border-t border-border-primary">
           <div>
-            <div className="flex justify-between text-[10px] text-text-muted mb-1">
+            <div className="flex justify-between text-[10px] text-text-muted mb-1.5 font-medium">
               <span>{t('misProyectos.progress')}</span>
               <span>0%</span>
             </div>
-            <div className="h-1.5 bg-surface-secondary rounded-full overflow-hidden">
-              <div className="h-full rounded-full" style={{ backgroundColor: project.color, width: '0%' }} />
+            <div className="h-1.5 bg-surface-secondary rounded-full overflow-hidden shadow-inner">
+              <div className="h-full rounded-full transition-all duration-1000" style={{ backgroundColor: project.color, width: '0%' }} />
             </div>
           </div>
           <div className="flex items-center justify-between">
             <MemberAvatars members={activeMembers} />
-            <span className="text-[10px] text-text-muted font-medium uppercase tracking-wider">
+            <span className="text-[10px] text-text-muted font-bold uppercase tracking-widest bg-surface-secondary px-2 py-0.5 rounded">
               {project.mode === 'HYBRID' ? 'Projeic Native' : project.methodology}
             </span>
           </div>
@@ -403,7 +403,7 @@ export default function MisProyectosPage() {
           </p>
         </div>
       ) : (
-        <div className={`flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 nice-scrollbar md:grid md:overflow-visible md:pb-0 ${viewMode === 'grid' ? 'md:grid-cols-2 lg:grid-cols-3' : 'md:grid-cols-1'}`}>
+        <div className={`flex overflow-x-auto snap-x snap-mandatory gap-6 pb-6 nice-scrollbar md:grid md:overflow-visible md:pb-0 ${viewMode === 'grid' ? 'md:grid-cols-2 lg:grid-cols-3' : 'md:grid-cols-1'}`}>
           {filteredProjects.map((project) => (
             <ProjectCard key={project.id} project={project} currentUserId={user?.userId} tDynamic={tDynamic} />
           ))}

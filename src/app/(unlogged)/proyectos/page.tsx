@@ -7,6 +7,7 @@ import { GET_PUBLIC_PROJECTS } from '@/graphql/misc/operations';
 import { AVATAR_FALLBACK_URL } from '@/lib/constants';
 import { useT } from '@/hooks/useT';
 import PublicProjectModal from '@/components/public/PublicProjectModal';
+import { useSearchParams } from 'next/navigation';
 
 interface Professor {
   id: string;
@@ -50,6 +51,9 @@ const FILTER_OPTIONS = ['ALL', 'ACTIVE', 'STARTING', 'COMPLETED'];
 
 export default function ProyectosPage() {
   const { t, tDynamic } = useT();
+  const searchParams = useSearchParams();
+  const projectIdFromUrl = searchParams.get('id');
+
   const getStatusLabel = (status: string) => tDynamic(`projectStatus.${status}`);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,6 +61,12 @@ export default function ProyectosPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (projectIdFromUrl) {
+      setSelectedProjectId(projectIdFromUrl);
+    }
+  }, [projectIdFromUrl]);
 
   const gridRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLElement>(null);
@@ -224,9 +234,9 @@ export default function ProyectosPage() {
               <button
                 key={status}
                 onClick={(e) => handleFilterClick(status, e)}
-                className={`whitespace-nowrap px-4 py-2 rounded-full font-medium transition-colors ${statusFilter === status
-                  ? 'bg-brand-dark text-white'
-                  : 'bg-surface-secondary text-text-secondary hover:bg-surface-tertiary'
+                className={`whitespace-nowrap px-4 py-2 rounded-lg font-medium transition-all duration-200 ${statusFilter === status
+                  ? 'bg-brand text-white shadow-md'
+                  : 'bg-surface-primary border border-border-secondary text-text-secondary hover:bg-surface-tertiary'
                   }`}
               >
                 {status === 'ALL' ? t('proyectosPage.filterAll') : getStatusLabel(status)}
