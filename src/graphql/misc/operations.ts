@@ -307,6 +307,20 @@ export const GET_PROJECT_METRICS = `
         date
         count
       }
+      burndownData {
+        date
+        totalTasks
+        completedTasks
+        todoTasks
+        inProgressTasks
+      }
+      projectRisk {
+        level
+        score
+        message
+        timeElapsedPercentage
+        workCompletedPercentage
+      }
     }
   }
 `;

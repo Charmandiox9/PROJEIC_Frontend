@@ -1,16 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Loader2, AlertCircle, Calendar, ArrowRight } from 'lucide-react';
+import { Loader2, AlertCircle, Calendar, ArrowRight, AlertTriangle, ShieldCheck, Info } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale/es';
 import { enUS } from 'date-fns/locale/en-US';
-
-// 🔥 Importaciones de Recharts con alias para el Tooltip
 import { 
   PieChart, Pie, Cell, Tooltip as RechartsTooltip, Legend, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, 
-  AreaChart, Area
+  AreaChart, Area, Line, LineChart
 } from 'recharts'; 
 
 import { fetchGraphQL } from '@/lib/graphQLClient';
@@ -112,6 +110,78 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
           <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{metrics.completedTasks} {t('tabMetricas.totalTasks').toLowerCase()} ({metrics.totalTasks})</p>
         </div>
       </div>
+
+      {metrics.projectRisk && (
+        <div className={`rounded-xl border p-5 mb-6 shadow-sm transition-colors ${
+          metrics.projectRisk.level === 'HIGH' ? 'bg-red-50/50 border-red-200 dark:bg-red-950/20 dark:border-red-900' :
+          metrics.projectRisk.level === 'MEDIUM' ? 'bg-yellow-50/50 border-yellow-200 dark:bg-yellow-950/20 dark:border-yellow-900' :
+          metrics.projectRisk.level === 'LOW' ? 'bg-green-50/50 border-green-200 dark:bg-green-950/20 dark:border-green-900' :
+          'bg-gray-50/50 border-gray-200 dark:bg-gray-800/50 dark:border-gray-700'
+        }`}>
+          <div className="flex items-start gap-4">
+            <div className={`p-3 rounded-lg shrink-0 ${
+              metrics.projectRisk.level === 'HIGH' ? 'bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-400' :
+              metrics.projectRisk.level === 'MEDIUM' ? 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/50 dark:text-yellow-400' :
+              metrics.projectRisk.level === 'LOW' ? 'bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400' :
+              'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
+            }`}>
+              {metrics.projectRisk.level === 'HIGH' && <AlertTriangle className="w-6 h-6" />}
+              {metrics.projectRisk.level === 'MEDIUM' && <Info className="w-6 h-6" />}
+              {metrics.projectRisk.level === 'LOW' && <ShieldCheck className="w-6 h-6" />}
+              {metrics.projectRisk.level === 'UNKNOWN' && <Info className="w-6 h-6 opacity-60" />}
+            </div>
+            
+            <div className="flex-1 w-full min-w-0">
+              <h3 className={`text-sm font-bold uppercase tracking-wider ${
+                metrics.projectRisk.level === 'HIGH' ? 'text-red-800 dark:text-red-400' :
+                metrics.projectRisk.level === 'MEDIUM' ? 'text-yellow-800 dark:text-yellow-400' :
+                metrics.projectRisk.level === 'LOW' ? 'text-green-800 dark:text-green-400' :
+                'text-gray-600 dark:text-gray-400'
+              }`}>
+                {t('tabMetricas.riskIndex')}
+              </h3>
+              <p className="text-gray-700 dark:text-gray-300 font-medium text-sm mt-1">
+                {metrics.projectRisk.message}
+              </p>
+              
+              {/* Mostramos las barras solo si tenemos datos calculables */}
+              {metrics.projectRisk.level !== 'UNKNOWN' && (
+                <div className="mt-4 flex flex-col md:flex-row gap-6">
+                  <div className="flex-1">
+                    <div className="flex justify-between text-xs font-semibold mb-1 text-gray-500">
+                      <span>{t('tabMetricas.timeElapsed') || 'Tiempo Transcurrido'}</span>
+                      <span>{metrics.projectRisk.timeElapsedPercentage}%</span>
+                    </div>
+                    <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-gray-400 dark:bg-gray-500" 
+                        style={{ width: `${metrics.projectRisk.timeElapsedPercentage}%` }}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex-1">
+                    <div className="flex justify-between text-xs font-semibold mb-1 text-gray-500">
+                      <span>{t('tabMetricas.workCompleted') || 'Trabajo Completado'}</span>
+                      <span>{metrics.projectRisk.workCompletedPercentage}%</span>
+                    </div>
+                    <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full ${
+                          metrics.projectRisk.level === 'HIGH' ? 'bg-red-500' :
+                          metrics.projectRisk.level === 'MEDIUM' ? 'bg-yellow-500' :
+                          'bg-green-500'
+                        }`} 
+                        style={{ width: `${metrics.projectRisk.workCompletedPercentage}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* MÉTRICAS RÁPIDAS & TENDENCIA DE ACTIVIDAD */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -288,6 +358,81 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
         ) : (
           <div className="text-center py-8 flex flex-col justify-center h-[300px]">
             <p className="text-sm text-gray-400">No hay datos de carga de trabajo disponibles.</p>
+          </div>
+        )}
+      </div>
+
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6 shadow-sm mt-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+          <div>
+            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">
+              {t('tabMetricas.burndownChart') || 'Burndown Chart'}
+            </h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Ritmo de completado vs. Trabajo total del proyecto.
+            </p>
+          </div>
+        </div>
+        
+        {metrics.burndownData && metrics.burndownData.length > 0 ? (
+          <div className="h-[350px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart
+                data={metrics.burndownData}
+                margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" className="dark:stroke-gray-700" />
+                <XAxis 
+                  dataKey="date" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fill: '#6b7280', fontSize: 12 }}
+                  tickFormatter={(val) => format(new Date(val), "d MMM", { locale: dateLocale })} 
+                />
+                <YAxis 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fill: '#6b7280', fontSize: 12 }} 
+                  allowDecimals={false}
+                />
+                <RechartsTooltip 
+                  cursor={{ stroke: '#9CA3AF', strokeWidth: 1, strokeDasharray: '3 3' }}
+                  contentStyle={{ 
+                    borderRadius: '8px', 
+                    border: 'none', 
+                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                    backgroundColor: 'var(--bg-surface-primary, #ffffff)' 
+                  }}
+                  labelFormatter={(label) => format(new Date(label), "d MMMM yyyy", { locale: dateLocale })}
+                />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
+                
+                <Line 
+                  type="stepAfter" 
+                  dataKey="totalTasks" 
+                  name="Total de Tareas" 
+                  stroke="#9CA3AF" 
+                  strokeWidth={2} 
+                  dot={false}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="completedTasks" 
+                  name="Tareas Completadas" 
+                  stroke="#10B981" 
+                  strokeWidth={3} 
+                  activeDot={{ r: 6, strokeWidth: 0 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div className="text-center py-12 flex flex-col items-center justify-center h-[300px] border-2 border-dashed border-gray-100 dark:border-gray-700 rounded-lg">
+            <Calendar className="w-8 h-8 text-gray-300 dark:text-gray-600 mb-3" />
+            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('tabMetricas.burndownCollecting')}</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 max-w-[250px]">
+              {t('tabMetricas.burndownDesc')}
+            </p>
           </div>
         )}
       </div>
