@@ -413,3 +413,59 @@ export const DISPATCH_WORKFLOW = `
     }
   }
 `;
+
+export const GET_FULL_PROJECT_REPORT = `
+  query GetFullProjectReport($id: String!, $projectId: String!) {
+    findOne(id: $id) {
+      id
+      name
+      description
+      mode
+      methodology
+      subject {
+        name
+        period
+        professors {
+          id
+          name
+        }
+      }
+      createdAt
+      members {
+        role
+        user {
+          name
+        }
+      }
+    }
+    projectMetrics(projectId: $projectId) {
+      totalTasks
+      completedTasks
+      overdueTasksCount
+      inReviewTasks
+      projectRisk {
+        level
+        message
+        timeElapsedPercentage
+        workCompletedPercentage
+      }
+      tasksByColumn {
+        name
+        count
+      }
+      activityLast7Days
+      burndownData {
+        date
+        totalTasks
+        completedTasks
+      }
+    }
+    sprintsByProject(projectId: $projectId) {
+      id
+      name
+      status
+      startDate
+      endDate
+    }
+  }
+`;

@@ -182,18 +182,10 @@ export default function ProjectDetailPage() {
         </nav>
         <div className="flex items-center gap-2 flex-wrap">
           <button
-            disabled
-            title={t('projectDetail.comingSoon')}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-text-muted border border-border-primary rounded-lg cursor-not-allowed opacity-50"
+            onClick={() => window.open(`/projeic/misc/proyectos/${id}/reports`, '_blank')}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-text-primary border border-border-primary rounded-lg hover:bg-surface-secondary transition-colors"
           >
             <FileDown className="w-3.5 h-3.5" /> {t('projectDetail.exportPdf')}
-          </button>
-          <button
-            disabled
-            title={t('projectDetail.comingSoon')}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-text-muted border border-border-primary rounded-lg cursor-not-allowed opacity-50"
-          >
-            <FileDown className="w-3.5 h-3.5" /> {t('projectDetail.exportCsv')}
           </button>
         </div>
       </div>

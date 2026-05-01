@@ -269,6 +269,25 @@
     "errorSendInvite": "Erro ao enviar o convite.",
     "inviteSuccess": "Convite enviado com sucesso."
   },
+  "projectReport": {
+    "noData": "Nenhum dado encontrado para este projeto.",
+    "exportPdf": "Exportar para PDF",
+    "title": "Relatório de Gestão de Projetos",
+    "createdAt": "Criado em",
+    "institution": "Instituição: Universidad Católica del Norte",
+    "section1": "1. Informações do Projeto",
+    "description": "Descrição",
+    "noDescription": "Nenhuma descrição fornecida.",
+    "methodology": "Metodologia de Trabalho",
+    "healthStatus": "Estado de Saúde",
+    "stable": "ESTÁVEL",
+    "section2": "2. Equipe do Projeto",
+    "section3": "3. Análise de Desempenho",
+    "predictiveConclusion": "Conclusão do Sistema Preditivo:",
+    "totalTasks": "Tarefas Totais",
+    "completedTasks": "Tarefas Concluídas",
+    "overdueTasks": "Tarefas Atrasadas"
+  },
   "createResult": {
     "title": "Novo Resultado Esperado",
     "fieldTitle": "Título do Valor Esperado *",

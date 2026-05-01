@@ -269,6 +269,25 @@
     "errorSendInvite": "Error sending invitation.",
     "inviteSuccess": "Invitation sent successfully."
   },
+  "projectReport": {
+    "noData": "No data found for this project.",
+    "exportPdf": "Export to PDF",
+    "title": "Project Management Report",
+    "createdAt": "Created on",
+    "institution": "Institution: Universidad Católica del Norte",
+    "section1": "1. Project Information",
+    "description": "Description",
+    "noDescription": "No description provided.",
+    "methodology": "Work Methodology",
+    "healthStatus": "Health Status",
+    "stable": "STABLE",
+    "section2": "2. Project Team",
+    "section3": "3. Performance Analysis",
+    "predictiveConclusion": "Predictive System Conclusion:",
+    "totalTasks": "Total Tasks",
+    "completedTasks": "Completed Tasks",
+    "overdueTasks": "Overdue Tasks"
+  },
   "createResult": {
     "title": "New Expected Result",
     "fieldTitle": "Expected Value Title *",

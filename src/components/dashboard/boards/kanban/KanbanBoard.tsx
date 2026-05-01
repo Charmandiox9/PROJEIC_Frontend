@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Search, Loader2, Tag, LayoutGrid, List, Edit2, Trash2, CalendarIcon, BarChartHorizontal } from 'lucide-react';
+import { Plus, Search, Loader2, Tag, LayoutGrid, List, Edit2, Trash2, CalendarIcon, BarChartHorizontal, FileDown } from 'lucide-react';
 import Select from '@/components/ui/Select';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { GET_BOARDS_BY_PROJECT, DELETE_BOARD } from '@/graphql/boards/operations';
@@ -29,6 +29,7 @@ interface KanbanBoardProps {
   members: ProjectMember[];
   userRole: string | null;
   sprintId?: string;
+  onExport?: (tasks: any[], projectName: string) => void;
 }
 
 const getStatusFromBoardName = (boardName: string): string => {
@@ -41,7 +42,7 @@ const getStatusFromBoardName = (boardName: string): string => {
   return 'TODO';
 };
 
-export default function KanbanBoard({ projectId, members, userRole, sprintId }: KanbanBoardProps) {
+export default function KanbanBoard({ projectId, members, userRole, sprintId, onExport }: KanbanBoardProps) {
   const { t } = useT();
   const [boards, setBoards] = useState<any[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
@@ -222,6 +223,15 @@ export default function KanbanBoard({ projectId, members, userRole, sprintId }: 
 
   return (
     <div className="space-y-6 animate-in fade-in w-full min-w-0">
+      <div className="flex justify-end">
+         <button 
+           onClick={() => onExport(tasks, "Nombre_Proyecto")}
+           title={t('projectDetail.comingSoon')}
+           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-text-primary border border-border-primary rounded-lg hover:bg-surface-secondary transition-colors"
+         >
+           <FileDown className="w-3.5 h-3.5" /> {t('projectDetail.exportCsv')}
+         </button>
+      </div>
       
       {/* TOOLBAR */}
       <div className="flex flex-wrap items-end gap-2 sm:gap-3 bg-surface-primary p-3 sm:p-4 rounded-xl border border-border-primary shadow-sm">
