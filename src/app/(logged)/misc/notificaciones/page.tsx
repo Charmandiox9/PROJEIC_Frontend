@@ -32,7 +32,7 @@ export default function NotificacionesPage() {
   const { t } = useT();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [filter, setFilter] = useState<'ALL' | 'UNREAD'>('ALL');
+  const [filter, setFilter] = useState<'ALL' | 'UNREAD'>('UNREAD');
   const [isMarkingAll, setIsMarkingAll] = useState(false);
   const [processingId, setProcessingId] = useState<string | null>(null);
 
@@ -119,6 +119,8 @@ export default function NotificacionesPage() {
     }
   };
 
+  const displayedNotifications = filter === 'UNREAD' ? notifications.filter(n => !n.isRead) : notifications;
+
   return (
     <div className="flex flex-col flex-1 h-full min-h-screen bg-surface-page">
       <div className="bg-surface-primary border-b border-border-primary px-6 py-6 sticky top-0 z-10">
@@ -167,7 +169,7 @@ export default function NotificacionesPage() {
               </div>
             ))}
           </div>
-        ) : notifications.length === 0 ? (
+        ) : displayedNotifications.length === 0 ? (
           <div className="text-center py-20 bg-surface-primary rounded-xl border border-border-primary">
             <div className="w-16 h-16 bg-surface-secondary rounded-full flex items-center justify-center mx-auto mb-4">
               <Bell className="w-8 h-8 text-text-secondary" />
@@ -176,7 +178,7 @@ export default function NotificacionesPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {notifications.map((notif) => {
+            {displayedNotifications.map((notif) => {
               const isInvitation = notif.type === 'PROJECT_INVITATION';
               const Icon = isInvitation ? UserPlus : Bell;
               const isProcessing = processingId === notif.id;
@@ -213,14 +215,14 @@ export default function NotificacionesPage() {
                       <div className="flex items-center gap-3 mt-4">
                         <button
                           onClick={(e) => handleRespondInvitation(notif, true, e)}
-                          disabled={isProcessing}
+                          disabled={isProcessing || notif.isRead}
                           className="px-4 py-1.5 text-xs font-bold text-white bg-brand hover:bg-brand-dark rounded-md transition-colors disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
                         >
                           <Check className="w-3.5 h-3.5" /> {t('notificationsPage.accept')}
                         </button>
                         <button
                           onClick={(e) => handleRespondInvitation(notif, false, e)}
-                          disabled={isProcessing}
+                          disabled={isProcessing || notif.isRead}
                           className="px-4 py-1.5 text-xs font-bold text-text-secondary bg-gray-200 hover:bg-gray-300 rounded-md transition-colors disabled:opacity-50 flex items-center gap-1.5"
                         >
                           <X className="w-3.5 h-3.5" /> {t('notificationsPage.decline')}
