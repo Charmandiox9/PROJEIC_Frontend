@@ -309,3 +309,14 @@ body {
   --badge-inst-bg: rgba(37, 150, 190, 0.15);
   --badge-inst-border: rgba(37, 150, 190, 0.3);
 }
+
+@media print {
+  body {
+    background-color: white !important;
+    color: black !important;
+  }
+  /* Ocultar scrollbars al imprimir */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+}
