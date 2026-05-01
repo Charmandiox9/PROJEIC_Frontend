@@ -21,6 +21,7 @@ export default function BurndownChart({ sprintId }: { sprintId: string }) {
   const { t } = useT();
   const [data, setData] = useState([]);
   const [isMounted, setIsMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     setIsMounted(true);

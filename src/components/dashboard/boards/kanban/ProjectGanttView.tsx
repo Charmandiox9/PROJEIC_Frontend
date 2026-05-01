@@ -42,7 +42,7 @@ export default function ProjectGanttView({ tasks, onEditTask }: ProjectGanttView
         },
         filter: (node: any) => {
           // Avoid exporting buttons or scrollbars if possible
-          if (node.tagName === 'BUTTON' && node.innerText === t('kanban.exportImage')) return false;
+          if (node.tagName === 'BUTTON' && node.innerText === t('common.exportImage')) return false;
           return true;
         }
       });

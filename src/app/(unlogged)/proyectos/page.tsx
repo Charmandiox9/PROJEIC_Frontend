@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import { Search, BookOpen, GraduationCap } from 'lucide-react';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { GET_PUBLIC_PROJECTS } from '@/graphql/misc/operations';
@@ -49,7 +49,7 @@ interface Project {
 
 const FILTER_OPTIONS = ['ALL', 'ACTIVE', 'STARTING', 'COMPLETED'];
 
-export default function ProyectosPage() {
+function ProyectosPageContent() {
   const { t, tDynamic } = useT();
   const searchParams = useSearchParams();
   const projectIdFromUrl = searchParams.get('id');
@@ -339,5 +339,17 @@ export default function ProyectosPage() {
       />
 
     </div>
+  );
+}
+
+export default function ProyectosPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-surface-primary">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-brand"></div>
+      </div>
+    }>
+      <ProyectosPageContent />
+    </Suspense>
   );
 }
