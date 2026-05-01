@@ -15,6 +15,7 @@ import EnvironmentsPanel from '../../github/EnvironmentsPanel';
 import ArtifactsPanel from '../../github/ArtifactsPanel';
 import CommitTimeline from '../../github/CommitTimeline';
 import AuthorModal from '../../github/AuthorModal';
+import CodeVsKanbanChart from '../../github/CodeVsKanbanChart';
 
 export default function GithubIntegration({ project }: { project: any }) {
   const { t } = useT();
@@ -245,6 +246,11 @@ export default function GithubIntegration({ project }: { project: any }) {
             </div>
           </div>
 
+          {/* 5. GRÁFICO DE CORRELACIÓN */}
+          {data && (
+            <CodeVsKanbanChart projectId={project.id} githubCommits={data.getGithubCommits.commits} />
+          )}
+            
             {/* 3. TIMELINE INFERIOR */}
             <CommitTimeline 
             commits={data.getGithubCommits.commits} 

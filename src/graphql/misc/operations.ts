@@ -321,6 +321,10 @@ export const GET_PROJECT_METRICS = `
         timeElapsedPercentage
         workCompletedPercentage
       }
+      dailyCompletions {
+        date
+        count
+      }
     }
   }
 `;
