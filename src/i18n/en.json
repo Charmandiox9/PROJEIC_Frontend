@@ -218,7 +218,15 @@
     "activity7Days": "Activity (7 days)",
     "overdueTaskSingle": "overdue task",
     "overdueTaskPlural": "overdue tasks",
-    "noOverdueTasks": "No overdue tasks"
+    "noOverdueTasks": "No overdue tasks",
+    "workload": "Workload by Member",
+    "noWorkload": "No workload data available.",
+    "burndownChart": "Burndown Chart",
+    "burndownCollecting": "Collecting historical data...",
+    "burndownDesc": "The Burndown chart will appear automatically once the system takes its first project snapshot.",
+    "riskIndex": "Predictive Risk Index",
+    "timeElapsed": "Time Elapsed",
+    "workCompleted": "Work Completed"
   },
   "resultDetails": {
     "expectedResult": "Expected Result",

@@ -218,7 +218,15 @@
     "activity7Days": "Actividad (7 días)",
     "overdueTaskSingle": "tarea atrasada",
     "overdueTaskPlural": "tareas atrasadas",
-    "noOverdueTasks": "Sin tareas vencidas"
+    "noOverdueTasks": "Sin tareas vencidas",
+    "workload": "Carga de Trabajo por Miembro",
+    "noWorkload": "No hay datos de carga de trabajo disponibles.",
+    "burndownChart": "Burndown Chart",
+    "burndownCollecting": "Recopilando datos históricos...",
+    "burndownDesc": "El gráfico de Burndown aparecerá automáticamente cuando el sistema tome la primera fotografía del proyecto.",
+    "riskIndex": "Índice de Riesgo Predictivo",
+    "timeElapsed": "Tiempo Transcurrido",
+    "workCompleted": "Trabajo Completado"
   },
   "resultDetails": {
     "expectedResult": "Resultado Esperado",

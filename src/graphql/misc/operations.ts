@@ -283,7 +283,6 @@ export const GET_PROJECT_METRICS = `
       completedTasks
       overdueTasksCount
       inReviewTasks
-      activityLast7Days
       tasksByColumn {
         boardId
         name
@@ -295,6 +294,36 @@ export const GET_PROJECT_METRICS = `
         title
         dueDate
         status
+      }
+      workload {
+        memberName
+        todo
+        inProgress
+        inReview
+        done
+      }
+      activityLast7Days
+      activityTrend {
+        date
+        count
+      }
+      burndownData {
+        date
+        totalTasks
+        completedTasks
+        todoTasks
+        inProgressTasks
+      }
+      projectRisk {
+        level
+        score
+        message
+        timeElapsedPercentage
+        workCompletedPercentage
+      }
+      dailyCompletions {
+        date
+        count
       }
     }
   }

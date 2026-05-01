@@ -10,6 +10,7 @@ import CreateTaskModal from '../../CreateTaskModal';
 import EditBoardModal from '../EditBoardModal';
 import CreateBoardModal from '../CreateBoardModal';
 import { useT } from '@/hooks/useT';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 
 import KanbanTaskCard from './KanbanTaskCard';
 import KanbanListView from './KanbanListView';
@@ -66,10 +67,31 @@ export default function KanbanBoard({ projectId, members, userRole, sprintId }: 
   const [boardToEdit, setBoardToEdit] = useState<any | null>(null);
   const [isCreateBoardOpen, setIsCreateBoardOpen] = useState(false);
 
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const taskIdFromUrl = searchParams.get('task');
+
   useEffect(() => {
     const savedView = localStorage.getItem('kanban-view-preference');
     if (savedView === 'list' || savedView === 'kanban') setViewMode(savedView as 'kanban' | 'list');
   }, []);
+
+  useEffect(() => {
+    if (tasks.length > 0 && taskIdFromUrl) {
+      const taskToOpen = tasks.find(t => t.id === taskIdFromUrl);
+      
+      if (taskToOpen) {
+        // Abrimos el modal con la tarea encontrada
+        openModal(taskToOpen.boardId, taskToOpen);
+        
+        // (Opcional pero recomendado): Limpiamos la URL para que no se vuelva a abrir si el usuario recarga la página
+        const newSearchParams = new URLSearchParams(searchParams.toString());
+        newSearchParams.delete('task');
+        router.replace(`${pathname}?${newSearchParams.toString()}`, { scroll: false });
+      }
+    }
+  }, [tasks, taskIdFromUrl, pathname, router, searchParams]);
 
   const handleSort = (key: string) => {
     let direction: 'asc' | 'desc' = 'asc';
