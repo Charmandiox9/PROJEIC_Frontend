@@ -1,5 +1,6 @@
 'use client';
 
+import { useCallback } from 'react';
 import { format } from 'date-fns'; // 🔥 Importante añadir esto
 import KanbanBoard from './kanban/KanbanBoard';
 import ScrumBoard from './scrum/ScrumBoard';
@@ -22,13 +23,15 @@ interface BoardRendererProps {
   projectId: string;
   members: ProjectMember[];
   userRole: string | null;
+  projectName: string;
+  setExportTrigger?: (fn: () => void) => void;
 }
 
-export default function BoardRenderer({ methodology, projectId, members, userRole }: BoardRendererProps) {
+export default function BoardRenderer({ methodology, projectId, members, userRole, projectName, setExportTrigger }: BoardRendererProps) {
   const { t } = useT();
 
   // 🔥 Movimos la función fuera de los IFs y antes de los RETURN
-  const handleExportCSV = (tasks: any[], projectName: string) => {
+  const handleExportCSV = useCallback((tasks: any[], projectName: string) => {
     const headers = ["ID", "Titulo", "Estado", "Prioridad", "Fecha Vencimiento"];
     const rows = tasks.map(t => [
       t.id,
@@ -47,17 +50,17 @@ export default function BoardRenderer({ methodology, projectId, members, userRol
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  };
+  }, []);
 
   // 🔥 Ahora pasamos la función a los hijos (debes actualizar los hijos para que acepten onExport)
   if (methodology === 'KANBAN') {
-    return <KanbanBoard projectId={projectId} members={members} userRole={userRole} onExport={handleExportCSV} />;
+    return <KanbanBoard projectId={projectId} members={members} userRole={userRole} projectName={projectName} onExport={handleExportCSV} setExportTrigger={setExportTrigger} />;
   }
   if (methodology === 'SCRUM') {
-    return <ScrumBoard projectId={projectId} members={members} userRole={userRole} onExport={handleExportCSV} />;
+    return <ScrumBoard projectId={projectId} members={members} userRole={userRole} projectName={projectName} onExport={handleExportCSV} setExportTrigger={setExportTrigger} />;
   }
   if (methodology === 'SCRUMBAN') {
-    return <ScrumbanBoard projectId={projectId} members={members} userRole={userRole} onExport={handleExportCSV} />;
+    return <ScrumbanBoard projectId={projectId} members={members} userRole={userRole} projectName={projectName} onExport={handleExportCSV} setExportTrigger={setExportTrigger} />;
   }
 
   return (

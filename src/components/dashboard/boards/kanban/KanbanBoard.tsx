@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Plus, Search, Loader2, Tag, LayoutGrid, List, Edit2, Trash2, CalendarIcon, BarChartHorizontal, FileDown } from 'lucide-react';
 import Select from '@/components/ui/Select';
 import { fetchGraphQL } from '@/lib/graphQLClient';
@@ -29,7 +29,9 @@ interface KanbanBoardProps {
   members: ProjectMember[];
   userRole: string | null;
   sprintId?: string;
+  projectName: string;
   onExport?: (tasks: any[], projectName: string) => void;
+  setExportTrigger?: (fn: () => void) => void;
 }
 
 const getStatusFromBoardName = (boardName: string): string => {
@@ -42,7 +44,9 @@ const getStatusFromBoardName = (boardName: string): string => {
   return 'TODO';
 };
 
-export default function KanbanBoard({ projectId, members, userRole, sprintId, onExport }: KanbanBoardProps) {
+export default function KanbanBoard({ 
+  projectId, members, userRole, sprintId, projectName, onExport, setExportTrigger 
+}: KanbanBoardProps) {
   const { t } = useT();
   const [boards, setBoards] = useState<any[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
@@ -81,11 +85,11 @@ export default function KanbanBoard({ projectId, members, userRole, sprintId, on
   useEffect(() => {
     if (tasks.length > 0 && taskIdFromUrl) {
       const taskToOpen = tasks.find(t => t.id === taskIdFromUrl);
-      
+
       if (taskToOpen) {
         // Abrimos el modal con la tarea encontrada
         openModal(taskToOpen.boardId, taskToOpen);
-        
+
         // (Opcional pero recomendado): Limpiamos la URL para que no se vuelva a abrir si el usuario recarga la página
         const newSearchParams = new URLSearchParams(searchParams.toString());
         newSearchParams.delete('task');
@@ -166,7 +170,7 @@ export default function KanbanBoard({ projectId, members, userRole, sprintId, on
   const handleDeleteTask = async (taskId: string) => {
     if (!confirm(t('kanban.confirmDeleteTask'))) return;
     setTasks(prev => prev.filter(t => t.id !== taskId));
-    try { await fetchGraphQL({ query: REMOVE_TASK, variables: { id: taskId } }); } 
+    try { await fetchGraphQL({ query: REMOVE_TASK, variables: { id: taskId } }); }
     catch { loadKanbanData(); }
   };
 
@@ -176,7 +180,7 @@ export default function KanbanBoard({ projectId, members, userRole, sprintId, on
       await fetchGraphQL({ query: DELETE_BOARD, variables: { id: boardId } });
       setBoards(prev => prev.filter(b => b.id !== boardId));
       loadKanbanData();
-    } catch (error: any) {}
+    } catch (error: any) { }
   };
 
   const openModal = (boardId?: string, task?: any) => {
@@ -219,48 +223,98 @@ export default function KanbanBoard({ projectId, members, userRole, sprintId, on
     });
   }
 
+  const tasksRef = useRef(tasks);
+  const projectNameRef = useRef(projectName);
+
+  useEffect(() => {
+    tasksRef.current = tasks;
+    projectNameRef.current = projectName;
+  }, [tasks, projectName]);
+
+  useEffect(() => {
+    if (onExport && setExportTrigger) {
+      setExportTrigger(() => onExport(tasksRef.current, projectNameRef.current));
+    }
+  }, [onExport, setExportTrigger]);
+
   if (isLoading) return <div className="flex justify-center py-32"><Loader2 className="w-8 h-8 text-brand animate-spin" /></div>;
 
   return (
     <div className="space-y-6 animate-in fade-in w-full min-w-0">
-      <div className="flex justify-end">
-         <button 
-           onClick={() => onExport?.(tasks, "Nombre_Proyecto")}
-           title={t('projectDetail.comingSoon')}
-           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-text-primary border border-border-primary rounded-lg hover:bg-surface-secondary transition-colors"
-         >
-           <FileDown className="w-3.5 h-3.5" /> {t('projectDetail.exportCsv')}
-         </button>
-      </div>
-      
+
       {/* TOOLBAR */}
-      <div className="flex flex-wrap items-end gap-2 sm:gap-3 bg-surface-primary p-3 sm:p-4 rounded-xl border border-border-primary shadow-sm">
-        <div className="relative flex-1 min-w-[140px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
-          <input type="text" placeholder={t('kanban.searchTasks')} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-9 pr-4 py-2 text-sm border border-border-secondary rounded-lg focus:ring-2 focus:ring-brand outline-none bg-surface-primary text-text-primary" />
+      <div className="flex flex-col gap-4 bg-surface-primary p-3 sm:p-4 rounded-xl border border-border-primary shadow-sm">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
+            <input 
+              type="text" 
+              placeholder={t('kanban.searchTasks')} 
+              value={searchTerm} 
+              onChange={(e) => setSearchTerm(e.target.value)} 
+              className="w-full pl-9 pr-4 py-2 text-sm border border-border-secondary rounded-lg focus:ring-2 focus:ring-brand outline-none bg-surface-primary text-text-primary" 
+            />
+          </div>
+          
+          <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+            <div className="relative flex-1 sm:flex-none sm:w-44">
+              <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
+              <input 
+                type="text" 
+                placeholder={t('kanban.filterTags')} 
+                value={tagFilter} 
+                onChange={(e) => setTagFilter(e.target.value)} 
+                className="w-full pl-9 pr-4 py-2 text-sm border border-border-secondary rounded-lg focus:ring-2 focus:ring-brand outline-none bg-surface-primary text-text-primary" 
+              />
+            </div>
+            <div className="flex-1 sm:flex-none sm:w-44">
+              <Select value={assigneeFilter} onChange={(e) => setAssigneeFilter(e.target.value)}>
+                <option value="">{t('kanban.assigneeAll')}</option>
+                {members.map(m => <option key={m.id} value={m.user.id}>{m.user.name}</option>)}
+              </Select>
+            </div>
+          </div>
+
+          {canManageTasks && (
+            <button 
+              onClick={() => openModal()} 
+              className="flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-brand rounded-lg hover:bg-brand-dark lg:ml-auto"
+            >
+              <Plus className="w-4 h-4" /> {t('kanban.newTask')}
+            </button>
+          )}
         </div>
-        <div className="relative w-36 sm:w-44">
-          <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
-          <input type="text" placeholder={t('kanban.filterTags')} value={tagFilter} onChange={(e) => setTagFilter(e.target.value)} className="w-full pl-9 pr-4 py-2 text-sm border border-border-secondary rounded-lg focus:ring-2 focus:ring-brand outline-none bg-surface-primary text-text-primary" />
-        </div>
-        <div className="w-36 sm:w-44">
-          <Select value={assigneeFilter} onChange={(e) => setAssigneeFilter(e.target.value)}>
-            <option value="">{t('kanban.assigneeAll')}</option>
-            {members.map(m => <option key={m.id} value={m.user.id}>{m.user.name}</option>)}
-          </Select>
-        </div>
-        {canManageTasks && (
-          <button onClick={() => openModal()} className="flex items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium text-white bg-brand rounded-lg hover:bg-brand-dark sm:ml-auto">
-            <Plus className="w-4 h-4" /> {t('kanban.newTask')}
-          </button>
-        )}
-        <div className="flex bg-surface-secondary rounded-lg border border-border-secondary p-1 shrink-0 mt-2 sm:mt-0">
-          <button onClick={() => { setViewMode('kanban'); localStorage.setItem('kanban-view-preference', 'kanban'); }} className={`flex items-center justify-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${viewMode === 'kanban' ? 'bg-surface-primary text-brand shadow-sm' : 'text-text-muted'}`}><LayoutGrid className="w-4 h-4" /> {t('kanban.viewKanban')}</button>
-          <button onClick={() => { setViewMode('list'); localStorage.setItem('kanban-view-preference', 'list'); }} className={`flex items-center justify-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${viewMode === 'list' ? 'bg-surface-primary text-brand shadow-sm' : 'text-text-muted'}`}><List className="w-4 h-4" /> {t('kanban.viewList')}</button>
-          <button onClick={() => { setViewMode('calendar'); localStorage.setItem('kanban-view-preference', 'calendar'); }} className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${viewMode === 'calendar' ? 'bg-surface-primary text-brand shadow-sm' : 'text-text-muted hover:text-text-primary'}`}><CalendarIcon className="w-4 h-4" /> {t('kanban.viewCalendar')}</button>
-          <button onClick={() => { setViewMode('gantt'); localStorage.setItem('kanban-view-preference', 'gantt'); }} className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${viewMode === 'gantt' ? 'bg-surface-primary text-brand shadow-sm' : 'text-text-muted hover:text-text-primary'}`}><BarChartHorizontal className="w-4 h-4" /> {t('kanban.viewGantt')}</button>
+
+        <div className="flex items-center gap-2 border-t border-border-primary pt-3 lg:border-t-0 lg:pt-0">
+          <div className="flex bg-surface-secondary rounded-lg border border-border-secondary p-1 overflow-x-auto nice-scrollbar max-w-full">
+            <button 
+              onClick={() => { setViewMode('kanban'); localStorage.setItem('kanban-view-preference', 'kanban'); }} 
+              className={`flex items-center gap-2 px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap ${viewMode === 'kanban' ? 'bg-surface-primary text-brand shadow-sm' : 'text-text-muted'}`}
+            >
+              <LayoutGrid className="w-4 h-4" /> {t('kanban.viewKanban')}
+            </button>
+            <button 
+              onClick={() => { setViewMode('list'); localStorage.setItem('kanban-view-preference', 'list'); }} 
+              className={`flex items-center gap-2 px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap ${viewMode === 'list' ? 'bg-surface-primary text-brand shadow-sm' : 'text-text-muted'}`}
+            >
+              <List className="w-4 h-4" /> {t('kanban.viewList')}
+            </button>
+            <button 
+              onClick={() => { setViewMode('calendar'); localStorage.setItem('kanban-view-preference', 'calendar'); }} 
+              className={`flex items-center gap-2 px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap ${viewMode === 'calendar' ? 'bg-surface-primary text-brand shadow-sm' : 'text-text-muted hover:text-text-primary'}`}
+            >
+              <CalendarIcon className="w-4 h-4" /> {t('kanban.viewCalendar')}
+            </button>
+            <button 
+              onClick={() => { setViewMode('gantt'); localStorage.setItem('kanban-view-preference', 'gantt'); }} 
+              className={`flex items-center gap-2 px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap ${viewMode === 'gantt' ? 'bg-surface-primary text-brand shadow-sm' : 'text-text-muted hover:text-text-primary'}`}
+            >
+              <BarChartHorizontal className="w-4 h-4" /> {t('kanban.viewGantt')}
+            </button>
+          </div>
         </div>
       </div>
+
 
       {/* RENDER VIEWS */}
       {viewMode === 'kanban' && (
@@ -304,17 +358,16 @@ export default function KanbanBoard({ projectId, members, userRole, sprintId, on
                   ) : (
                     <>
                       {(expandedColumns.has(board.id) ? boardTasks : boardTasks.slice(0, 3)).map((task) => (
-                        /* 🔥 USAMOS EL COMPONENTE DE LA TARJETA 🔥 */
-                        <KanbanTaskCard 
-                          key={task.id} 
-                          task={task} 
-                          members={members} 
-                          canManageTasks={canManageTasks} 
-                          isDragging={draggingTaskId === task.id} 
-                          onDragStart={handleDragStart} 
-                          onDragEnd={handleDragEnd} 
-                          onEdit={(t) => openModal(board.id, t)} 
-                          onDelete={handleDeleteTask} 
+                        <KanbanTaskCard
+                          key={task.id}
+                          task={task}
+                          members={members}
+                          canManageTasks={canManageTasks}
+                          isDragging={draggingTaskId === task.id}
+                          onDragStart={handleDragStart}
+                          onDragEnd={handleDragEnd}
+                          onEdit={(t) => openModal(board.id, t)}
+                          onDelete={handleDeleteTask}
                         />
                       ))}
                       {!expandedColumns.has(board.id) && boardTasks.length > 3 && (
@@ -343,31 +396,31 @@ export default function KanbanBoard({ projectId, members, userRole, sprintId, on
             </button>
           )}
         </div>
-      )} 
+      )}
 
       {viewMode === 'list' && (
-        <KanbanListView 
-          tasks={displayTasks} 
-          members={members} 
-          activeBoards={activeBoards} 
-          canManageTasks={canManageTasks} 
-          onSort={handleSort} 
-          onEdit={openModal} 
-          onDelete={handleDeleteTask} 
+        <KanbanListView
+          tasks={displayTasks}
+          members={members}
+          activeBoards={activeBoards}
+          canManageTasks={canManageTasks}
+          onSort={handleSort}
+          onEdit={openModal}
+          onDelete={handleDeleteTask}
         />
       )}
 
       {viewMode === 'calendar' && (
-        <ProjectCalendarView 
+        <ProjectCalendarView
           tasks={displayTasks}
-          onEditTask={openModal} 
+          onEditTask={openModal}
         />
       )}
 
       {viewMode === 'gantt' && (
-        <ProjectGanttView 
-          tasks={displayTasks} 
-          onEditTask={openModal} 
+        <ProjectGanttView
+          tasks={displayTasks}
+          onEditTask={openModal}
         />
       )}
 

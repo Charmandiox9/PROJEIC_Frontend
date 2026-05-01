@@ -145,14 +145,14 @@ export default function GithubIntegration({ project }: { project: any }) {
       {/* PANEL DE CONTROL SUPERIOR */}
       <div className="p-6 bg-surface-primary rounded-xl border border-border-primary space-y-4 shadow-sm">
         
-        {/* 🔥 NUEVO: Selector de Repositorios Múltiples */}
+        {/* 🔥 Selector de Repositorios Múltiples */}
         {project.repositories.length > 1 && (
-          <div className="flex items-center gap-3 p-3 bg-surface-secondary border border-border-secondary rounded-lg mb-4">
-            <label className="text-sm font-medium text-text-secondary">{t('github.activeRepo')}</label>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-surface-secondary/50 border border-border-secondary rounded-lg mb-4">
+            <label className="text-sm font-bold text-text-muted uppercase tracking-wider">{t('github.activeRepo')}</label>
             <select
               value={activeRepoId}
               onChange={(e) => setActiveRepoId(e.target.value)}
-              className="bg-surface-primary border border-border-secondary rounded-lg px-3 py-1.5 text-sm font-medium focus:ring-2 focus:ring-brand focus:border-brand outline-none transition-shadow"
+              className="bg-surface-primary border border-border-secondary rounded-lg px-3 py-1.5 text-sm font-medium focus:ring-2 focus:ring-brand focus:border-brand outline-none transition-shadow flex-1 min-w-0 truncate"
             >
               {project.repositories.map((repo: any) => (
                 <option key={repo.id} value={repo.id}>
@@ -163,20 +163,20 @@ export default function GithubIntegration({ project }: { project: any }) {
           </div>
         )}
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Github className="w-6 h-6 text-text-primary" />
-            <h3 className="font-bold text-lg flex items-center gap-2">
-              {activeRepo.name}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <Github className="w-6 h-6 text-text-primary shrink-0" />
+            <h3 className="font-bold sm:text-lg text-base flex flex-wrap items-baseline gap-x-2 min-w-0 flex-1 leading-tight">
+              <span className="break-words whitespace-normal">{activeRepo.name}</span>
               {project.repositories.length === 1 && (
-                <span className="text-sm font-normal text-text-muted">
+                <span className="text-xs sm:text-sm font-normal text-text-muted break-all">
                   ({activeRepo.owner}/{activeRepo.repoName})
                 </span>
               )}
             </h3>
           </div>
           {data && (
-            <span className="px-3 py-1 bg-green-500/10 text-green-500 text-[10px] font-bold rounded-full uppercase tracking-wider flex items-center gap-2">
+            <span className="px-3 py-1 bg-green-500/10 text-green-500 text-[10px] font-bold rounded-full uppercase tracking-wider flex items-center gap-2 shrink-0 w-fit">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> {t('github.synced')}
             </span>
           )}

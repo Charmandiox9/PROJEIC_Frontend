@@ -15,8 +15,9 @@ export default function EnvironmentsPanel({ deployments }: { deployments: any[] 
             <div className="flex justify-between items-start pl-2">
               <div>
                 <p className="text-xs text-text-muted font-bold uppercase tracking-wider">{dep.environment}</p>
-                <p className="text-sm font-bold text-text-primary mt-0.5 flex items-center gap-1">
-                  <GitBranch className="w-3 h-3 text-text-muted" /> {dep.ref}
+                <p className="text-sm font-bold text-text-primary mt-0.5 flex items-center gap-1 min-w-0">
+                  <GitBranch className="w-3 h-3 text-text-muted shrink-0" /> 
+                  <span className="truncate" title={dep.ref}>{dep.ref}</span>
                 </p>
               </div>
               <span className="flex h-2 w-2 relative">

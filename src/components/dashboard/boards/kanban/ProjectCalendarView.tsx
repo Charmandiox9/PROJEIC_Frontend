@@ -46,7 +46,7 @@ export default function ProjectCalendarView({ tasks, onEditTask }: ProjectCalend
       days.push(
         <div
           key={day.toString()}
-          className={`min-h-[120px] p-2 border-b border-r border-border-secondary transition-colors ${
+          className={`min-h-[100px] sm:min-h-[120px] p-1 sm:p-2 border-b border-r border-border-secondary transition-colors ${
             !isSameMonth(day, monthStart)
               ? "bg-surface-secondary/40 text-text-muted"
               : isToday(day) 
@@ -121,19 +121,30 @@ export default function ProjectCalendarView({ tasks, onEditTask }: ProjectCalend
         </div>
       </div>
 
-      {/* Días de la semana */}
-      <div className="grid grid-cols-7 bg-surface-primary border-b border-border-primary shadow-sm z-10">
-        {[0, 1, 2, 3, 4, 5, 6].map(dayIndex => (
-          <div key={dayIndex} className="py-3 text-center text-[11px] font-extrabold text-text-muted uppercase tracking-wider border-r border-border-secondary last:border-0">
-            {format(addDays(startOfWeek(new Date(), { weekStartsOn: 1 }), dayIndex), "EEEE", { locale: dateLocale })}
+      {/* Contenedor Scrollable para Header y Cuadrícula */}
+      <div className="flex-1 overflow-x-auto nice-scrollbar bg-surface-secondary/10">
+        <div className="min-w-[700px] flex flex-col h-full">
+          {/* Días de la semana */}
+          <div className="grid grid-cols-7 bg-surface-primary border-b border-border-primary shadow-sm z-10 sticky top-0">
+            {[0, 1, 2, 3, 4, 5, 6].map(dayIndex => (
+              <div key={dayIndex} className="py-3 text-center text-[9px] sm:text-[11px] font-extrabold text-text-muted uppercase tracking-wider border-r border-border-secondary last:border-0">
+                <span className="hidden sm:inline">
+                  {format(addDays(startOfWeek(new Date(), { weekStartsOn: 1 }), dayIndex), "EEEE", { locale: dateLocale })}
+                </span>
+                <span className="sm:hidden">
+                  {format(addDays(startOfWeek(new Date(), { weekStartsOn: 1 }), dayIndex), "EEE", { locale: dateLocale })}
+                </span>
+              </div>
+            ))}
           </div>
-        ))}
+
+          {/* Cuadrícula */}
+          <div className="flex-1">
+            {rows}
+          </div>
+        </div>
       </div>
 
-      {/* Cuadrícula */}
-      <div className="flex-1 overflow-y-auto bg-surface-secondary/10">
-        {rows}
-      </div>
     </div>
   );
 }

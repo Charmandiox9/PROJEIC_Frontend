@@ -784,6 +784,24 @@
     "deleteBtn": "Delete account",
     "comingSoon": "This feature will be available soon"
   },
+  "publicProjectModal": {
+    "errorNotFound": "Project not found.",
+    "errorLoading": "Error loading project information.",
+    "projectNotAvailable": "Project not available",
+    "noDescription": "This project does not have a detailed public description at this time. It is part of the PROJEIC development ecosystem.",
+    "technicalSheet": "Technical Sheet",
+    "startedOn": "Started on",
+    "methodology": "Methodology",
+    "nativeMethodology": "Projeic Native",
+    "subject": "Subject",
+    "period": "Period",
+    "professor": "Guiding professor",
+    "access": "Access",
+    "accessPublic": "Open Public",
+    "accessPrivate": "Restricted Private",
+    "participants": "Project Participants",
+    "noParticipants": "There are no public participants registered yet."
+  },
   "global": {
     "loginWithGoogle": "Log in with Google"
   }

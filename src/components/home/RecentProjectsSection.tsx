@@ -5,6 +5,7 @@ import { fetchGraphQL } from '@/lib/graphQLClient';
 import { GET_PUBLIC_PROJECTS } from '@/graphql/misc/operations';
 import { AVATAR_FALLBACK_URL } from '@/lib/constants';
 import { useT } from '@/hooks/useT';
+import { useRouter } from 'next/navigation';
 
 interface PublicUser {
   id: string;
@@ -37,6 +38,7 @@ const STATUS_BADGE: Record<string, string> = {
 };
 
 export default function RecentProjectsSection() {
+  const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -239,6 +241,7 @@ export default function RecentProjectsSection() {
                 className="w-[82vw] shrink-0 snap-center md:w-auto md:shrink md:snap-align-none border border-border-primary rounded-xl overflow-hidden hover:shadow-xl transition-shadow bg-surface-primary flex flex-col cursor-pointer"
                 onMouseEnter={handleCardEnter}
                 onMouseLeave={handleCardLeave}
+                onClick={() => router.push(`/proyectos?id=${project.id}`)}
               >
                 <div 
                   className="project-color-bar w-full shrink-0" 

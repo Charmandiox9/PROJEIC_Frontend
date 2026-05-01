@@ -32,19 +32,19 @@ export default function TeamRanking({ data, onSelectAuthor }: { data: any, onSel
             onClick={() => onSelectAuthor(author)}
             className="p-3 bg-surface-secondary border border-border-secondary rounded-lg cursor-pointer hover:border-brand hover:shadow-sm transition-all group flex items-center justify-between"
           >
-            <div className="flex items-center gap-3">
-              <div className="relative">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div className="relative shrink-0">
                 <img src={author.avatarUrl} alt="" className="w-10 h-10 rounded-full border-2 border-surface-primary group-hover:border-brand transition-colors" />
                 <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-surface-primary border border-border-secondary rounded-full flex items-center justify-center text-[10px] font-bold text-text-primary">
                   {index + 1}
                 </span>
               </div>
-              <div>
-                <p className="font-bold text-sm text-text-primary group-hover:text-brand transition-colors">{author.name}</p>
-                <p className="text-[10px] text-text-muted font-mono">{t('github.commitsInBranch').replace('{n}', author.totalCommits)}</p>
+              <div className="min-w-0 flex-1">
+                <p className="font-bold text-sm text-text-primary group-hover:text-brand transition-colors truncate" title={author.name}>{author.name}</p>
+                <p className="text-[10px] text-text-muted font-mono truncate">{t('github.commitsInBranch').replace('{n}', author.totalCommits)}</p>
               </div>
             </div>
-            <div className="flex flex-col items-end gap-1 text-[10px] font-mono">
+            <div className="flex flex-col items-end gap-1 text-[10px] font-mono shrink-0">
               <span className="text-green-500 bg-green-500/10 px-2 py-0.5 rounded">+{author.additions.toLocaleString()}</span>
               <span className="text-red-500 bg-red-500/10 px-2 py-0.5 rounded">-{author.deletions.toLocaleString()}</span>
             </div>

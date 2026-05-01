@@ -10,7 +10,7 @@ import BurndownChart from './BurndownChart';
 import { Loader2, Layout, History, LineChart } from 'lucide-react';
 import { useT } from '@/hooks/useT';
 
-export default function ScrumBoard({ projectId, members, userRole }: any) {
+export default function ScrumBoard({ projectId, members, userRole, onExport, setExportTrigger, projectName }: any) {
   const { t } = useT();
   const [allSprints, setAllSprints] = useState<any[]>([]);
   const [activeSprint, setActiveSprint] = useState<any>(null);
@@ -64,38 +64,40 @@ export default function ScrumBoard({ projectId, members, userRole }: any) {
     <div className="space-y-6">
 
       {/* SUB-MENÚ ESTILO JIRA */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-1 bg-gray-50/50 dark:bg-gray-800/50 p-1 rounded-xl border border-gray-100 dark:border-gray-700 w-full sm:w-fit">
+      {/* SUB-MENÚ ESTILO JIRA */}
+      <div className="flex items-center gap-1 bg-gray-50/50 dark:bg-gray-800/50 p-1 rounded-xl border border-gray-100 dark:border-gray-700 w-full overflow-x-auto nice-scrollbar">
         <button
           onClick={() => setCurrentView('board')}
-          className={`flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ${currentView === 'board'
-            ? 'bg-white dark:bg-gray-700 text-brand shadow-sm border border-gray-200/50 dark:border-gray-600'
-            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+          className={`flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all whitespace-nowrap ${currentView === 'board'
+            ? 'bg-surface-primary dark:bg-gray-700 text-brand shadow-sm border border-border-secondary'
+            : 'text-text-muted hover:text-text-primary hover:bg-surface-secondary'
             }`}
         >
           <Layout className="w-4 h-4 shrink-0" />
-          <span className="truncate">{activeSprint ? t('kanban.activeSprint') : t('kanban.planning')}</span>
+          <span>{activeSprint ? t('kanban.activeSprint') : t('kanban.planning')}</span>
         </button>
         <button
           onClick={() => setCurrentView('timeline')}
-          className={`flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ${currentView === 'timeline'
-            ? 'bg-white dark:bg-gray-700 text-brand shadow-sm border border-gray-200/50 dark:border-gray-600'
-            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+          className={`flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all whitespace-nowrap ${currentView === 'timeline'
+            ? 'bg-surface-primary dark:bg-gray-700 text-brand shadow-sm border border-border-secondary'
+            : 'text-text-muted hover:text-text-primary hover:bg-surface-secondary'
             }`}
         >
           <History className="w-4 h-4 shrink-0" />
-          <span className="truncate">{t('kanban.timelineHistory')}</span>
+          <span>{t('kanban.timelineHistory')}</span>
         </button>
         <button
           onClick={() => setCurrentView('burndown')}
-          className={`flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ${currentView === 'burndown'
-            ? 'bg-white dark:bg-gray-700 text-brand shadow-sm border border-gray-200/50 dark:border-gray-600'
-            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+          className={`flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all whitespace-nowrap ${currentView === 'burndown'
+            ? 'bg-surface-primary dark:bg-gray-700 text-brand shadow-sm border border-border-secondary'
+            : 'text-text-muted hover:text-text-primary hover:bg-surface-secondary'
             }`}
         >
           <LineChart className="w-4 h-4 shrink-0" />
-          <span className="truncate">{t('kanban.burndown')}</span>
+          <span>{t('kanban.burndown')}</span>
         </button>
       </div>
+
 
       {/* RENDERIZADO CONDICIONAL DE LA VISTA */}
       {currentView === 'timeline' ? (
@@ -137,6 +139,9 @@ export default function ScrumBoard({ projectId, members, userRole }: any) {
             members={members || []}
             userRole={userRole}
             sprintId={activeSprint.id}
+            projectName={projectName}
+            onExport={onExport}
+            setExportTrigger={setExportTrigger}
           />
         </div>
       ) : (

@@ -20,9 +20,11 @@ const GET_BURNDOWN = `
 export default function BurndownChart({ sprintId }: { sprintId: string }) {
   const { t } = useT();
   const [data, setData] = useState([]);
+  const [isMounted, setIsMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    setIsMounted(true);
     const loadData = async () => {
       if (!sprintId) return;
       try {
@@ -37,7 +39,7 @@ export default function BurndownChart({ sprintId }: { sprintId: string }) {
     loadData();
   }, [sprintId]);
 
-  if (isLoading) return <div className="h-64 flex justify-center items-center"><Loader2 className="animate-spin text-brand" /></div>;
+  if (!isMounted || isLoading) return <div className="h-64 flex justify-center items-center"><Loader2 className="animate-spin text-brand" /></div>;
   if (data.length === 0) return <div className="h-64 flex justify-center items-center text-gray-400 text-sm">{t('kanban.burndownNoData')}</div>;
 
   return (

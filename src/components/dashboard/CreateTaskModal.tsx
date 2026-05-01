@@ -125,12 +125,18 @@ export default function CreateTaskModal({
 
   useEffect(() => {
     if (isOpen) {
+      document.body.style.overflow = 'hidden';
       setFormData(buildInitialForm());
       setIsSubmitting(false);
       setError(null);
       setNewComment('');
       setLocalComments(taskToEdit?.comments || []);
+    } else {
+      document.body.style.overflow = 'unset';
     }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
   }, [isOpen, taskToEdit, defaultBoardId, boards]);
 
   if (!isOpen) return null;
@@ -249,8 +255,11 @@ export default function CreateTaskModal({
   const modalTitle = isCompletelyReadOnly ? t('createTask.titleReadOnly') : (isEditing ? t('createTask.titleEdit') : t('createTask.titleNew'));
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-surface-primary rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200 custom-scrollbar">
+    <div 
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
+    >
+      <div className="bg-surface-primary rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 cursor-default">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-primary sticky top-0 bg-surface-primary z-10">
           <h2 className="text-lg font-bold text-text-primary">
             {modalTitle}
@@ -260,7 +269,8 @@ export default function CreateTaskModal({
           </button>
         </div>
 
-        <form onSubmit={isCompletelyReadOnly ? (e) => e.preventDefault() : handleSubmit} className="p-6 space-y-4">
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
+          <form onSubmit={isCompletelyReadOnly ? (e) => e.preventDefault() : handleSubmit} className="p-6 space-y-4">
           {error && <div className="p-3 text-sm text-red-600 bg-red-50 border rounded-lg">{error}</div>}
 
           <Input id="task-title" label={t('createTask.fieldTitle')} name="title" required value={formData.title} onChange={handleChange} disabled={!canEditDetails} />
@@ -378,7 +388,8 @@ export default function CreateTaskModal({
               </>
             )}
           </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );

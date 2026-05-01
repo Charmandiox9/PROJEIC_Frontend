@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { X, Loader2, UserPlus } from 'lucide-react';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { ADD_PROJECT_MEMBER } from '@/graphql/misc/operations';
@@ -24,6 +24,17 @@ export default function AddMemberModal({ isOpen, projectId, onClose, onSuccess }
     role: 'STUDENT',
   });
   const [showSuccess, setShowSuccess] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
 
   if (!isOpen) {
     if (showSuccess) setShowSuccess(false);
@@ -101,8 +112,11 @@ export default function AddMemberModal({ isOpen, projectId, onClose, onSuccess }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-surface-primary rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+    <div 
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
+    >
+      <div className="bg-surface-primary rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 cursor-default">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-primary">
           <h2 className="text-xl font-bold text-text-primary flex items-center gap-2">
             <UserPlus className="w-5 h-5 text-brand" /> {t('addMember.title')}

@@ -25,8 +25,10 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
   const dateLocale = locale === 'en' ? enUS : es;
   const [metrics, setMetrics] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     if (!projectId) return;
 
     const loadMetrics = async () => {
@@ -45,7 +47,7 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
     loadMetrics();
   }, [projectId]);
 
-  if (isLoading) {
+  if (isLoading || !isMounted) {
     return (
       <div className="flex justify-center items-center py-20">
         <Loader2 className="w-8 h-8 text-brand animate-spin" />
@@ -201,7 +203,7 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
           
           {metrics.activityTrend && metrics.activityTrend.length > 0 && (
             <div className="absolute bottom-0 left-0 right-0 h-16 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height={64}>
                 <AreaChart data={metrics.activityTrend}>
                   <defs>
                     <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
@@ -240,7 +242,7 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
             </div>
           ) : (
             <div className="h-[250px] w-full mt-4">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
                   <Pie
                     data={pieChartData}
@@ -318,42 +320,44 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
         </h3>
         
         {metrics.workload && metrics.workload.length > 0 ? (
-          <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={metrics.workload}
-                margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" className="dark:stroke-gray-700" />
-                <XAxis 
-                  dataKey="memberName" 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fill: '#6b7280', fontSize: 12 }} 
-                />
-                <YAxis 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fill: '#6b7280', fontSize: 12 }} 
-                  allowDecimals={false}
-                />
-                <RechartsTooltip 
-                  cursor={{ fill: 'rgba(0,0,0,0.05)' }}
-                  contentStyle={{ 
-                    borderRadius: '8px', 
-                    border: 'none', 
-                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                    backgroundColor: 'var(--bg-surface-primary, #ffffff)' 
-                  }}
-                />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
-                
-                <Bar dataKey="todo" name={t('kanban.todo') || 'Por Hacer'} stackId="a" fill="#9CA3AF" radius={[0, 0, 4, 4]} />
-                <Bar dataKey="inProgress" name={t('kanban.inProgress') || 'En Progreso'} stackId="a" fill="#3B82F6" />
-                <Bar dataKey="inReview" name={t('kanban.statusInReview') || 'En Revisión'} stackId="a" fill="#F59E0B" />
-                <Bar dataKey="done" name={t('kanban.done') || 'Completado'} stackId="a" fill="#10B981" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+          <div className="w-full overflow-x-auto nice-scrollbar pb-2">
+            <div className="h-[300px] min-w-[600px] lg:min-w-0 w-full">
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart
+                  data={metrics.workload}
+                  margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" className="dark:stroke-gray-700" />
+                  <XAxis 
+                    dataKey="memberName" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: '#6b7280', fontSize: 12 }} 
+                  />
+                  <YAxis 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: '#6b7280', fontSize: 12 }} 
+                    allowDecimals={false}
+                  />
+                  <RechartsTooltip 
+                    cursor={{ fill: 'rgba(0,0,0,0.05)' }}
+                    contentStyle={{ 
+                      borderRadius: '8px', 
+                      border: 'none', 
+                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                      backgroundColor: 'var(--bg-surface-primary, #ffffff)' 
+                    }}
+                  />
+                  <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
+                  
+                  <Bar dataKey="todo" name={t('kanban.todo') || 'Por Hacer'} stackId="a" fill="#9CA3AF" radius={[0, 0, 4, 4]} />
+                  <Bar dataKey="inProgress" name={t('kanban.inProgress') || 'En Progreso'} stackId="a" fill="#3B82F6" />
+                  <Bar dataKey="inReview" name={t('kanban.statusInReview') || 'En Revisión'} stackId="a" fill="#F59E0B" />
+                  <Bar dataKey="done" name={t('kanban.done') || 'Completado'} stackId="a" fill="#10B981" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         ) : (
           <div className="text-center py-8 flex flex-col justify-center h-[300px]">
@@ -375,56 +379,58 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
         </div>
         
         {metrics.burndownData && metrics.burndownData.length > 0 ? (
-          <div className="h-[350px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={metrics.burndownData}
-                margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" className="dark:stroke-gray-700" />
-                <XAxis 
-                  dataKey="date" 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fill: '#6b7280', fontSize: 12 }}
-                  tickFormatter={(val) => format(new Date(val), "d MMM", { locale: dateLocale })} 
-                />
-                <YAxis 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fill: '#6b7280', fontSize: 12 }} 
-                  allowDecimals={false}
-                />
-                <RechartsTooltip 
-                  cursor={{ stroke: '#9CA3AF', strokeWidth: 1, strokeDasharray: '3 3' }}
-                  contentStyle={{ 
-                    borderRadius: '8px', 
-                    border: 'none', 
-                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                    backgroundColor: 'var(--bg-surface-primary, #ffffff)' 
-                  }}
-                  labelFormatter={(label) => format(new Date(label), "d MMMM yyyy", { locale: dateLocale })}
-                />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
-                
-                <Line 
-                  type="stepAfter" 
-                  dataKey="totalTasks" 
-                  name="Total de Tareas" 
-                  stroke="#9CA3AF" 
-                  strokeWidth={2} 
-                  dot={false}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="completedTasks" 
-                  name="Tareas Completadas" 
-                  stroke="#10B981" 
-                  strokeWidth={3} 
-                  activeDot={{ r: 6, strokeWidth: 0 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+          <div className="w-full overflow-x-auto nice-scrollbar pb-2">
+            <div className="h-[350px] min-w-[600px] lg:min-w-0 w-full">
+              <ResponsiveContainer width="100%" height={350}>
+                <LineChart
+                  data={metrics.burndownData}
+                  margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" className="dark:stroke-gray-700" />
+                  <XAxis 
+                    dataKey="date" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: '#6b7280', fontSize: 12 }}
+                    tickFormatter={(val) => format(new Date(val), "d MMM", { locale: dateLocale })} 
+                  />
+                  <YAxis 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: '#6b7280', fontSize: 12 }} 
+                    allowDecimals={false}
+                  />
+                  <RechartsTooltip 
+                    cursor={{ stroke: '#9CA3AF', strokeWidth: 1, strokeDasharray: '3 3' }}
+                    contentStyle={{ 
+                      borderRadius: '8px', 
+                      border: 'none', 
+                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                      backgroundColor: 'var(--bg-surface-primary, #ffffff)' 
+                    }}
+                    labelFormatter={(label) => format(new Date(label), "d MMMM yyyy", { locale: dateLocale })}
+                  />
+                  <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
+                  
+                  <Line 
+                    type="stepAfter" 
+                    dataKey="totalTasks" 
+                    name="Total de Tareas" 
+                    stroke="#9CA3AF" 
+                    strokeWidth={2} 
+                    dot={false}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="completedTasks" 
+                    name="Tareas Completadas" 
+                    stroke="#10B981" 
+                    strokeWidth={3} 
+                    activeDot={{ r: 6, strokeWidth: 0 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         ) : (
           <div className="text-center py-12 flex flex-col items-center justify-center h-[300px] border-2 border-dashed border-gray-100 dark:border-gray-700 rounded-lg">

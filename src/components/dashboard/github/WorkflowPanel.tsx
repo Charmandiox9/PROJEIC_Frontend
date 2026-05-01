@@ -24,13 +24,13 @@ export default function WorkflowPanel({ workflows, workflowFile, setWorkflowFile
 
   return (
     <div className="bg-surface-primary border border-border-primary rounded-xl p-5 flex-1 flex flex-col">
-      <div className="flex justify-between items-center mb-4">
-        <h4 className="font-bold flex items-center gap-2 text-lg">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+        <h4 className="font-bold flex items-center gap-2 text-lg shrink-0">
           <Activity className="w-5 h-5 text-brand" /> {t('github.deployments')}
         </h4>
-        <div className="flex gap-2">
-          <input type="text" placeholder="main.yml" value={workflowFile} onChange={(e) => setWorkflowFile(e.target.value)} className="text-[10px] px-2 py-1 bg-surface-secondary border border-border-secondary rounded outline-none focus:border-brand w-24" />
-          <button onClick={handleDispatch} disabled={dispatching || !token} className="flex items-center gap-1 px-3 py-1 bg-brand text-white text-[10px] font-bold rounded hover:bg-brand-hover disabled:opacity-50 transition-colors">
+        <div className="flex gap-2 w-full sm:w-auto">
+          <input type="text" placeholder="main.yml" value={workflowFile} onChange={(e) => setWorkflowFile(e.target.value)} className="text-[10px] px-2 py-1 bg-surface-secondary border border-border-secondary rounded outline-none focus:border-brand flex-1 sm:w-24 min-w-0" />
+          <button onClick={handleDispatch} disabled={dispatching || !token} className="flex items-center gap-1 px-3 py-1 bg-brand text-white text-[10px] font-bold rounded hover:bg-brand-hover disabled:opacity-50 transition-colors shrink-0">
             <Play className="w-3 h-3 fill-current" /> {dispatching ? t('github.running') : t('github.run')}
           </button>
         </div>

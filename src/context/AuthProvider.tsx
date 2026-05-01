@@ -1,5 +1,5 @@
 'use client';
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface User {
@@ -32,8 +32,15 @@ function readUserFromStorage(): User | null {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(readUserFromStorage);
+  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    const storedUser = readUserFromStorage();
+    if (storedUser) {
+      setUser(storedUser);
+    }
+  }, []);
 
   const logout = () => {
     localStorage.removeItem('projeic_accessToken');
