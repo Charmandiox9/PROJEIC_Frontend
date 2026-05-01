@@ -26,6 +26,7 @@ import {
 import { useAuth } from '@/context/AuthProvider';
 import { Project } from '@/types/project';
 import { useT } from '@/hooks/useT';
+import { useSearchParams, usePathname } from 'next/navigation';
 
 import UpdateProjectModal from '@/components/dashboard/UpdateProjectModal';
 import BoardRenderer from '@/components/dashboard/boards/BoardRenderer';
@@ -45,11 +46,14 @@ export default function ProjectDetailPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { t } = useT();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
 
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<TabId>('resumen');
+  const initialTab: TabId = searchParams.get('task') ? 'tablero' : 'resumen';
+  const [activeTab, setActiveTab] = useState<TabId>(initialTab);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
@@ -113,6 +117,15 @@ export default function ProjectDetailPage() {
     } catch {
       alert(t('projectDetail.errorRemove'));
     }
+  };
+
+  const handleJumpToTask = (taskId: string) => {
+    setActiveTab('tablero');
+    
+    const newSearchParams = new URLSearchParams(searchParams.toString());
+    newSearchParams.set('task', taskId);
+    
+    router.push(`${pathname}?${newSearchParams.toString()}`, { scroll: false });
   };
 
   if (isLoading && !project) return <div className="min-h-[60vh] flex items-center justify-center"><Loader2 className="w-8 h-8 text-brand animate-spin" /></div>;
@@ -230,7 +243,7 @@ export default function ProjectDetailPage() {
         )}
 
         {activeTab === 'actividad' && <ActivityFeed project={project} />}
-        {activeTab === 'metricas' && <TabMetricas projectId={project.id} />}
+        {activeTab === 'metricas' && <TabMetricas projectId={project.id} onTaskClick={handleJumpToTask} />}
         {activeTab === 'miembros' && (
           <TabMiembros
             project={project}

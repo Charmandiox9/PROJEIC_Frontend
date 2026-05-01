@@ -1,19 +1,23 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Loader2, AlertCircle, Calendar } from 'lucide-react';
+import { Loader2, AlertCircle, Calendar, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale/es';
+import { enUS } from 'date-fns/locale/en-US';
+import Link from 'next/link';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts'; 
+
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { GET_PROJECT_METRICS } from '@/graphql/misc/operations';
 import { useT } from '@/hooks/useT';
-import { enUS } from 'date-fns/locale/en-US';
 
 interface TabMetricasProps {
   projectId: string;
+  onTaskClick: (taskId: string) => void;
 }
 
-export default function TabMetricas({ projectId }: TabMetricasProps) {
+export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps) {
   const { t, locale } = useT();
   const dateLocale = locale === 'en' ? enUS : es;
   const [metrics, setMetrics] = useState<any>(null);
@@ -53,9 +57,10 @@ export default function TabMetricas({ projectId }: TabMetricasProps) {
     : 0;
 
   const hasOverdue = metrics.overdueTasksCount > 0;
-  const healthColor = hasOverdue ? '#ef4444' : '#22c55e';
   const healthBgColor = hasOverdue ? 'bg-red-500' : 'bg-green-500';
-  const healthText = hasOverdue ? `${metrics.overdueTasksCount} ${metrics.overdueTasksCount === 1 ? t('tabMetricas.overdueTaskSingle') : t('tabMetricas.overdueTaskPlural')}` : t('tabMetricas.noOverdueTasks');
+  const healthText = hasOverdue 
+    ? `${metrics.overdueTasksCount} ${metrics.overdueTasksCount === 1 ? t('tabMetricas.overdueTaskSingle') : t('tabMetricas.overdueTaskPlural')}` 
+    : t('tabMetricas.noOverdueTasks');
 
   const metricCards = [
     { label: t('tabMetricas.totalTasks'), value: metrics.totalTasks },
@@ -64,10 +69,15 @@ export default function TabMetricas({ projectId }: TabMetricasProps) {
     { label: t('tabMetricas.activity7Days'), value: metrics.activityLast7Days },
   ];
 
+  const chartData = metrics.tasksByColumn.map((col: any) => ({
+    name: col.name,
+    value: col.count,
+    color: col.color || '#3B82F6'
+  }));
+
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
 
-      {/* TARJETA DE SALUD DEL PROYECTO */}
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6 flex items-center gap-6 shadow-sm">
         <div className="relative w-20 h-20 shrink-0">
           <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
@@ -98,7 +108,6 @@ export default function TabMetricas({ projectId }: TabMetricasProps) {
         </div>
       </div>
 
-      {/* MÉTRICAS RÁPIDAS */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {metricCards.map((card) => (
           <div key={card.label} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-5 shadow-sm hover:border-brand/30 transition-colors">
@@ -108,47 +117,52 @@ export default function TabMetricas({ projectId }: TabMetricasProps) {
         ))}
       </div>
 
-      {/* ESTADÍSTICAS POR COLUMNA & TAREAS VENCIDAS */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-        {/* AVANCE POR COLUMNA */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6 shadow-sm">
-          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-6">{t('tabMetricas.boardDistribution')}</h3>
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6 shadow-sm flex flex-col">
+          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-2">{t('tabMetricas.boardDistribution')}</h3>
+          
           {metrics.tasksByColumn.length === 0 ? (
-            <div className="text-center py-8">
+            <div className="text-center py-8 flex-1 flex flex-col justify-center">
               <p className="text-sm text-gray-400">{t('tabMetricas.noColumns')}</p>
             </div>
           ) : (
-            <div className="space-y-4">
-              {metrics.tasksByColumn.map((col: any) => {
-                const percentage = metrics.totalTasks > 0 ? Math.round((col.count / metrics.totalTasks) * 100) : 0;
-                return (
-                  <div key={col.boardId}>
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="font-medium text-gray-700 dark:text-gray-300">{col.name}</span>
-                      <span className="text-gray-500 dark:text-gray-400">{col.count} {t('tabMetricas.tasksCount')} ({percentage}%)</span>
-                    </div>
-                    <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2">
-                      <div
-                        className="h-2 rounded-full transition-all duration-1000"
-                        style={{ width: `${percentage}%`, backgroundColor: col.color || '#3B82F6' }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="h-[250px] w-full mt-4">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={chartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={90}
+                    paddingAngle={3}
+                    dataKey="value"
+                  >
+                    {chartData.map((entry: any, index: number) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} stroke="transparent" />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                    formatter={(value) => [`${value} tareas`, 'Total']}
+                  />
+                  <Legend verticalAlign="bottom" height={36} iconType="circle" />
+                </PieChart>
+              </ResponsiveContainer>
             </div>
           )}
         </div>
 
-        {/* LISTA DE TAREAS VENCIDAS */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6 shadow-sm">
-          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-            {t('tabMetricas.overdueList')} {hasOverdue && <span className="bg-red-100 text-red-600 text-[10px] px-2 py-0.5 rounded-full">{metrics.overdueTasksList.length}</span>}
-          </h3>
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6 shadow-sm flex flex-col">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+              {t('tabMetricas.overdueList')} 
+              {hasOverdue && <span className="bg-red-100 text-red-600 text-[10px] px-2 py-0.5 rounded-full">{metrics.overdueTasksList.length}</span>}
+            </h3>
+          </div>
 
           {metrics.overdueTasksList.length === 0 ? (
-            <div className="text-center py-10 flex flex-col items-center">
+            <div className="text-center py-10 flex flex-col items-center flex-1 justify-center">
               <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center mb-3">
                 <Calendar className="w-6 h-6 text-green-500" />
               </div>
@@ -156,26 +170,32 @@ export default function TabMetricas({ projectId }: TabMetricasProps) {
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('tabMetricas.noOverdueDesc')}</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 overflow-y-auto max-h-[250px] pr-2 custom-scrollbar">
               {metrics.overdueTasksList.map((task: any) => (
-                <div key={task.id} className="flex items-start justify-between p-3 bg-red-50/50 border border-red-100 rounded-lg">
+                <button
+                  onClick={() => onTaskClick(task.id)}
+                  key={task.id} 
+                  className="w-full text-left flex items-center justify-between p-3 bg-red-50/50 hover:bg-red-50 border border-red-100 hover:border-red-200 transition-colors rounded-lg group"
+                >
                   <div>
-                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-1">{task.title}</p>
+                    <p className="text-sm font-semibold text-gray-900 group-hover:text-red-700 line-clamp-1 transition-colors">{task.title}</p>
                     <div className="flex items-center gap-1.5 mt-1 text-xs text-red-600 font-medium">
                       <AlertCircle className="w-3.5 h-3.5" />
                       {t('tabMetricas.overdueSince')} {format(new Date(task.dueDate), "d MMM yyyy", { locale: dateLocale })}
                     </div>
                   </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider bg-white dark:bg-gray-700 px-2 py-1 rounded text-gray-500 dark:text-gray-300 border border-gray-200 dark:border-gray-600">
-                    {task.status}
-                  </span>
-                </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[10px] font-bold uppercase tracking-wider bg-white px-2 py-1 rounded text-gray-500 border border-gray-200">
+                      {task.status}
+                    </span>
+                    <ArrowRight className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                </button>
               ))}
             </div>
           )}
         </div>
       </div>
-
     </div>
   );
 }
