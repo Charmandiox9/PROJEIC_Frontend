@@ -296,6 +296,13 @@ export const GET_PROJECT_METRICS = `
         dueDate
         status
       }
+      workload {
+        memberName
+        todo
+        inProgress
+        inReview
+        done
+      }
     }
   }
 `;

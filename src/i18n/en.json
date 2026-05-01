@@ -218,7 +218,9 @@
     "activity7Days": "Activity (7 days)",
     "overdueTaskSingle": "overdue task",
     "overdueTaskPlural": "overdue tasks",
-    "noOverdueTasks": "No overdue tasks"
+    "noOverdueTasks": "No overdue tasks",
+    "workload": "Workload by Member",
+    "noWorkload": "No workload data available."
   },
   "resultDetails": {
     "expectedResult": "Expected Result",

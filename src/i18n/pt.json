@@ -218,7 +218,9 @@
     "activity7Days": "Atividade (7 dias)",
     "overdueTaskSingle": "tarefa atrasada",
     "overdueTaskPlural": "tarefas atrasadas",
-    "noOverdueTasks": "Sem tarefas atrasadas"
+    "noOverdueTasks": "Sem tarefas atrasadas",
+    "workload": "Carga de Trabalho por Membro",
+    "noWorkload": "Não há dados de carga de trabalho disponíveis."
   },
   "resultDetails": {
     "expectedResult": "Resultado Esperado",

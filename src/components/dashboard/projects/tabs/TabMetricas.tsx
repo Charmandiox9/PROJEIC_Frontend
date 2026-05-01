@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale/es';
 import { enUS } from 'date-fns/locale/en-US';
 import Link from 'next/link';
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts'; 
+import { PieChart, Pie, Cell, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts'; 
 
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { GET_PROJECT_METRICS } from '@/graphql/misc/operations';
@@ -195,6 +195,56 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
             </div>
           )}
         </div>
+      </div>
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6 shadow-sm mt-6">
+        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-6">
+          {t('tabMetricas.workload') || 'Carga de Trabajo por Miembro'}
+        </h3>
+        
+        {metrics.workload && metrics.workload.length > 0 ? (
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={metrics.workload}
+                margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                <XAxis 
+                  dataKey="memberName" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fill: '#6b7280', fontSize: 12 }} 
+                />
+                <YAxis 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fill: '#6b7280', fontSize: 12 }} 
+                  allowDecimals={false}
+                />
+                <RechartsTooltip 
+                  cursor={{ fill: 'rgba(0,0,0,0.05)' }}
+                  contentStyle={{ 
+                    borderRadius: '8px', 
+                    border: 'none', 
+                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                    backgroundColor: 'var(--bg-surface-primary, #ffffff)' 
+                  }}
+                />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
+                
+                {/* Barras Apiladas (Stacked) */}
+                <Bar dataKey="todo" name={t('kanban.todo') || 'Por Hacer'} stackId="a" fill="#9CA3AF" radius={[0, 0, 4, 4]} />
+                <Bar dataKey="inProgress" name={t('kanban.inProgress') || 'En Progreso'} stackId="a" fill="#3B82F6" />
+                <Bar dataKey="inReview" name={t('kanban.statusInReview') || 'En Revisión'} stackId="a" fill="#F59E0B" />
+                <Bar dataKey="done" name={t('kanban.done') || 'Completado'} stackId="a" fill="#10B981" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div className="text-center py-8 flex flex-col justify-center h-[300px]">
+            <p className="text-sm text-gray-400">{t('tabMetricas.noWorkload') || 'No hay datos de carga de trabajo disponibles.'}</p>
+          </div>
+        )}
       </div>
     </div>
   );
