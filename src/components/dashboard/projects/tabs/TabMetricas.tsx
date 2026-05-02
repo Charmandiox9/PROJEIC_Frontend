@@ -32,6 +32,17 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
     return new Intl.NumberFormat('es-CL', {
       style: 'currency',
       currency: 'CLP',
+      maximumFractionDigits: 0 
+    }).format(amount || 0);
+  };
+
+  const formatCompactCurrency = (amount: number) => {
+    return new Intl.NumberFormat('es-CL', {
+      notation: 'compact',
+      compactDisplay: 'short',
+      style: 'currency',
+      currency: 'CLP',
+      maximumFractionDigits: 1
     }).format(amount || 0);
   };
 
@@ -88,7 +99,7 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
   }));
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
+    <div className="space-y-6 animate-in fade-in duration-300 pb-12">
 
       {/* TARJETA DE SALUD DEL PROYECTO */}
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6 flex items-center gap-6 shadow-sm">
@@ -154,7 +165,6 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
                 {metrics.projectRisk.message}
               </p>
               
-              {/* Mostramos las barras solo si tenemos datos calculables */}
               {metrics.projectRisk.level !== 'UNKNOWN' && (
                 <div className="mt-4 flex flex-col md:flex-row gap-6">
                   <div className="flex-1">
@@ -229,7 +239,7 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
                   />
                   <RechartsTooltip 
                     cursor={false}
-                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', backgroundColor: 'var(--bg-surface-primary, #ffffff)' }}
                     labelFormatter={(label) => format(new Date(label), "d MMM", { locale: dateLocale })}
                   />
                 </AreaChart>
@@ -450,35 +460,31 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
           </div>
         )}
       </div>
-
-      {/* ==================================================
-          2. NUEVA SECCIÓN: MÉTRICAS FINANCIERAS (BURN RATE)
-          ================================================== */}
       
       {metrics.financialTrend && metrics.financialTrend.length > 0 && (
-        <div className="mt-12 pt-8 border-t border-border-primary space-y-6">
+        <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-800 space-y-6">
           
           <div className="flex items-center gap-3 mb-2">
             <div className="bg-brand/10 p-2 rounded-lg text-brand">
               <TrendingDown className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-text-primary">Burn Rate & Salud Financiera</h2>
-              <p className="text-sm text-text-muted">Análisis de cómo el proyecto está consumiendo su presupuesto institucional.</p>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Burn Rate & Salud Financiera</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Análisis de cómo el proyecto está consumiendo su presupuesto institucional.</p>
             </div>
           </div>
 
           {/* Tarjetas resumen financiero */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-surface-primary border border-border-primary p-6 rounded-2xl shadow-sm">
-              <div className="flex items-center gap-2 text-text-muted mb-2">
+            <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-6 rounded-2xl shadow-sm">
+              <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2">
                 <Wallet className="w-4 h-4" />
                 <h4 className="text-sm font-semibold uppercase tracking-wider">Presupuesto Actual</h4>
               </div>
-              <p className="text-3xl font-black text-text-primary">{formatCurrency(metrics.currentBalance || 0)}</p>
+              <p className="text-3xl font-black text-gray-900 dark:text-gray-100">{formatCurrency(metrics.currentBalance || 0)}</p>
             </div>
-            <div className="bg-surface-primary border border-border-primary p-6 rounded-2xl shadow-sm">
-              <div className="flex items-center gap-2 text-text-muted mb-2">
+            <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-6 rounded-2xl shadow-sm">
+              <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2">
                 <TrendingDown className="w-4 h-4" />
                 <h4 className="text-sm font-semibold uppercase tracking-wider">Total Gastado</h4>
               </div>
@@ -489,41 +495,51 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
             
             {/* GRÁFICO 1: EVOLUCIÓN DEL BALANCE (BURN RATE) */}
-            <div className="xl:col-span-2 bg-surface-primary rounded-2xl border border-border-primary p-6 shadow-sm">
-              <h3 className="text-sm font-bold text-text-muted uppercase tracking-widest mb-6">Proyección de Gastos (Burn Rate)</h3>
+            <div className="xl:col-span-2 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6 shadow-sm">
+              <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-6">Proyección de Gastos (Burn Rate)</h3>
               <div className="w-full overflow-x-auto nice-scrollbar pb-2">
                 <div className="h-[300px] min-w-[600px] lg:min-w-0 w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <ComposedChart data={metrics.financialTrend} margin={{ top: 10, right: 10, left: 20, bottom: 0 }}>
+                    <ComposedChart data={metrics.financialTrend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                       <defs>
                         <linearGradient id="colorBalance" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
                           <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-primary)" />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" className="dark:stroke-gray-700" />
                       <XAxis 
                         dataKey="date" 
                         axisLine={false} tickLine={false} 
-                        tick={{ fill: 'var(--text-muted)', fontSize: 12 }}
+                        tick={{ fill: '#6b7280', fontSize: 12 }}
                         tickFormatter={(val) => format(new Date(val), "d MMM", { locale: dateLocale })}
                       />
+                      
                       <YAxis 
                         yAxisId="left"
                         axisLine={false} tickLine={false} 
-                        tick={{ fill: 'var(--text-muted)', fontSize: 12 }}
-                        tickFormatter={(val) => `$${(val / 1000)}k`} // Formato abreviado
+                        tick={{ fill: '#10B981', fontSize: 12 }}
+                        tickFormatter={(val) => formatCompactCurrency(val)} 
                       />
+                      
+                      <YAxis 
+                        yAxisId="right"
+                        orientation="right"
+                        axisLine={false} tickLine={false} 
+                        tick={{ fill: '#EF4444', fontSize: 12 }}
+                        tickFormatter={(val) => formatCompactCurrency(val)} 
+                      />
+
                       <RechartsTooltip 
-                        contentStyle={{ borderRadius: '12px', border: '1px solid var(--border-primary)', backgroundColor: 'var(--bg-surface-primary)' }}
-                        labelFormatter={(label) => format(new Date(label), "d MMM yyyy", { locale: dateLocale })}
-                        formatter={(value: any, name: any) => [formatCurrency(Number(value) || 0), name === 'balance' ? 'Bóveda' : 'Gastos del día']}
+                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', backgroundColor: 'var(--bg-surface-primary, #ffffff)' }}
+                        labelFormatter={(label) => format(new Date(label), "d MMMM yyyy", { locale: dateLocale })}
+                        formatter={(value: any, name: any) => [formatCurrency(Number(value) || 0), name]}
                       />
                       <Legend iconType="circle" />
-                      {/* Area verde para el balance */}
+                      
                       <Area yAxisId="left" type="stepAfter" dataKey="balance" name="Balance de Bóveda" fill="url(#colorBalance)" stroke="#10B981" strokeWidth={3} />
-                      {/* Barras rojas para indicar días de alto gasto */}
-                      <Bar yAxisId="left" dataKey="spent" name="Gastos Diarios" fill="#EF4444" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                      
+                      <Bar yAxisId="right" dataKey="spent" name="Gastos Diarios" fill="#EF4444" radius={[4, 4, 0, 0]} maxBarSize={40} />
                     </ComposedChart>
                   </ResponsiveContainer>
                 </div>
@@ -531,8 +547,8 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
             </div>
 
             {/* GRÁFICO 2: DISTRIBUCIÓN DE GASTOS */}
-            <div className="xl:col-span-1 bg-surface-primary rounded-2xl border border-border-primary p-6 shadow-sm flex flex-col">
-              <h3 className="text-sm font-bold text-text-muted uppercase tracking-widest mb-6">Distribución de Gastos</h3>
+            <div className="xl:col-span-1 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6 shadow-sm flex flex-col">
+              <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-6">Distribución de Gastos</h3>
               
               {metrics.expensesByType && metrics.expensesByType.length > 0 ? (
                 <div className="flex-1 flex flex-col justify-center">
@@ -551,28 +567,27 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
                           ))}
                         </Pie>
                         <RechartsTooltip 
-                          contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', backgroundColor: 'var(--bg-surface-primary)' }}
-                          formatter={(value: any, name: any) => [formatCurrency(Number(value) || 0), 'Monto']}
+                          contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', backgroundColor: 'var(--bg-surface-primary, #ffffff)' }}
+                          formatter={(value: any) => [formatCurrency(Number(value) || 0), 'Monto']}
                         />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
                   
-                  {/* Leyenda personalizada */}
                   <div className="mt-4 space-y-2 px-2">
                     {metrics.expensesByType.map((expense: any) => (
                       <div key={expense.type} className="flex items-center justify-between text-sm">
                         <div className="flex items-center gap-2">
                           <div className="w-3 h-3 rounded-full" style={{ backgroundColor: expense.color }}></div>
-                          <span className="text-text-primary font-medium">{expense.name}</span>
+                          <span className="text-gray-900 dark:text-gray-100 font-medium">{expense.name}</span>
                         </div>
-                        <span className="text-text-muted font-bold">{formatCurrency(expense.amount)}</span>
+                        <span className="text-gray-500 dark:text-gray-400 font-bold">{formatCurrency(expense.amount)}</span>
                       </div>
                     ))}
                   </div>
                 </div>
               ) : (
-                <div className="flex-1 flex flex-col items-center justify-center text-text-muted opacity-50">
+                <div className="flex-1 flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 opacity-50">
                   <DollarSign className="w-12 h-12 mb-2" />
                   <p className="text-sm text-center">Aún no hay gastos registrados para analizar la distribución.</p>
                 </div>

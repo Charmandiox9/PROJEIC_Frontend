@@ -98,13 +98,20 @@ export default function NotificacionesPage() {
         });
       } catch (err: any) {
         if (err.message && err.message.includes('No tienes ninguna invitación pendiente')) {
-          // Ya procesado, no lanzamos crash
         } else {
           throw err;
         }
       }
 
-      setNotifications((prev) => prev.filter((n) => n.id !== notif.id));
+      await fetchGraphQL({
+        query: MARK_NOTIFICATION_READ,
+        variables: { id: notif.id },
+      });
+
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notif.id ? { ...n, isRead: true } : n))
+      );
+      
       window.dispatchEvent(new CustomEvent('notifications:refresh'));
 
       if (accept) {
