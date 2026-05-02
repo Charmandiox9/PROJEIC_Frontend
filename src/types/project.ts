@@ -26,6 +26,21 @@ export interface Repository {
   repoName: String;
 }
 
+export interface ProjectDocument {
+  id: string;
+  name: string;
+  r2Key: string;
+  fileType: string;
+  size: number;
+  createdAt: string;
+  updatedAt: string;
+  uploadedById: string;
+  uploadedBy: {
+    name: string;
+    email: string;
+  };
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -44,4 +59,5 @@ export interface Project {
   mode?: string;
   professor?: { id: string; name: string }[];
   repositories: Repository[];
+  documents: ProjectDocument[];
 }

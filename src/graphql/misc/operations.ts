@@ -53,6 +53,17 @@ export const GET_PROJECT_BY_ID = `
       isInstitutional
       mode
       myRole
+      documents {
+        id
+        name
+        r2Key
+        size
+        createdAt
+        uploadedBy {
+          id
+          name
+        }
+      }
       repositories {
         id
         name
@@ -467,5 +478,37 @@ export const GET_FULL_PROJECT_REPORT = `
       startDate
       endDate
     }
+  }
+`;
+
+export const GET_DOCUMENT_UPLOAD_URL = `
+  mutation GetDocumentUploadUrl($projectId: String!, $fileName: String!, $fileType: String!) {
+    getDocumentUploadUrl(projectId: $projectId, fileName: $fileName, fileType: $fileType) {
+      uploadUrl
+      r2Key
+    }
+  }
+`;
+
+export const SAVE_DOCUMENT_RECORD = `
+  mutation SaveDocumentRecord($input: SaveDocumentInput!) {
+    saveDocumentRecord(input: $input) {
+      id
+      name
+      r2Key
+      fileType
+      size
+      createdAt
+      uploadedBy {
+        id
+        name
+      }
+    }
+  }
+`;
+
+export const GET_DOCUMENT_DOWNLOAD_URL = `
+  query GetDocumentDownloadUrl($r2Key: String!) {
+    getDocumentDownloadUrl(r2Key: $r2Key)
   }
 `;
