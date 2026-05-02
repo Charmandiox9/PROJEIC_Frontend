@@ -475,14 +475,14 @@ export default function TabMetricas({ projectId, onTaskClick }: TabMetricasProps
                 <Wallet className="w-4 h-4" />
                 <h4 className="text-sm font-semibold uppercase tracking-wider">Presupuesto Actual</h4>
               </div>
-              <p className="text-3xl font-black text-text-primary">{formatCurrency(metrics.currentBalance)}</p>
+              <p className="text-3xl font-black text-text-primary">{formatCurrency(metrics.currentBalance || 0)}</p>
             </div>
             <div className="bg-surface-primary border border-border-primary p-6 rounded-2xl shadow-sm">
               <div className="flex items-center gap-2 text-text-muted mb-2">
                 <TrendingDown className="w-4 h-4" />
                 <h4 className="text-sm font-semibold uppercase tracking-wider">Total Gastado</h4>
               </div>
-              <p className="text-3xl font-black text-red-500">-{formatCurrency(metrics.totalSpent)}</p>
+              <p className="text-3xl font-black text-red-500">-{formatCurrency(metrics.totalSpent || 0)}</p>
             </div>
           </div>
 
