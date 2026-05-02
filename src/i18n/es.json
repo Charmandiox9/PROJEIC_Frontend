@@ -806,7 +806,12 @@
     "deleteAccount": "Eliminar cuenta permanentemente",
     "deleteDesc": "Esta acción borrará tus datos y no se puede deshacer.",
     "deleteBtn": "Eliminar cuenta",
-    "comingSoon": "Esta función estará disponible próximamente"
+    "comingSoon": "Esta función estará disponible próximamente",
+    "dataManagement": "Gestión de Datos",
+    "dataManagementDesc": "Descarga una copia de tu información de perfil y actividad en formato JSON.",
+    "exportData": "Exportar mis datos",
+    "exportSuccess": "Datos exportados exitosamente",
+    "deleteInfo": "Esta función aún se encuentra en desarrollo. Para solicitar la eliminación de tus datos bajo la ley de protección de información, por favor contacta al administrador del sistema en soporte@eic.ucn.cl"
   },
   "publicProjectModal": {
     "errorNotFound": "Proyecto no encontrado.",
