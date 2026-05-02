@@ -90,6 +90,26 @@ export const GET_PROJECT_BY_ID = `
           avatarUrl
         }
       }
+      wallet {
+        id
+        balance
+        currency
+        transactions {
+          id
+          amount
+          type
+          description
+          createdAt
+          executorId
+        }
+        costs {
+          id
+          name
+          amount
+          cycle
+          isActive
+        }
+      }
     }
   }
 `;
@@ -336,6 +356,19 @@ export const GET_PROJECT_METRICS = `
         date
         count
       }
+        currentBalance
+      totalSpent
+      financialTrend {
+        date
+        balance
+        spent
+      }
+      expensesByType {
+        type
+        name
+        amount
+        color
+      }
     }
   }
 `;
@@ -510,5 +543,74 @@ export const SAVE_DOCUMENT_RECORD = `
 export const GET_DOCUMENT_DOWNLOAD_URL = `
   query GetDocumentDownloadUrl($r2Key: String!) {
     getDocumentDownloadUrl(r2Key: $r2Key)
+  }
+`;
+
+export const FUND_PROJECT = `
+  mutation FundProject($input: FundProjectInput!) {
+    fundProject(input: $input) {
+      id
+      balance
+      currency
+      transactions {
+        id
+        amount
+        type
+        description
+        createdAt
+      }
+    }
+  }
+`;
+
+export const PAY_MEMBER = `
+  mutation PayMember($input: PayMemberInput!) {
+    payMember(input: $input) {
+      id
+      balance
+      currency
+      transactions {
+        id
+        amount
+        type
+        description
+        createdAt
+      }
+    }
+  }
+`;
+
+export const GET_MY_PROJECT_EARNINGS = `
+  query GetMyProjectEarnings($projectId: String!) {
+    getMyProjectEarnings(projectId: $projectId)
+  }
+`;
+
+export const SUBSCRIBE_CATALOG_ITEM = `
+  mutation SubscribeCatalogItem($input: SubscribeCatalogInput!) {
+    subscribeCatalog(input: $input) {
+      id
+      balance
+      currency
+      transactions {
+        id
+        amount
+        type
+        description
+        createdAt
+      }
+    }
+  }
+`;
+
+export const APPLY_PENALTY = `
+  mutation ApplyPenalty($input: ApplyPenaltyInput!) {
+    applyPenalty(input: $input) { id }
+  }
+`;
+
+export const CANCEL_SUBSCRIPTION = `
+  mutation CancelSubscription($input: CancelSubscriptionInput!) {
+    cancelSubscription(input: $input)
   }
 `;
