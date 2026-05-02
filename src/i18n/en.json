@@ -806,7 +806,12 @@
     "deleteAccount": "Permanently delete account",
     "deleteDesc": "This action will delete your data and cannot be undone.",
     "deleteBtn": "Delete account",
-    "comingSoon": "This feature will be available soon"
+    "comingSoon": "This feature will be available soon",
+    "dataManagement": "Data Management",
+    "dataManagementDesc": "Download a copy of your profile information and activity in JSON format.",
+    "exportData": "Export my data",
+    "exportSuccess": "Data exported successfully",
+    "deleteInfo": "This function is still under development. To request the deletion of your data under the information protection law, please contact the system administrator at soporte@eic.ucn.cl"
   },
   "publicProjectModal": {
     "errorNotFound": "Project not found.",

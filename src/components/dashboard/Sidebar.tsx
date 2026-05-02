@@ -13,6 +13,8 @@ import { useT } from '@/hooks/useT';
 import { GET_MY_NOTIFICATIONS } from '@/graphql/misc/operations';
 import logoTexto from '../../../public/Logo__Texto.png';
 import logoIcon from '../../../public/logo.png';
+import { ThemeToggle } from './settings/ThemeToggle';
+import { LanguageSelector } from './settings/LanguageSelector';
 
 interface NavItem {
   name: string;
@@ -219,7 +221,6 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* MOBILE HEADER */}
       <div className="md:hidden sticky top-0 z-40 flex items-center justify-between bg-surface-nav text-white p-4 border-b border-white/10 dark:border-white/5 shadow-sm">
         <Link href="/" className="flex items-center">
           <Image src={logoTexto} alt="PROJEIC" width={100} height={28} style={{ width: 'auto', height: '1.5rem' }} priority />
@@ -229,7 +230,6 @@ export default function Sidebar() {
         </button>
       </div>
 
-      {/* MOBILE DRAWER OVERLAY */}
       {mobileMenuOpen && (
         <div className="md:hidden fixed inset-0 z-50 flex">
           <div className="fixed inset-0 bg-black/60 transition-opacity duration-300" onClick={() => setMobileMenuOpen(false)}></div>
@@ -283,27 +283,16 @@ export default function Sidebar() {
                 <LogOut className="w-5 h-5 shrink-0" />
                 <span>{t('sidebar.logout')}</span>
               </button>
-              <button
-                data-mobile-item
-                style={{ opacity: 0 }}
-                onClick={toggle}
-                className="flex items-center gap-3 text-white/70 hover:text-white text-sm font-medium transition-colors"
-              >
-                {isDark ? <Sun className="w-5 h-5 shrink-0" /> : <Moon className="w-5 h-5 shrink-0" />}
-                <span>{isDark ? t('sidebar.lightMode') : t('sidebar.darkMode')}</span>
-              </button>
-              <button
-                data-mobile-item
-                style={{ opacity: 0 }}
-                onClick={toggleLocale}
-                aria-label={locale === 'es' ? 'Switch to English' : locale === 'en' ? 'Mudar para português' : 'Cambiar a Español'}
-                className="flex items-center gap-3 text-white/70 hover:text-white text-sm font-medium transition-colors"
-              >
-                <span className="w-5 h-5 shrink-0 flex items-center justify-center text-xs font-bold">
-                  {locale === 'es' ? 'EN' : locale === 'en' ? 'PT' : 'ES'}
-                </span>
-                <span>{locale === 'es' ? 'English' : locale === 'en' ? 'Português' : 'Español'}</span>
-              </button>
+              <ThemeToggle 
+                variant="icon" 
+                showLabel={true} 
+                className="px-0"
+              />
+              <LanguageSelector 
+                variant="cycle" 
+                showLabel={true} 
+                className="px-0"
+              />
               <div data-mobile-item style={{ opacity: 0 }} className="flex items-center gap-3 pt-4 border-t border-white/10 mt-2">
                 <div className="w-9 h-9 rounded-full bg-surface-primary/20 flex items-center justify-center text-sm overflow-hidden shrink-0">
                   {mounted && user?.avatarUrl ? (
@@ -322,7 +311,6 @@ export default function Sidebar() {
         </div>
       )}
 
-      {/* DESKTOP SIDEBAR */}
       <aside ref={desktopNavRef} className={`hidden md:flex sticky top-0 h-screen bg-surface-nav text-white flex-col py-6 shrink-0 transition-all duration-300 ease-in-out border-r border-white/10 dark:border-white/5 ${collapsed ? 'w-16' : 'w-[240px]'}`}>
         
         <div data-sidebar-item style={{ opacity: 0 }} className={`flex items-center mb-6 pl-5 ${collapsed ? 'flex-col gap-4' : 'justify-between pr-4'}`}>
@@ -412,38 +400,26 @@ export default function Sidebar() {
             </div>
             {!collapsed && <span className="nav-text">{t('sidebar.logout')}</span>}
           </button>
-
-          <button
-            data-sidebar-item
+          
+          <ThemeToggle 
+            variant="icon" 
+            showLabel={!collapsed} 
+            className="px-0"
+            data-sidebar-item={true}
             style={{ opacity: 0 }}
-            onClick={handleThemeToggle}
             onMouseEnter={handleItemEnter}
             onMouseLeave={handleItemLeave}
-            aria-label={isDark ? t('sidebar.lightMode') : t('sidebar.darkMode')}
-            title={collapsed ? (isDark ? t('sidebar.lightMode') : t('sidebar.darkMode')) : undefined}
-            className={`flex items-center text-white/70 hover:text-white transition-colors text-sm font-medium w-full ${collapsed ? 'justify-center' : 'gap-3'}`}
-          >
-            <div className="nav-icon origin-center flex items-center justify-center">
-              {isDark ? <Sun className="w-5 h-5 shrink-0" /> : <Moon className="w-5 h-5 shrink-0" />}
-            </div>
-            {!collapsed && <span className="nav-text">{isDark ? t('sidebar.lightMode') : t('sidebar.darkMode')}</span>}
-          </button>
+          />
 
-          <button
-            data-sidebar-item
+          <LanguageSelector 
+            variant="cycle" 
+            showLabel={!collapsed} 
+            className="px-0"
+            data-sidebar-item={true}
             style={{ opacity: 0 }}
-            onClick={toggleLocale}
             onMouseEnter={handleItemEnter}
             onMouseLeave={handleItemLeave}
-            aria-label={locale === 'es' ? 'Switch to English' : locale === 'en' ? 'Mudar para português' : 'Cambiar a Español'}
-            title={collapsed ? (locale === 'es' ? 'English' : locale === 'en' ? 'Português' : 'Español') : undefined}
-            className={`flex items-center text-white/70 hover:text-white transition-colors text-sm font-medium w-full ${collapsed ? 'justify-center' : 'gap-3'}`}
-          >
-            <div className="nav-icon origin-center flex items-center justify-center text-xs font-bold w-5 h-5 shrink-0">
-              {locale === 'es' ? 'EN' : locale === 'en' ? 'PT' : 'ES'}
-            </div>
-            {!collapsed && <span className="nav-text">{locale === 'es' ? 'English' : locale === 'en' ? 'Português' : 'Español'}</span>}
-          </button>
+          />
 
           <div data-sidebar-item style={{ opacity: 0 }} className={`flex items-center mt-2 ${collapsed ? 'justify-center' : 'gap-3'}`}>
             <div className="w-9 h-9 rounded-full bg-surface-primary/20 border border-white/10 flex items-center justify-center text-sm font-medium overflow-hidden shrink-0 shadow-sm">
