@@ -35,3 +35,40 @@ query CountSubjects {
   countSubjects
 }
 `;
+
+export const GET_MY_TAUGHT_SUBJECTS = `
+  query GetMyTaughtSubjects {
+    getMyTaughtSubjects {
+      id
+      name
+      code
+      period
+    }
+  }
+`;
+
+export const GET_SUBJECT_CATALOG = `
+  query GetSubjectCatalog($subjectId: String!) {
+    getSubjectCatalog(subjectId: $subjectId) {
+      id
+      name
+      description
+      basePrice
+      cycle
+    }
+  }
+`;
+
+export const CREATE_CATALOG_ITEM = `
+  mutation CreateCatalogItem($input: CreateCatalogItemInput!) {
+    createCatalogItem(input: $input) {
+      id
+    }
+  }
+`;
+
+export const DELETE_CATALOG_ITEM = `
+  mutation DeleteCatalogItem($id: String!) {
+    deleteCatalogItem(id: $id)
+  }
+`;

@@ -60,4 +60,30 @@ export interface Project {
   professor?: { id: string; name: string }[];
   repositories: Repository[];
   documents: ProjectDocument[];
+  wallet?: ProjectWallet;
+}
+
+export interface Transaction {
+  id: string;
+  amount: number;
+  type: "FUNDING" | "PAYROLL" | "EXPENSE" | "PENALTY" | "REFUND";
+  description: string;
+  createdAt: string;
+  executorId: string;
+}
+
+export interface ProjectWallet {
+  id: string;
+  balance: number;
+  currency: string;
+  transactions?: Transaction[];
+  costs?: ProjectCost[];
+}
+
+export interface ProjectCost {
+  id: string;
+  name: string;
+  amount: number;
+  cycle: string;
+  isActive: boolean;
 }

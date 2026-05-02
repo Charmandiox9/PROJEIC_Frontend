@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
-import { LayoutDashboard, FolderKanban, Globe, Bell, Settings, ArrowLeft, LogOut, PanelLeftClose, PanelLeftOpen, Sun, Moon, Menu } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, Globe, Bell, Settings, ArrowLeft, LogOut, PanelLeftClose, PanelLeftOpen, Sun, Moon, Menu, BookOpen } from 'lucide-react';
 import { useAuth } from '@/context/AuthProvider';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { useTheme } from '@/hooks/useTheme';
@@ -64,10 +64,16 @@ export default function Sidebar() {
 
   useEffect(() => setMounted(true), []);
 
+  const isProfessor = 
+    user?.email?.endsWith('@ucn.cl') || 
+    user?.email?.endsWith('@ce.ucn.cl') ||
+    user?.email === 'didurangarcia@gmail.com';
+
   const navItems: NavItem[] = [
     { name: t('sidebar.dashboard'), href: '/misc/profile', icon: LayoutDashboard },
     { name: t('sidebar.myProjects'), href: '/misc/proyectos', icon: FolderKanban },
     { name: t('sidebar.publicProjects'), href: '/misc/proyectos-publicos', icon: Globe },
+    ...(isProfessor ? [{ name: t('sidebar.subjects') || 'Mis Asignaturas', href: '/misc/asignaturas', icon: BookOpen }] : []),
     { name: t('sidebar.notifications'), href: '/misc/notificaciones', icon: Bell, badge: unreadCount },
     { name: t('sidebar.settings'), href: '/misc/configuracion', icon: Settings },
   ];
@@ -355,7 +361,7 @@ export default function Sidebar() {
         <nav className="flex-1 px-3 space-y-1.5 overflow-y-auto nice-scrollbar">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href;
+            const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
 
             return (
               <Link

@@ -22,7 +22,8 @@ import {
   Target,
   CalendarIcon,
   Code,
-  Folder
+  Folder,
+  DollarSign,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthProvider';
 import { Project } from '@/types/project';
@@ -40,8 +41,9 @@ import TabResultados from '@/components/dashboard/projects/tabs/TabResultados';
 import TabCronograma from '@/components/dashboard/projects/tabs/TabCronograma';
 import GithubIntegration from '@/components/dashboard/projects/tabs/GithubIntegration';
 import TabDocumentos from '@/components/dashboard/projects/tabs/TabDocumentos';
+import TabFinanzas from '@/components/dashboard/projects/tabs/TabFinanzas';
 
-type TabId = 'resumen' | 'tablero' | 'resultados' | 'actividad' | 'metricas' | 'miembros' | 'cronograma' | 'github' | 'documentos';
+type TabId = 'resumen' | 'tablero' | 'resultados' | 'actividad' | 'metricas' | 'miembros' | 'cronograma' | 'github' | 'documentos' | 'finanzas';
 
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -152,6 +154,7 @@ export default function ProjectDetailPage() {
   const actualRole = project?.members?.find((m) => m.user.id === user?.userId)?.role;
   const currentUserRole = project?.myRole || actualRole || null;
   const isLeader = currentUserRole === 'LEADER';
+  const isSupervisor = currentUserRole === 'SUPERVISOR';
 
   const currentTabs: { id: TabId; label: string; icon: React.ElementType }[] = [
     { id: 'resumen', label: t('projectDetail.tabResumen'), icon: Layout },
@@ -173,6 +176,10 @@ export default function ProjectDetailPage() {
 
   if (project.repositories && project.repositories.length > 0) {
     currentTabs.push({ id: 'github', label: t('projectDetail.tabGithub'), icon: Code });
+  }
+
+  if (project.wallet) {
+    currentTabs.push({ id: 'finanzas', label: t('projectDetail.tabFinanzas'), icon: DollarSign });
   }
 
   return (
@@ -289,6 +296,17 @@ export default function ProjectDetailPage() {
             projectId={project.id}
             isLeader={isLeader}
             documents={project.documents || []}
+            onRefresh={loadProject}
+          />
+        )}
+        {activeTab === 'finanzas' && (
+          <TabFinanzas 
+            projectId={project.id} 
+            subjectId={project?.subject?.id}
+            isLeader={isLeader} 
+            isSupervisor={isSupervisor} 
+            wallet={project.wallet} 
+            members={project.members || []} 
             onRefresh={loadProject}
           />
         )}
