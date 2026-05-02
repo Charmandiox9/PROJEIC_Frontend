@@ -21,7 +21,8 @@ import {
   Users,
   Target,
   CalendarIcon,
-  Code
+  Code,
+  Folder
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthProvider';
 import { Project } from '@/types/project';
@@ -38,8 +39,9 @@ import InviteMemberForm from '@/components/dashboard/projects/members/InviteMemb
 import TabResultados from '@/components/dashboard/projects/tabs/TabResultados';
 import TabCronograma from '@/components/dashboard/projects/tabs/TabCronograma';
 import GithubIntegration from '@/components/dashboard/projects/tabs/GithubIntegration';
+import TabDocumentos from '@/components/dashboard/projects/tabs/TabDocumentos';
 
-type TabId = 'resumen' | 'tablero' | 'resultados' | 'actividad' | 'metricas' | 'miembros' | 'cronograma' | 'github';
+type TabId = 'resumen' | 'tablero' | 'resultados' | 'actividad' | 'metricas' | 'miembros' | 'cronograma' | 'github' | 'documentos';
 
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -89,6 +91,12 @@ export default function ProjectDetailPage() {
   useEffect(() => {
     if (projectId) loadProject();
   }, [projectId, loadProject]);
+
+  useEffect(() => {
+    if (project) {
+      console.log("👀 Datos del proyecto recibidos:", project);
+    }
+  }, [project]);
 
   const handleDelete = async () => {
     if (!confirm(t('projectDetail.confirmDelete'))) return;
@@ -159,6 +167,7 @@ export default function ProjectDetailPage() {
   currentTabs.push(
     { id: 'actividad', label: t('projectDetail.tabActividad'), icon: Activity },
     { id: 'metricas', label: t('projectDetail.tabMetricas'), icon: BarChart2 },
+    { id: 'documentos', label: t('projectDetail.tabDocumentos'), icon: Folder },
     { id: 'miembros', label: t('projectDetail.tabMiembros'), icon: Users },
   );
 
@@ -274,6 +283,14 @@ export default function ProjectDetailPage() {
         )}
         {activeTab === 'github' && (
           <GithubIntegration project={project} />
+        )}
+        {activeTab === 'documentos' && (
+          <TabDocumentos
+            projectId={project.id}
+            isLeader={isLeader}
+            documents={project.documents || []}
+            onRefresh={loadProject}
+          />
         )}
       </div>
 
