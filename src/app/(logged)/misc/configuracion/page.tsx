@@ -4,6 +4,8 @@ import { useAuth } from '@/context/AuthProvider';
 import { Mail, BellRing, Settings, LogOut, User, AlertTriangle, Languages, Moon, Sun, Trash2, ShieldAlert, Download } from 'lucide-react';
 import { useT } from '@/hooks/useT';
 import { useTheme } from '@/hooks/useTheme';
+import { ThemeToggle } from '@/components/dashboard/settings/ThemeToggle';
+import { LanguageSelector } from '@/components/dashboard/settings/LanguageSelector';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
@@ -12,7 +14,6 @@ export default function ConfiguracionPage() {
   const { t, locale } = useT();
   const { isDark, toggle: toggleTheme } = useTheme();
   
-  // State for notifications (persisted in localStorage)
   const [notifSettings, setNotifSettings] = useState({
     'notif-email': true,
     'notif-alerts': true,
@@ -55,7 +56,6 @@ export default function ConfiguracionPage() {
 
       <main className="max-w-4xl mx-auto w-full px-6 py-8 space-y-8 pb-20">
 
-        {/* Perfil */}
         <section className="bg-surface-primary rounded-xl border border-border-primary p-6 shadow-sm hover:shadow-md transition-shadow">
           <h2 className="text-xs font-bold text-text-muted uppercase tracking-widest mb-6 flex items-center gap-2">
             <User className="w-4 h-4" /> {t('settingsPage.profile')}
@@ -83,58 +83,22 @@ export default function ConfiguracionPage() {
           </div>
         </section>
 
-        {/* Apariencia e Idioma */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <section className="bg-surface-primary rounded-xl border border-border-primary p-6 shadow-sm">
             <h2 className="text-xs font-bold text-text-muted uppercase tracking-widest mb-6 flex items-center gap-2">
               <Sun className="w-4 h-4" /> {t('sidebar.lightMode')} / {t('sidebar.darkMode')}
             </h2>
-            <div className="flex items-center justify-between p-4 bg-surface-secondary rounded-xl border border-border-secondary">
-              <div className="flex items-center gap-3">
-                {isDark ? <Moon className="w-5 h-5 text-brand" /> : <Sun className="w-5 h-5 text-amber-500" />}
-                <span className="text-sm font-medium text-text-primary">
-                  {isDark ? t('sidebar.darkMode') : t('sidebar.lightMode')}
-                </span>
-              </div>
-              <button
-                onClick={toggleTheme}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ring-2 ring-offset-2 ring-transparent focus:ring-brand ${isDark ? 'bg-brand' : 'bg-gray-200'}`}
-              >
-                <span
-                  className={`${isDark ? 'translate-x-6' : 'translate-x-1'
-                    } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
-                />
-              </button>
-            </div>
+            <ThemeToggle variant="switch" />
           </section>
 
           <section className="bg-surface-primary rounded-xl border border-border-primary p-6 shadow-sm">
             <h2 className="text-xs font-bold text-text-muted uppercase tracking-widest mb-6 flex items-center gap-2">
               <Languages className="w-4 h-4" /> {t('nav.about')} (Idioma)
             </h2>
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { code: 'es', label: 'ESP', flag: '🇪🇸' },
-                { code: 'en', label: 'ENG', flag: '🇺🇸' },
-                { code: 'pt', label: 'POR', flag: '🇧🇷' },
-              ].map((l) => (
-                <button
-                  key={l.code}
-                  onClick={() => handleLocaleChange(l.code)}
-                  className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all ${locale === l.code
-                    ? 'bg-brand/10 border-brand text-brand font-bold'
-                    : 'bg-surface-secondary border-border-secondary text-text-muted hover:border-brand/50'
-                    }`}
-                >
-                  <span className="text-xl mb-1">{l.flag}</span>
-                  <span className="text-[10px] tracking-tighter">{l.label}</span>
-                </button>
-              ))}
-            </div>
+            <LanguageSelector variant="grid" />
           </section>
         </div>
 
-        {/* Notificaciones */}
         <section className="bg-surface-primary rounded-xl border border-border-primary p-6 shadow-sm">
           <h2 className="text-xs font-bold text-text-muted uppercase tracking-widest mb-6 flex items-center gap-2">
             <BellRing className="w-4 h-4" /> {t('settingsPage.notificationsTitle')}
@@ -154,11 +118,11 @@ export default function ConfiguracionPage() {
                 </div>
                 <button
                   onClick={() => handleToggleNotif(item.id)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${notifSettings[item.id as keyof typeof notifSettings] ? 'bg-brand' : 'bg-gray-200'}`}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all focus:outline-none hover:scale-105 active:scale-95 ${notifSettings[item.id as keyof typeof notifSettings] ? 'bg-brand shadow-sm shadow-brand/20' : 'bg-surface-tertiary border border-border-secondary'}`}
                 >
                   <span
                     className={`${notifSettings[item.id as keyof typeof notifSettings] ? 'translate-x-6' : 'translate-x-1'
-                      } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                      } inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm`}
                   />
                 </button>
               </div>
@@ -166,29 +130,27 @@ export default function ConfiguracionPage() {
           </div>
         </section>
 
-        {/* Sesión */}
         <section className="bg-surface-primary rounded-xl border border-border-primary p-6 shadow-sm">
           <h2 className="text-xs font-bold text-text-muted uppercase tracking-widest mb-6 flex items-center gap-2">
             <LogOut className="w-4 h-4" /> {t('settingsPage.sessionTitle')}
           </h2>
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             <p className="text-sm text-text-muted">{t('settingsPage.sessionDesc')}</p>
-            <button
-              onClick={logout}
-              className="px-4 py-2 text-sm font-medium text-brand hover:text-white bg-brand/5 hover:bg-brand rounded-lg transition-colors border border-brand/20 hover:border-brand shrink-0 flex items-center gap-2"
-            >
-              <LogOut className="w-4 h-4" /> {t('settingsPage.logoutBtn')}
-            </button>
+              <button
+                onClick={logout}
+                className="px-4 py-2 text-sm font-medium text-brand hover:text-white bg-brand/5 hover:bg-brand rounded-lg transition-colors border border-border-secondary hover:border-brand shrink-0 flex items-center gap-2"
+              >
+                <LogOut className="w-4 h-4" /> {t('settingsPage.logoutBtn')}
+              </button>
           </div>
         </section>
 
-        {/* Gestión de Datos */}
         <section className="bg-surface-primary rounded-xl border border-border-primary p-6 shadow-sm">
           <h2 className="text-xs font-bold text-text-muted uppercase tracking-widest mb-6 flex items-center gap-2">
-            <ShieldAlert className="w-4 h-4" /> Gestión de Datos
+            <ShieldAlert className="w-4 h-4" /> {t('settingsPage.dataManagement')}
           </h2>
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <p className="text-sm text-text-muted">Descarga una copia de tu información de perfil y actividad en formato JSON.</p>
+            <p className="text-sm text-text-muted">{t('settingsPage.dataManagementDesc')}</p>
             <button
               onClick={() => {
                 const data = {
@@ -204,28 +166,27 @@ export default function ConfiguracionPage() {
                 a.href = url;
                 a.download = `projeic-data-${user?.name?.replace(/\s+/g, '-').toLowerCase()}.json`;
                 a.click();
-                toast.success("Datos exportados exitosamente");
+                toast.success(t('settingsPage.exportSuccess'));
               }}
               className="px-4 py-2 text-sm font-medium text-text-primary hover:bg-surface-secondary border border-border-secondary rounded-lg transition-colors flex items-center gap-2"
             >
-              <Download className="w-4 h-4" /> Exportar mis datos
+              <Download className="w-4 h-4" /> {t('settingsPage.exportData')}
             </button>
           </div>
         </section>
 
-        {/* Zona de peligro */}
-        <section className="bg-red-50 dark:bg-red-950/20 rounded-xl border border-red-100 dark:border-red-900/30 p-6">
-          <h2 className="text-xs font-bold text-red-500 uppercase tracking-widest mb-6 flex items-center gap-2">
+        <section className="bg-surface-danger-subtle rounded-xl border border-border-danger-subtle p-6">
+          <h2 className="text-xs font-bold text-text-danger uppercase tracking-widest mb-6 flex items-center gap-2">
             <AlertTriangle className="w-4 h-4" /> {t('settingsPage.dangerZone')}
           </h2>
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             <div>
-              <p className="text-sm font-bold text-red-700 dark:text-red-400">{t('settingsPage.deleteAccount')}</p>
-              <p className="text-xs text-red-600 dark:text-red-500/80 mt-1">{t('settingsPage.deleteDesc')}</p>
+              <p className="text-sm font-bold text-text-danger">{t('settingsPage.deleteAccount')}</p>
+              <p className="text-xs text-text-danger/80 mt-1">{t('settingsPage.deleteDesc')}</p>
             </div>
             <button
               onClick={() => setShowDeleteModal(true)}
-              className="px-4 py-2 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg shadow-sm transition-all hover:scale-105 active:scale-95 shrink-0 flex items-center gap-2"
+              className="px-4 py-2 text-sm font-bold text-white bg-surface-danger hover:bg-surface-danger-hover rounded-lg shadow-sm transition-all hover:scale-105 active:scale-95 shrink-0 flex items-center gap-2"
             >
               <Trash2 className="w-4 h-4" /> {t('settingsPage.deleteBtn')}
             </button>
@@ -234,16 +195,15 @@ export default function ConfiguracionPage() {
 
       </main>
 
-      {/* Modal de eliminación */}
       {showDeleteModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-surface-primary rounded-2xl max-w-md w-full p-8 shadow-2xl border border-border-primary animate-in zoom-in-95 duration-300">
-            <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-6">
-              <ShieldAlert className="w-8 h-8 text-red-600" />
+            <div className="w-16 h-16 rounded-full bg-surface-danger-subtle flex items-center justify-center mx-auto mb-6">
+              <ShieldAlert className="w-8 h-8 text-text-danger" />
             </div>
             <h3 className="text-xl font-bold text-text-primary text-center mb-2">{t('settingsPage.deleteAccount')}</h3>
             <p className="text-text-muted text-center text-sm mb-8 leading-relaxed">
-              Esta función aún se encuentra en desarrollo. Para solicitar la eliminación de tus datos bajo la ley de protección de información, por favor contacta al administrador del sistema en <span className="font-bold text-brand">soporte@eic.ucn.cl</span>
+              {t('settingsPage.deleteInfo')}
             </p>
             <div className="flex gap-3">
               <button
@@ -257,7 +217,7 @@ export default function ConfiguracionPage() {
                   toast.error(t('settingsPage.comingSoon'));
                   setShowDeleteModal(false);
                 }}
-                className="flex-1 px-4 py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 shadow-lg shadow-red-200 dark:shadow-none transition-all"
+                className="flex-1 px-4 py-3 bg-surface-danger text-white font-bold rounded-xl hover:bg-surface-danger-hover shadow-lg shadow-surface-danger/20 transition-all"
               >
                 {t('settingsPage.deleteBtn')}
               </button>

@@ -83,6 +83,16 @@
   --color-surface-btn: var(--surface-btn);
   --color-surface-btn-hover: var(--surface-btn-hover);
   --color-text-btn: var(--text-btn);
+
+  /* Tokens de Estado */
+  --color-surface-danger-subtle: var(--surface-danger-subtle);
+  --color-border-danger-subtle: var(--border-danger-subtle);
+  --color-text-danger: var(--text-danger);
+  --color-surface-danger: var(--surface-danger);
+  --color-surface-danger-hover: var(--surface-danger-hover);
+  --color-text-warning: var(--text-warning);
+  --color-surface-success-subtle: var(--surface-success-subtle);
+  --color-text-success: var(--text-success);
 }
 
 body {
@@ -276,6 +286,16 @@ body {
   /* ── Badge Institucional (Ramo/Materia) ── */
   --badge-inst-bg: rgba(249, 250, 251, 0.8);
   --badge-inst-border: var(--color-gray-100);
+
+  /* ── Estados (Acciones) ── */
+  --surface-danger-subtle: #fef2f2;
+  --border-danger-subtle: #fee2e2;
+  --text-danger: #dc2626;
+  --surface-danger: #dc2626;
+  --surface-danger-hover: #b91c1c;
+  --text-warning: #d97706;
+  --surface-success-subtle: #f0fdf4;
+  --text-success: #16a34a;
 }
 
 .dark {
@@ -308,6 +328,16 @@ body {
   /* Badge Institucional */
   --badge-inst-bg: rgba(37, 150, 190, 0.15);
   --badge-inst-border: rgba(37, 150, 190, 0.3);
+
+  /* Estados */
+  --surface-danger-subtle: rgba(220, 38, 38, 0.1);
+  --border-danger-subtle: rgba(220, 38, 38, 0.2);
+  --text-danger: #f87171;
+  --surface-danger: #dc2626;
+  --surface-danger-hover: #ef4444;
+  --text-warning: #fbbf24;
+  --surface-success-subtle: rgba(22, 163, 74, 0.1);
+  --text-success: #4ade80;
 }
 
 @media print {

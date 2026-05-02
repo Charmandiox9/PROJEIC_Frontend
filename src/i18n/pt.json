@@ -806,7 +806,12 @@
     "deleteAccount": "Excluir conta permanentemente",
     "deleteDesc": "Esta ação apagará seus dados e não pode ser desfeita.",
     "deleteBtn": "Excluir conta",
-    "comingSoon": "Esta função estará disponível em breve"
+    "comingSoon": "Esta função estará disponível em breve",
+    "dataManagement": "Gerenciamento de Dados",
+    "dataManagementDesc": "Baixe uma cópia de suas informações de perfil e atividade em formato JSON.",
+    "exportData": "Exportar meus dados",
+    "exportSuccess": "Dados exportados com sucesso",
+    "deleteInfo": "Esta função ainda está em desenvolvimento. Para solicitar a exclusão de seus dados sob a lei de proteção de informações, entre em contato com o administrador do sistema em soporte@eic.ucn.cl"
   },
   "publicProjectModal": {
     "errorNotFound": "Projeto não encontrado.",
