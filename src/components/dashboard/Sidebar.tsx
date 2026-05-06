@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
-import { LayoutDashboard, FolderKanban, Globe, Bell, Settings, ArrowLeft, LogOut, PanelLeftClose, PanelLeftOpen, Sun, Moon, Menu, BookOpen } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, Globe, Bell, Settings, ArrowLeft, LogOut, PanelLeftClose, PanelLeftOpen, Sun, Moon, Menu, BookOpen, Shield, User, ArrowRight, ArrowLeftRight } from 'lucide-react';
 import { useAuth } from '@/context/AuthProvider';
 import { fetchGraphQL } from '@/lib/graphQLClient';
 import { useTheme } from '@/hooks/useTheme';
@@ -34,6 +34,7 @@ export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showAdminChoiceModal, setShowAdminChoiceModal] = useState(false);
 
   const desktopNavRef = useRef<HTMLElement>(null);
   const mobileNavRef = useRef<HTMLElement>(null);
@@ -283,6 +284,17 @@ export default function Sidebar() {
                 <LogOut className="w-5 h-5 shrink-0" />
                 <span>{t('sidebar.logout')}</span>
               </button>
+              {user?.isAdmin && (
+                <button
+                  data-mobile-item
+                  style={{ opacity: 0 }}
+                  onClick={() => setShowAdminChoiceModal(true)}
+                  className="flex items-center gap-3 text-white/70 hover:text-blue-400 transition-colors text-sm font-medium"
+                >
+                  <ArrowLeftRight className="w-5 h-5 shrink-0" />
+                  <span>Cambiar Vista</span>
+                </button>
+              )}
               <ThemeToggle 
                 variant="icon" 
                 showLabel={true} 
@@ -400,6 +412,23 @@ export default function Sidebar() {
             </div>
             {!collapsed && <span className="nav-text">{t('sidebar.logout')}</span>}
           </button>
+
+          {user?.isAdmin && (
+            <button
+              data-sidebar-item
+              style={{ opacity: 0 }}
+              onClick={() => setShowAdminChoiceModal(true)}
+              onMouseEnter={handleItemEnter}
+              onMouseLeave={handleItemLeave}
+              title={collapsed ? 'Cambiar Vista' : undefined}
+              className={`flex items-center text-white/70 hover:text-blue-400 transition-colors text-sm font-medium w-full ${collapsed ? 'justify-center' : 'gap-3'}`}
+            >
+              <div className="nav-icon origin-center flex items-center justify-center">
+                <ArrowLeftRight className="w-5 h-5 shrink-0" />
+              </div>
+              {!collapsed && <span className="nav-text">Cambiar Vista</span>}
+            </button>
+          )}
           
           <ThemeToggle 
             variant="icon" 
@@ -438,6 +467,51 @@ export default function Sidebar() {
           </div>
         </div>
       </aside>
+
+      {/* MODAL CAMBIAR VISTA */}
+      {showAdminChoiceModal && (
+        <div className="fixed inset-0 bg-black/60 z-[100] flex justify-center items-center p-4">
+          <div className="bg-surface-primary dark:bg-brand-dark p-8 rounded-3xl max-w-xl w-full border border-border-primary shadow-2xl animate-in fade-in zoom-in duration-300 flex flex-col items-center gap-6 text-center">
+            <div>
+              <h2 className="text-2xl font-black text-text-primary mb-1">Cambiar de Vista</h2>
+              <p className="text-sm text-text-muted">Selecciona el entorno de trabajo al que deseas cambiar</p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+              <button 
+                onClick={() => { setShowAdminChoiceModal(false); window.location.href = '/projeic/admin'; }}
+                className="group relative flex flex-col items-center p-6 bg-red-500/5 hover:bg-red-500/10 border border-red-500/20 hover:border-red-500 rounded-3xl transition-all duration-300 shadow-sm hover:shadow-red-500/20"
+              >
+                <div className="p-3 bg-red-500 rounded-2xl text-white mb-4 group-hover:scale-110 transition-transform shadow-lg shadow-red-500/30">
+                  <Shield className="w-8 h-8" />
+                </div>
+                <span className="font-bold text-lg text-text-primary">Panel de Control</span>
+                <span className="text-xs text-text-muted mt-1">Gestión global de la UCN</span>
+                <ArrowRight className="w-5 h-5 mt-4 text-red-500 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+              </button>
+
+              <button 
+                onClick={() => { setShowAdminChoiceModal(false); window.location.href = '/projeic/misc/profile'; }}
+                className="group relative flex flex-col items-center p-6 bg-brand/5 hover:bg-brand/10 border border-brand/20 hover:border-brand rounded-3xl transition-all duration-300 shadow-sm hover:shadow-brand/20"
+              >
+                <div className="p-3 bg-brand rounded-2xl text-white mb-4 group-hover:scale-110 transition-transform shadow-lg shadow-brand/30">
+                  <User className="w-8 h-8" />
+                </div>
+                <span className="font-bold text-lg text-text-primary">Vista de Usuario</span>
+                <span className="text-xs text-text-muted mt-1">Mis proyectos y perfil</span>
+                <ArrowRight className="w-5 h-5 mt-4 text-brand opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+              </button>
+            </div>
+            
+            <button 
+              onClick={() => setShowAdminChoiceModal(false)}
+              className="mt-4 text-sm font-medium text-text-muted hover:text-text-primary transition-colors"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }

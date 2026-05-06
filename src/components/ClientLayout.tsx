@@ -3,7 +3,7 @@ import { usePathname } from 'next/navigation';
 import Navbar from './Navbar';
 import PublicFooter from './layout/PublicFooter';
 
-const PRIVATE_ROUTES = ['/misc'];
+const PRIVATE_ROUTES = ['/misc', '/admin'];
 
 function isPrivateRoute(pathname: string): boolean {
   return PRIVATE_ROUTES.some(route => pathname.startsWith(route)) || pathname.startsWith('/auth');
